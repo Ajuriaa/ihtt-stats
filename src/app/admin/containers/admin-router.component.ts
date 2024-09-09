@@ -37,9 +37,9 @@ import { HeaderComponent, SideBarComponent } from 'src/app/shared';
     .bar {
       display: flex;
       justify-content: center;
-      position: absolute;
+      position: fixed;
       width: 100%;
-      bottom: 3rem;
+      bottom: 1.5rem;
       z-index: 2;
     }
   `]
