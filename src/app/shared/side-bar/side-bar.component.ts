@@ -12,7 +12,7 @@ import { SideNavButtonComponent } from '../buttons';
   styleUrl: './side-bar.component.scss'
 })
 export class SideBarComponent implements OnInit {
-  public selectedOption = 'dashboard';
+  public selectedOption = 'emissions';
   public iconTopPosition = 4.5;
 
   constructor(
@@ -29,7 +29,7 @@ export class SideBarComponent implements OnInit {
     this.selectedOption = option;
     this.animateIcon();
     setTimeout(() => {
-      option === 'history' ? this.router.navigate(['admin/history/0']) : this.router.navigate([`admin/`, option]);
+      this.router.navigate([`admin/`, option]);
     }, 500);
   }
 
@@ -40,8 +40,17 @@ export class SideBarComponent implements OnInit {
   private routeOption(): void {
     const url = this.router.url;
     switch(true) {
+      case url.includes('inspection'):
+        this.selectedOption = 'inspection';
+        break;
+      case url.includes('emissions'):
+        this.selectedOption = 'emissions';
+        break;
+      case url.includes('operations'):
+        this.selectedOption = 'operations';
+        break;
       default:
-        this.selectedOption = 'dashboard';
+        this.selectedOption = 'emissions';
     }
     this.animateIcon();
   }
@@ -49,23 +58,14 @@ export class SideBarComponent implements OnInit {
 
   private animateIcon(): void {
     switch (this.selectedOption) {
-      case 'dashboard':
+      case 'emissions':
         this.iconTopPosition = 3.5;
         break;
-      case 'products':
+      case 'inspection':
         this.iconTopPosition = 18;
         break;
-      case 'inventory':
+      case 'operations':
         this.iconTopPosition = 32.5;
-        break;
-      case 'providers':
-        this.iconTopPosition = 47;
-        break;
-      case 'requisitions':
-        this.iconTopPosition = 61.5;
-        break;
-      case 'history':
-        this.iconTopPosition = 76;
         break;
     }
   }

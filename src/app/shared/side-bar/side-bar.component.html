@@ -1,12 +1,23 @@
 <div class="container">
   <div class="bar-menu">
     <app-side-nav-button
-      icon='dashboard'
-      label='Dashboard'
-      [selected]="selectedOption === 'dashboard'"
-      (click)="selectOption('dashboard')"
-    >
-    </app-side-nav-button>
+      icon='emissions'
+      label='Emisiones'
+      [selected]="selectedOption === 'emissions'"
+      (click)="selectOption('emissions')"
+    />
+    <app-side-nav-button
+      icon='inspection'
+      label='Inspectoría'
+      [selected]="selectedOption === 'inspection'"
+      (click)="selectOption('inspection')"
+    />
+    <app-side-nav-button
+      icon='operations'
+      label='Operaciones'
+      [selected]="selectedOption === 'operations'"
+      (click)="selectOption('operations')"
+    />
     <div class="dot" [style.left.rem]="iconTopPosition"></div>
   </div>
 </div>

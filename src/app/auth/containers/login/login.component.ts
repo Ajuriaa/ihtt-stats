@@ -39,7 +39,7 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this._router.navigate(['/admin/dashboard']);
+    this._router.navigate(['/admin/emissions']);
     this.loginForm = this._formBuilder.group({
       username: ['', [Validators.required]],
       password: ['', [Validators.required]]
@@ -58,7 +58,7 @@ export class LoginComponent implements OnInit {
     }
     this._auth.login(this.loginForm.value.username, this.loginForm.value.password).subscribe(success => {
       if (success) {
-        this._router.navigate(['/admin/dashboard']);
+        this._router.navigate(['/admin/emissions']);
       }
     });
   }

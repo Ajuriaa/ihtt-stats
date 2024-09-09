@@ -13,7 +13,7 @@ import { cookieHelper } from 'src/app/core/helpers';
 })
 export class HeaderComponent implements OnInit {
   public position = this.cookieHelper.getPosition();
-  public title = 'Sistema de Gestión de Vehículos';
+  public title = 'Sistema de Estadísticas';
   public name = '';
 
   constructor(
@@ -36,8 +36,14 @@ export class HeaderComponent implements OnInit {
   private setTitle(): void {
     const url = this.router.url;
     switch(true) {
-      case url.includes('dashboard'):
-        this.title = 'Dashboard';
+      case url.includes('inspection'):
+        this.title = 'Inspectoría';
+        break;
+      case url.includes('emissions'):
+        this.title = 'Emisiones';
+        break;
+      case url.includes('operations'):
+        this.title = 'Operaciones';
         break;
       default:
         this.title = 'IHTT';

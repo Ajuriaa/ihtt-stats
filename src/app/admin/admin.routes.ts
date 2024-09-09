@@ -1,8 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '../core/guards';
-import {
-  AdminRouterComponent, DashboardComponent
-} from './containers';
+import { AdminRouterComponent, EmissionsComponent, InspectionComponent, OperationsComponent } from './containers';
 
 export const adminRoutes: Routes = [{
   path: '',
@@ -10,9 +8,19 @@ export const adminRoutes: Routes = [{
   canActivate: [authGuard],
   children: [
     {
-      path: 'dashboard',
-      title: 'Inicio',
-      component: DashboardComponent
+      title: 'Inspectoría',
+      path: 'inspection',
+      component: InspectionComponent
+    },
+    {
+      title: 'Emisiones',
+      path: 'emissions',
+      component: EmissionsComponent
+    },
+    {
+      title: 'Operaciones',
+      path: 'operations',
+      component: OperationsComponent
     }
   ]
 }];

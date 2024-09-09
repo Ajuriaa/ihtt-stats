@@ -9,7 +9,7 @@ import { Component, Input } from '@angular/core';
   styleUrl: './side-nav-button.component.scss'
 })
 export class SideNavButtonComponent {
-  @Input() public icon = 'dashboard';
-  @Input() public label = 'Dashboard';
+  @Input() public icon = 'emissions';
+  @Input() public label = 'Emissions';
   @Input() public selected = false;
 }
