@@ -1,0 +1,36 @@
+@import 'global';
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: 8rem;
+  width: 100%;
+  background-color: $blue;
+  color: $white;
+  font-size: 3.5rem;
+
+  .image {
+    position: absolute;
+    left: 4rem;
+    height: 6rem;
+  }
+
+  .profile {
+    height: 6rem;
+  }
+}
+
+.profile-info {
+  @include flex-center;
+  position: absolute;
+  right: 4rem;
+  gap: 2rem;
+
+  .labels {
+    color: $white;
+    text-align: right;
+    font-size: 1.7rem;
+  }
+}

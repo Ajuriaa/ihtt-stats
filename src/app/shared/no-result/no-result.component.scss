@@ -1,0 +1,16 @@
+@import 'global';
+
+.container {
+  @include flex-center;
+  height: 30rem;
+  gap: 2rem;
+
+  .label {
+    font-size: 3rem;
+    font-weight: bold;
+  }
+
+  .uil {
+    font-size: 8rem;
+  }
+}

@@ -1,0 +1,30 @@
+@import 'global';
+
+.btn {
+  @include flex-center-column;
+  cursor: pointer;
+  height: 8rem;
+  width: 8rem;
+  border-radius: 100%;
+  gap: 1rem;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: $black;
+  position: relative;
+
+  .label {
+    margin: 0;
+    position: absolute;
+    bottom: 0;
+  }
+}
+
+.image {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+.selected {
+  transition: background-color 0.7s linear;
+  background-color: $opaque-blue;
+}

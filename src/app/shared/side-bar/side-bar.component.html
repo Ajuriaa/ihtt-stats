@@ -1,0 +1,12 @@
+<div class="container">
+  <div class="bar-menu">
+    <app-side-nav-button
+      icon='dashboard'
+      label='Dashboard'
+      [selected]="selectedOption === 'dashboard'"
+      (click)="selectOption('dashboard')"
+    >
+    </app-side-nav-button>
+    <div class="dot" [style.left.rem]="iconTopPosition"></div>
+  </div>
+</div>

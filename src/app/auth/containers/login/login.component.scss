@@ -1,0 +1,91 @@
+@import 'global';
+
+.container {
+  @include flex-center;
+  justify-content: space-evenly;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: $white;
+
+  .panel {
+    @include flex-center-column;
+    justify-content: space-between;
+    background-color: $blue;
+    height: 100%;
+    width: 20%;
+  }
+}
+
+.labels {
+  width: 90%;
+  text-align: center;
+  margin-bottom: 2rem;
+
+  .main {
+    font-weight: bold;
+    font-size: 3.5rem;
+    margin: 10rem 0 2rem 0;
+  }
+}
+
+.image {
+  margin-bottom: 5rem;
+  width: 50%;
+}
+
+.form {
+  @include flex-center-column;
+  position: relative;
+  background-color: $white;
+  width: 100%;
+
+  .input {
+    padding-left: 3rem;
+    width: 80%;
+  }
+
+  .icon {
+    position: absolute;
+    color: $gray;
+    font-size: 2rem;
+  }
+
+  .error-color {
+    color: $red;
+  }
+
+  .first {
+    margin-top: 1.5rem;
+  }
+
+  .field {
+    width: 90%;
+  }
+
+  .label {
+    width: 90%;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .error {
+    width: 90%;
+    font-size: 1.5rem;
+  }
+
+  .eye {
+    right: 0;
+  }
+}
+
+.button {
+  display: flex;
+  width: 20rem;
+  margin: 2rem;
+}
+
+.labels {
+  color: $white;
+  font-size: 2rem;
+}

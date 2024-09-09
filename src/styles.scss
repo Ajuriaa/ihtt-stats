@@ -1,0 +1,104 @@
+@import 'global';
+@import 'system-theme.scss';
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+// regular style toast
+@import 'ngx-toastr/toastr';
+
+@font-face {
+  font-family: 'S';
+  src: url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+}
+
+:root,
+html {
+  font-size: 62.5%;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Noto Sans', sans-serif;
+  letter-spacing: 0.05rem;
+}
+
+* {
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.pointer { cursor: pointer; }
+
+.inter {
+  font-family: 'Inter', sans-serif;
+}
+
+.toast-success, .toast-error, .toast-warning, .toast-info {
+  background-color: $blue !important;
+  height: 10rem;
+  font-size: 1.7rem;
+}
+
+.toast-error {
+  background-color: $red !important;
+}
+
+.toast-warning {
+  background-color: $warning !important;
+}
+
+.toast-info {
+  background-color: $dark-blue !important;
+}
+
+.timepicker-overlay {
+  z-index: 10000000 !important;
+}
+
+.timepicker-backdrop-overlay {
+  z-index: 10000000 !important;
+}
+
+.toast-title {
+  font-size: 2rem;
+}
+
+.loading {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.my-pagination {
+  font-size: 2rem;
+  font-weight: bold;
+  display: flex;
+  margin-top: 1rem;
+  justify-content: flex-end;
+
+  .ngx-pagination .current {
+    background-color: $blue;
+  }
+}
+
+.marker {
+  height: 5rem;
+}
+
+input[type=password]::-ms-reveal,
+input[type=password]::-ms-clear
+{
+  display: none;
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

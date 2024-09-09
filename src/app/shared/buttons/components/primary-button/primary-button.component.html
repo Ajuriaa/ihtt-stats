@@ -1,0 +1,11 @@
+<button
+  mat-button
+  class="btn"
+  [class]="styleClass"
+  [disabled]="disableButton"
+  (click)="btnClick.emit($event)"
+>
+  <div class="button-content">
+    <ng-content></ng-content>
+  </div>
+</button>

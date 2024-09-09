@@ -1,0 +1,22 @@
+<file-upload
+  class="file-uploader"
+  [accept]="allowedExtensions"
+  [control]="filesControl"
+  [multiple]="multiple"
+  [animation]="true"
+  (change)="onFilesSelected()"
+>
+  <ng-template let-isFileDragDropAvailable="isFileDragDropAvailable" #placeholder>
+    <file-upload-drop-zone class="zone">
+        @if (isFileDragDropAvailable) {
+          <b>Arrastre y suelte archivos</b><br> o haga clic aquí
+        } @else {
+          <b>Haga clic aquí</b> para<br> seleccionar un archivo
+        }
+    </file-upload-drop-zone>
+  </ng-template>
+
+  <ng-template let-i="index" let-file="file" let-control="control" #item>
+      <file-upload-list-item  [index]="i" [file]="file" [control]="control">Eliminar</file-upload-list-item>
+  </ng-template>
+</file-upload>
