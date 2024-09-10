@@ -102,3 +102,10 @@ input[type=password]::-ms-clear
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.date-filter {
+  position: absolute;
+  z-index: 3;
+  left: 4rem;
+  bottom: 2rem;
+}

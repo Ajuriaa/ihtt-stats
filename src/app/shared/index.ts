@@ -4,3 +4,4 @@ export * from './loading/loading.component';
 export * from './no-result/no-result.component';
 export * from './header/header.component';
 export * from  './file-drop/file-drop.component';
+export * from './date-filter/date-filter.component';
