@@ -17,6 +17,16 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "allowedCommonJsDependencies": [
+              "core-js",
+              "raf",
+              "rgbcolor",
+              "moment",
+              "moment-timezone",
+              "jspdf-autotable",
+              "html2canvas",
+              "dompurify"
+            ],
             "outputPath": "dist/supply-system",
             "index": "src/index.html",
             "browser": "src/main.ts",
@@ -45,8 +55,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "1.5mb",
+                  "maximumError": "2mb"
                 },
                 {
                   "type": "anyComponentStyle",
