@@ -12,8 +12,9 @@ import { SideNavButtonComponent } from '../buttons';
   styleUrl: './side-bar.component.scss'
 })
 export class SideBarComponent implements OnInit {
-  public selectedOption = 'emissions';
+  public selectedOption = 'dashboard';
   public iconTopPosition = 4.5;
+  public currentMode = 'certificates';
 
   constructor(
     private router: Router
@@ -21,6 +22,7 @@ export class SideBarComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectedOption = this.router.url.split('/')[2];
+    this.currentMode = this.router.url.split('/')[3];
     this.animateIcon();
     this.routeOption();
   }
@@ -29,7 +31,7 @@ export class SideBarComponent implements OnInit {
     this.selectedOption = option;
     this.animateIcon();
     setTimeout(() => {
-      this.router.navigate([`admin/`, option]);
+      this.router.navigate([`admin/${option}/${this.currentMode}`]);
     }, 500);
   }
 
@@ -39,18 +41,18 @@ export class SideBarComponent implements OnInit {
 
   private routeOption(): void {
     const url = this.router.url;
-    switch(true) {
-      case url.includes('inspection'):
-        this.selectedOption = 'inspection';
+    switch (true) {
+      case url.includes('dashboard'):
+        this.selectedOption = 'dashboard';
         break;
-      case url.includes('emissions'):
-        this.selectedOption = 'emissions';
+      case url.includes('reports'):
+        this.selectedOption = 'reports';
         break;
-      case url.includes('operations'):
-        this.selectedOption = 'operations';
+      case url.includes('details'):
+        this.selectedOption = 'details';
         break;
       default:
-        this.selectedOption = 'emissions';
+        this.selectedOption = 'dashboard';
     }
     this.animateIcon();
   }
@@ -58,13 +60,13 @@ export class SideBarComponent implements OnInit {
 
   private animateIcon(): void {
     switch (this.selectedOption) {
-      case 'emissions':
+      case 'dashboard':
         this.iconTopPosition = 3.5;
         break;
-      case 'inspection':
+      case 'details':
         this.iconTopPosition = 18;
         break;
-      case 'operations':
+      case 'reports':
         this.iconTopPosition = 32.5;
         break;
     }

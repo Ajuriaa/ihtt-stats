@@ -15,6 +15,7 @@ export class HeaderComponent implements OnInit {
   public position = this.cookieHelper.getPosition();
   public title = 'Sistema de Estadísticas';
   public name = '';
+  public mode = 'certificates';
 
   constructor(
     private cookieHelper: cookieHelper,
@@ -29,6 +30,7 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.mode = this.router.url.split('/')[3];
     this.setTitle();
     this.name = this.nameHelper.getShortName(this.cookieHelper.getName());
   }
@@ -36,14 +38,14 @@ export class HeaderComponent implements OnInit {
   private setTitle(): void {
     const url = this.router.url;
     switch(true) {
-      case url.includes('inspection'):
-        this.title = 'Inspectoría';
+      case url.includes('dashboard'):
+        this.title = 'Dashboard' + (this.mode === 'certificates' ? ' de Certificados' : ' de Multas');
         break;
-      case url.includes('emissions'):
-        this.title = 'Emisiones';
+      case url.includes('details'):
+        this.title = 'Lista Detallada' + (this.mode === 'certificates' ? ' de Certificados' : ' de Multas');
         break;
-      case url.includes('operations'):
-        this.title = 'Operaciones';
+      case url.includes('reports'):
+        this.title = 'Reportes' + (this.mode === 'certificates' ? ' de Certificados' : ' de Multas');
         break;
       default:
         this.title = 'IHTT';
