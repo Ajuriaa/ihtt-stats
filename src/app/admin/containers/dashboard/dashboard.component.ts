@@ -119,7 +119,7 @@ export class DashboardComponent implements OnInit{
       .filter(cert => cert.noticeStatusDescription === 'ACTIVO')
       .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
 
-    this.upcomingExpirations = this.filteredCertificates.filter(cert => {
+    this.upcomingExpirations = this.certificates.filter(cert => {
       const certExpDate = cert.certificateExpirationDate ? moment(cert.certificateExpirationDate) : null;
       const permExpDate = cert.permissionExpirationDate ? moment(cert.permissionExpirationDate) : null;
 
