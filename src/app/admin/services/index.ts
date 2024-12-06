@@ -1,1 +1,1 @@
-export * from './operations.queries';
+export * from './dashboard.queries';

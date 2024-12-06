@@ -1,67 +1,43 @@
-export interface IExpedientRenovationQuery {
-  cityCode: string;
-  normalProcessExpedientCount: number;
-  automaticRenovationExpedientCount: number;
+export interface Certificate {
+  id: number;                    // ID único del certificado
+  areaName: string | null;       // Nombre del área
+  documentStatus: string | null; // Estado del documento
+  coStatus: string | null;       // Estado del certificado
+  deliveryDate: string | null;   // Fecha de entrega (en formato ISO)
+  shelfNumber: string | null;    // Número de estante
+  rowNumber: string | null;      // Número de fila
+  ringNumber: string | null;     // Número de anillo
+  certificateNumber: string | null; // Número del certificado
+  plateId: string | null;        // ID de la placa
+  exploitationPermissionNumber: string | null; // Número de permiso de explotación
+  modality: string | null;       // Modalidad
+  documentType: string | null;   // Tipo de documento
+  department: string | null;     // Departamento
+  requestId: string | null;      // ID de la solicitud
+  fileId: string | null;         // ID del expediente
+  isAutomaticRenewal: boolean;   // Indicador de renovación automática
+  preform: string | null;        // Tipo de preforma
+  concessionaireRtn: string | null; // RTN del concesionario
+  concessionaireName: string | null; // Nombre del concesionario
+  concessionairePhone: string | null; // Teléfono del concesionario
+  concessionaireEmail: string | null; // Email del concesionario
+  legalRepresentativeName: string | null; // Nombre del representante legal
+  legalRepresentativeEmail: string | null; // Email del representante legal
+  legalRepresentativePhone: string | null; // Teléfono del representante legal
+  unifiedRequirement: string | null; // Requisito unificado
+  noticeCode: number | null;         // Código de aviso de cobro
+  noticeStatusDescription: string | null; // Estado del aviso de cobro
+  totalNoticeAmount: number | null;  // Monto total del aviso de cobro
+  systemUser: string | null;         // Usuario del sistema
+  inventoryDate: string | null;      // Fecha de inventario (en formato ISO)
+  certificateExpirationDate: string | null; // Fecha de expiración del certificado
+  paymentDate: string | null;    // Fecha de pago (en formato ISO)
+  permissionExpirationDate: string | null;  // Fecha de expiración del permiso
 }
 
-export interface IExpedientByProcedureAndCategoryQuery {
-  procedureType: string;
-  category: string;
-  expedientCount: number;
-}
-
-export interface IExpedientByModalityAndProcedureQuery {
-  procedureType: string;
-  modalityOrCategory: string;
-  expedientCount: number;
-}
-
-export interface IEmissionsByExpirationAndAmountQuery {
-  year: number;
-  month: string;
-  modality: string;
-  expiredCertificateCount: number;
-  amountToCollect: number;
-}
-
-export interface IFinesByRegionalQuery {
-  officeId: number;
-  officeDescription: string;
-  totalRegional: number;
-}
-
-export interface IFinesByInfractionQuery {
-  infractionId: string;
-  infractionType: string;
-  totalByInfraction: number;
-}
-
-export interface IFinesByDepartmentQuery {
-  departmentDescription: string;
-  departmentId: number;
-  totalByDepartment: number;
-}
-
-export interface ISeizuresByDepartmentQuery {
-  departmentDescription: string;
-  departmentId: number;
-  totalByDepartment: number;
-}
-
-export interface IFinesByInfractionDescriptionQuery {
-  infractionAbbreviation: string;
-  totalInfraction: number;
-}
-
-export interface IFinesByTypeQuery {
-  detail: string;
-  totalFines: number;
-}
-
-export interface IChargesSummaryQuery {
-  procedureTypeCode: string;
-  detailDescription: string;
-  amount: number;
-  count: number;
-  totalAmount: number;
+export interface CertificateResponse {
+  data: Certificate[]; // Lista de certificados
+  total: number;       // Total de registros encontrados
+  page?: number;       // Página actual (si la paginación está habilitada)
+  pages?: number;      // Total de páginas (si la paginación está habilitada)
 }

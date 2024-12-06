@@ -1,1 +1,67 @@
-<p>dashboard works!</p>
+<app-loading class="loading" *ngIf="loading"></app-loading>
+
+<div class="container">
+  <div class="filter-wrapper">
+    <app-date-filter (dateRangeChanged)="filterDates($event)"></app-date-filter>
+    <!-- Modalidad -->
+    <mat-form-field>
+      <mat-label>Modalidad</mat-label>
+      <mat-select [(ngModel)]="selectedModality" (selectionChange)="applyFilter('modality', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let modality of modalities" [value]="modality">
+          {{ modality }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Departamento -->
+    <mat-form-field>
+      <mat-label>Departamento</mat-label>
+      <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="applyFilter('department', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let department of departments" [value]="department">
+          {{ department }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Estado de Documento -->
+    <mat-form-field>
+      <mat-label>Estado de Documento</mat-label>
+      <mat-select [(ngModel)]="selectedDocumentStatus" (selectionChange)="applyFilter('documentStatus', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let status of documentStatuses" [value]="status">
+          {{ status }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Estado de Aviso de Cobro -->
+    <mat-form-field>
+      <mat-label>Estado de Aviso</mat-label>
+      <mat-select [(ngModel)]="selectedNoticeStatus" (selectionChange)="applyFilter('noticeStatus', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let noticeStatus of noticeStatuses" [value]="noticeStatus">
+          {{ noticeStatus }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="kpi-container">
+    <mat-card class="kpi-card">
+      <p class="title">{{ totalOwed | currency:'HNL':'L.':'2.2'  }}</p>
+      <p>Total Adeudado</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ totalPaid | currency:'HNL':'L.':'2.2' }}</p>
+      <p>Total Recaudado</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ upcomingExpirations }}</p>
+      <p>Certificados Próximos a Vencer</p>
+    </mat-card>
+  </div>
+</div>
