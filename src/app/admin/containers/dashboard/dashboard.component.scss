@@ -26,3 +26,10 @@
   }
 
 }
+
+.graph-container {
+  @include flex-center;
+  justify-content: space-between;
+  width: 100%;
+  height: auto;
+}

@@ -64,4 +64,21 @@
       <p>Certificados Próximos a Vencer</p>
     </mat-card>
   </div>
+  <div class="graph-container">
+    <div id="debtDistributionChart" style="width: 40%; height: 400px;"></div>
+    <div id="monthlyRevenueChart" style="width: 40%; height: 400px;"></div>
+  </div>
+  <div id="debtByDepartmentChart" style="width: 100%; height: 400px; margin-bottom: 15rem;"></div>
+  <div class="kpi-container">
+    <mat-card class="kpi-card">
+      <p class="title">{{ totalPaidLast12Months | currency:'HNL':'L.':'2.2' }}</p>
+      <p>Recaudo Últimos 12 Meses</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ totalProjectedNext12Months | currency:'HNL':'L.':'2.2' }}</p>
+      <p>Proyección Próximos 12 Meses</p>
+    </mat-card>
+  </div>
+  <div id="projectionsChart" style="width: 100%; height: 400px; margin-bottom: 15rem;"></div>
 </div>
