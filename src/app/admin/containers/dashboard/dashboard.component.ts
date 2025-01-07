@@ -13,14 +13,16 @@ import * as am5 from '@amcharts/amcharts5';
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
+import { PrimaryButtonComponent } from "../../../shared/buttons/components/primary-button/primary-button.component";
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     DateFilterComponent, MatFormFieldModule, MatOptionModule, MatSelectModule, CommonModule, FormsModule,
-    MatCardModule, LoadingComponent
-  ],
+    MatCardModule, LoadingComponent,
+    PrimaryButtonComponent
+],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -72,7 +74,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (dates.startDate && dates.endDate) {
       this.start = moment.utc(dates.startDate).format('YYYY-MM-DD');
       this.end = moment.utc(dates.endDate).format('YYYY-MM-DD');
-      this.filterCertificates();
+      console.log(this.start, this.end);
     }
   }
 
@@ -91,21 +93,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.selectedNoticeStatus = value || '';
         break;
     }
-    this.filterCertificates();
-  }
-
-  private filterCertificates(): void {
-    this.filteredCertificates = this.certificates.filter(cert => {
-      return (
-        (!this.selectedModality || cert.modality === this.selectedModality) &&
-        (!this.selectedDepartment || cert.department === this.selectedDepartment) &&
-        (!this.selectedDocumentStatus || cert.documentStatus === this.selectedDocumentStatus) &&
-        (!this.selectedNoticeStatus || cert.noticeStatusDescription === this.selectedNoticeStatus) &&
-        moment(cert.paymentDate).isBetween(this.start, this.end)
-      );
-    });
-    this.calculateKPIs();
-    this.generateGraphs();
   }
 
   // Fetch data from API and update UI
@@ -115,12 +102,45 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Update UI with data
     this.dashboardQueries.getCertificates({}).subscribe((response) => {
       this.certificates = response.data;
-      this.filteredCertificates = this.certificates;
-      this.filterCertificates();
+      this.filteredCertificates = this.certificates.filter(cert => {
+        return (
+          moment(cert.paymentDate).isBetween(this.start, this.end) || moment(cert.certificateExpirationDate).isBetween(this.start, this.end) ||
+          moment(cert.permissionExpirationDate).isBetween(this.start, this.end)
+        );
+      });
+      this.generateGraphs();
       this.calculateKPIs();
       this.loading = false;
     });
   }
+
+  public onSubmit(): void {
+    this.loading = true;
+
+    // Construir parámetros para la consulta
+    const params: any = {
+      modality: this.selectedModality || undefined,
+      department: this.selectedDepartment || undefined,
+      documentStatus: this.selectedDocumentStatus || undefined,
+      noticeStatus: this.selectedNoticeStatus || undefined,
+      startDate: this.start || undefined,
+      endDate: this.end || undefined
+    };
+
+    // Limpiar parámetros: elimina claves con valores undefined
+    const cleanedParams = Object.fromEntries(
+      Object.entries(params).filter(([_, value]) => value !== undefined)
+    );
+
+    // Llamar al servicio con los parámetros construidos
+    this.dashboardQueries.getCertificates(cleanedParams).subscribe((response) => {
+      this.filteredCertificates = response.data;
+      this.calculateKPIs(); // Actualizar KPIs
+      this.generateGraphs(); // Actualizar gráficos
+      this.loading = false;
+    });
+  }
+
 
   private generateGraphs(): void {
     // Limpia gráficos anteriores antes de generar nuevos
