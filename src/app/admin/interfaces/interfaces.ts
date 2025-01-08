@@ -41,3 +41,32 @@ export interface CertificateResponse {
   page?: number;       // Página actual (si la paginación está habilitada)
   pages?: number;      // Total de páginas (si la paginación está habilitada)
 }
+
+export interface Fine {
+  id: number;
+  fineId?: string;
+  operationId?: string;
+  fineStatus?: string;
+  origin?: string;
+  plate?: string;
+  startDate?: string;
+  companyName?: string;
+  dniRtn?: string;
+  phone?: string;
+  email?: string;
+  certificate?: string;
+  region?: string;
+  systemDate?: string;
+  noticeCode?: number;
+  totalAmount?: number;
+  department?: string;
+  municipality?: string;
+  place?: string;
+}
+
+export interface FineResponse {
+  data: Fine[];
+  total: number;
+  page?: number;
+  pages?: number;
+}

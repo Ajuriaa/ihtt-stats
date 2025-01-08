@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { SideNavButtonComponent } from '../buttons';
 
 @Component({
@@ -17,12 +17,22 @@ export class SideBarComponent implements OnInit {
   public currentMode = 'certificates';
 
   constructor(
-    private router: Router
-  ){}
+    private router: Router,
+    private route: ActivatedRoute
+  ){
+    this.router.events.subscribe((ev) => {
+      if (ev instanceof NavigationEnd) {
+        const segments = this.router.url.split('/');
+        this.selectedOption = segments[2] || 'dashboard'; // Segundo segmento
+        this.currentMode = segments[3] || 'certificates'; // Tercer segmento
+      }
+    });
+  }
 
   ngOnInit(): void {
-    this.selectedOption = this.router.url.split('/')[2];
-    this.currentMode = this.router.url.split('/')[3];
+    const segments = this.router.url.split('/');
+    this.selectedOption = segments[2] || 'dashboard';
+    this.currentMode = segments[3] || 'certificates';
     this.animateIcon();
     this.routeOption();
   }
@@ -30,6 +40,7 @@ export class SideBarComponent implements OnInit {
   public selectOption(option: string): void {
     this.selectedOption = option;
     this.animateIcon();
+    console.log(this.currentMode);
     setTimeout(() => {
       this.router.navigate([`admin/${option}/${this.currentMode}`]);
     }, 500);
