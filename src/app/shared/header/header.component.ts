@@ -35,6 +35,18 @@ export class HeaderComponent implements OnInit {
     this.name = this.nameHelper.getShortName(this.cookieHelper.getName());
   }
 
+  public toggleMode(): void {
+    this.mode = this.mode === 'certificates' ? 'fines' : 'certificates';
+
+    // Obtiene la ruta actual sin el parámetro de modo
+    const currentUrl = this.router.url.split('/');
+    currentUrl[3] = this.mode; // Cambia el `mode` en la posición correspondiente
+
+    // Redirige al usuario a la nueva ruta
+    this.router.navigateByUrl(currentUrl.join('/'));
+  }
+
+
   private setTitle(): void {
     const url = this.router.url;
     switch(true) {
