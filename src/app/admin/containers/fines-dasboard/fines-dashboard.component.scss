@@ -1,0 +1,35 @@
+@import 'global';
+
+.container {
+  @include flex-center-column;
+  margin: 2rem 0;
+  gap: 2rem;
+  width: 100%;
+}
+
+.filter-wrapper {
+  @include flex-center;
+  gap: 2rem;
+  width: 70%;
+}
+
+.kpi-container {
+  @include flex-center;
+  justify-content: space-between;
+  gap: 2rem;
+  font-size: 2.2rem;
+  width: 85%;
+
+  .title {
+    font-weight: bold;
+    font-size: 2.5rem;
+  }
+
+}
+
+.graph-container {
+  @include flex-center;
+  justify-content: space-between;
+  width: 100%;
+  height: auto;
+}

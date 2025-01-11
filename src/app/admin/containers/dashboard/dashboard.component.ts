@@ -22,7 +22,7 @@ import { PrimaryButtonComponent } from "../../../shared/buttons/components/prima
     DateFilterComponent, MatFormFieldModule, MatOptionModule, MatSelectModule, CommonModule, FormsModule,
     MatCardModule, LoadingComponent,
     PrimaryButtonComponent
-],
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })

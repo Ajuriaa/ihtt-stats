@@ -1,0 +1,69 @@
+<app-loading class="loading" *ngIf="loading"></app-loading>
+
+<div class="container">
+  <div class="filter-wrapper">
+    <app-date-filter (dateRangeChanged)="filterDates($event)"></app-date-filter>
+
+    <!-- Estado -->
+    <mat-form-field>
+      <mat-label>Estado</mat-label>
+      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter('status', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let status of statuses" [value]="status">
+          {{ status }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Region -->
+    <mat-form-field>
+      <mat-label>Región</mat-label>
+      <mat-select [(ngModel)]="selectedRegion" (selectionChange)="applyFilter('region', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let region of regions" [value]="region">
+          {{ region }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Departamento -->
+    <mat-form-field>
+      <mat-label>Departamento</mat-label>
+      <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="applyFilter('department', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let department of departments" [value]="department">
+          {{ department }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
+  </div>
+  <div class="kpi-container">
+    <mat-card class="kpi-card">
+      <p class="title">{{ totalFines }}</p>
+      <p>Total de Multas Emitidas</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ totalFineRevenue | currency:'HNL':'L.':'2.2' }}</p>
+      <p>Total Pagado por Multas</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ activeFines }}</p>
+      <p>Multas Activas</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ totalAmountDue | currency:'HNL':'L.':'2.2' }}</p>
+      <p>Total Adeudado por Multas Activas</p>
+    </mat-card>
+  </div>
+
+  <div class="graph-container">
+    <div id="finesStatusChart" style="width: 40%; height: 400px;"></div>
+    <div id="monthlyFineRevenueChart" style="width: 40%; height: 400px;"></div>
+  </div>
+  <div id="fineDebtByDepartmentChart" style="width: 100%; height: 400px;"></div>
+  <div id="finesByDepartmentChart" style="width: 100%; height: 400px; margin-bottom: 15rem;"></div>
+</div>
