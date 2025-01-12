@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { PDFHelper } from 'src/app/core/helpers';
 
 const COLUMNS = ['certificateExpirationDate', 'permissionExpirationDate', 'paymentDate', 'areaName', 'department', 'coStatus', 'noticeStatusDescription', 'noticeCode', 'totalNoticeAmount', 'document'];
 @Component({
@@ -59,11 +60,16 @@ export class DetailsComponent {
 
   constructor(
     private certificatesService: DashboardQueries,
-    private _toaster: ToastrService
+    private _toaster: ToastrService,
+    private pdfHelper: PDFHelper
   ) {}
 
   ngOnInit(): void {
     this.loadCertificates();
+  }
+
+  public generatePDF(): void {
+    this.pdfHelper.generateCertificatePDF(this.certificates, this.globalParams);
   }
 
   public onSubmit(): void {

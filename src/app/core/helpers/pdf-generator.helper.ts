@@ -2,15 +2,18 @@ import { Injectable } from '@angular/core';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import moment from 'moment';
+import { Fine, Certificate } from 'src/app/admin/interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PDFHelper {
   private isFirstPageDrawn = false;
+  private finalY = 0;
+
   constructor() {}
 
-  public generatePDF(formattedData: any[], columns: string[], title: string): void {
+  public generatePDF(formattedData: any[], columns: string[], title: string, params: {}): void {
     this.isFirstPageDrawn = false;
     const doc = new jsPDF('landscape');
     doc.setTextColor(40);
@@ -41,20 +44,83 @@ export class PDFHelper {
         const margin = 4;
         doc.setFillColor(blue);
         doc.rect(margin, margin, 10, pageSize.height-2*margin, 'F');
+        this.finalY = data.cursor?.y || 95;
       },
     });
     const pageCount = (doc as any).internal.getNumberOfPages();
     const footerHeight = doc.internal.pageSize.height - 7;
+
+    doc.setFontSize(12);
 
     // Footer
     for(let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(10);
       doc.text('Página ' + i + ' de ' + pageCount, doc.internal.pageSize.width - 35, footerHeight);
-      doc.text('Lista generada el ' + moment().format('DD/MM/YYYY'), 25, footerHeight);
+      doc.text('Lista generada el ' + moment.utc().format('DD/MM/YYYY'), 25, footerHeight);
+      const paramsText = Object.values(params).slice(2).join(', ');
+      doc.text('Parámetros de búsqueda:' + paramsText, 80, footerHeight);
     }
 
     doc.output('dataurlnewwindow');
+  }
+
+  public generateCertificatePDF(certificates: Certificate[], params: {}): void {
+    const columns = [
+      'Fecha Exp. Certificado', // certificateExpirationDate
+      'Monto Total', // totalNoticeAmount
+      'Estado del Aviso', // noticeStatusDescription
+      'Departamento', // department
+      'Aviso de Cobro (Código)', // noticeCode
+      'Modalidad', // modality
+      'Estado del Documento', // documentStatus
+    ];
+    const formattedFine = this.formatCertificateForPDF(certificates);
+    this.generatePDF(formattedFine, columns, 'Listado de Certificados', params);
+  }
+
+  private formatCertificateForPDF(certificates: Certificate[]) {
+    return certificates.map(certificate => {
+      return [
+        this.getDate(certificate.certificateExpirationDate), // Fecha Expiración Certificado
+        certificate.totalNoticeAmount || 0, // Monto Total
+        certificate.noticeStatusDescription || 'N/A', // Estado del Aviso
+        certificate.department || 'N/A', // Departamento
+        certificate.noticeCode || 'N/A', // Aviso de Cobro
+        certificate.modality || 'N/A', // Modalidad
+        certificate.documentStatus || 'N/A', // Estado del Documento
+      ];
+    });
+  }
+
+
+  public generateFinePDF(fines: Fine[], params: {}): void {
+    const columns = ['Fecha', 'Monto', 'Estado', 'Departamento', 'DNI/RTN', 'Nombre Empresa', 'Teléfono', 'Aviso de Cobro'];
+    const formattedFine = this.formatFineForPDF(fines);
+    this.generatePDF(formattedFine, columns, 'Listado de Multas', params);
+  }
+
+  private formatFineForPDF(fines: Fine[]) {
+    return fines.map(fine => {
+      return [
+        this.getDate(fine.startDate),
+        fine.totalAmount,
+        fine.fineStatus,
+        fine.department,
+        fine.dniRtn ? fine.dniRtn : 'N/A',
+        fine.companyName ? fine.companyName : 'N/A',
+        fine.phone ? fine.phone : 'N/A',
+        fine.noticeCode ? fine.noticeCode : 'N/A',
+      ];
+    });
+
+  }
+
+  private getDate(date: Date | null | undefined | string): string {
+    if (!date ) {
+      return 'NO DISPONIBLE';
+    }
+    return moment.utc(date).format('DD/MM/YYYY');
   }
 }
 

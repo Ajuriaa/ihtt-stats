@@ -35,6 +35,7 @@
     </mat-form-field>
 
     <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
+    <app-primary-button (btnClick)="generatePDF()">IMPRIMIR LISTADO</app-primary-button>
   </div>
 
   <section class="table-container">
@@ -105,6 +106,7 @@
     </table>
 
     <pagination-controls
+      *ngIf="fines.length > 0"
       class="my-pagination"
       (pageChange)="onPageChange($event)"
       previousLabel="Anterior"

@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { PDFHelper } from 'src/app/core/helpers';
 
 const COLUMNS = [
   'fineId', 'totalAmount', 'fineStatus', 'date', 'department', 'region', 'plate', 'rtn'
@@ -57,11 +58,16 @@ export class FinesDetailsComponent {
 
   constructor(
     private finesService: DashboardQueries,
-    private _toaster: ToastrService
+    private _toaster: ToastrService,
+    private pdfHelper: PDFHelper
   ) {}
 
   ngOnInit(): void {
     this.loadFines();
+  }
+
+  public generatePDF(): void {
+    this.pdfHelper.generateFinePDF(this.fines, this.globalParams);
   }
 
   public onSubmit(): void {
@@ -124,7 +130,6 @@ export class FinesDetailsComponent {
         this.selectedRegion = value || '';
         break;
     }
-    console.log('Filter applied:', filterType, value);
   }
 
   public loadFines(): void {
