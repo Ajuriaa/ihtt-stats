@@ -1,1 +1,154 @@
-<p>details works!</p>
+<div class="container">
+  <div class="filter-wrapper">
+    <app-date-filter (dateRangeChanged)="filterDates($event)"></app-date-filter>
+    <!-- Modalidad -->
+    <mat-form-field>
+      <mat-label>Modalidad</mat-label>
+      <mat-select [(ngModel)]="selectedModality" (selectionChange)="applyFilter('modality', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let modality of modalities" [value]="modality">
+          {{ modality }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Departamento -->
+    <mat-form-field>
+      <mat-label>Departamento</mat-label>
+      <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="applyFilter('department', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let department of departments" [value]="department">
+          {{ department }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- ESTADO -->
+    <mat-form-field>
+      <mat-label>Estado del Certificado</mat-label>
+      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter('coStatus', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let status of statuses" [value]="status">
+          {{ status }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Estado de Documento -->
+    <mat-form-field>
+      <mat-label>Estado de Documento</mat-label>
+      <mat-select [(ngModel)]="selectedDocumentStatus" (selectionChange)="applyFilter('documentStatus', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let status of documentStatuses" [value]="status">
+          {{ status }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Estado de Aviso de Cobro -->
+    <mat-form-field>
+      <mat-label>Estado de Aviso</mat-label>
+      <mat-select [(ngModel)]="selectedNoticeStatus" (selectionChange)="applyFilter('noticeStatus', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let noticeStatus of noticeStatuses" [value]="noticeStatus">
+          {{ noticeStatus }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
+  </div>
+  <section class="table-container">
+    <app-no-result *ngIf="certificates.length === 0"></app-no-result>
+    <table mat-table [dataSource]="certificates | paginate: { itemsPerPage, currentPage: page }" class="table" *ngIf="certificates.length > 0">
+      <!-- Fecha de Expiración del Certificado -->
+      <ng-container matColumnDef="certificateExpirationDate">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Fecha Exp. Certificado</th>
+        <td mat-cell *matCellDef="let element" class="table-cell pointer">
+          {{ getDate(element.certificateExpirationDate) }}
+        </td>
+      </ng-container>
+
+      <!-- Fecha de Expiración del Permiso -->
+      <ng-container matColumnDef="permissionExpirationDate">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Fecha Exp. Permiso</th>
+        <td mat-cell *matCellDef="let element" class="table-cell pointer">
+          {{ getDate(element.permissionExpirationDate) }}
+        </td>
+      </ng-container>
+
+      <!-- Fecha de Pago -->
+      <ng-container matColumnDef="paymentDate">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Fecha de Pago</th>
+        <td mat-cell *matCellDef="let element" class="table-cell pointer">
+          {{ element.noticeStatusDescription !== 'PAGADO' ? 'NO PAGADO' : getDate(element.paymentDate) }}
+        </td>
+      </ng-container>
+
+      <!-- Nombre del Área -->
+      <ng-container matColumnDef="areaName">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Área</th>
+        <td mat-cell *matCellDef="let element" class="table-cell pointer">
+          {{ element.areaName }}
+        </td>
+      </ng-container>
+
+      <!-- Departamento -->
+      <ng-container matColumnDef="department">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Departamento</th>
+        <td mat-cell *matCellDef="let element" class="table-cell pointer">
+          {{ element.department }}
+        </td>
+      </ng-container>
+
+      <!-- Estado -->
+      <ng-container matColumnDef="coStatus">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Estado</th>
+        <td mat-cell *matCellDef="let element" class="table-cell pointer">
+          {{ element.coStatus }}
+        </td>
+      </ng-container>
+
+      <!-- Estado del Aviso -->
+      <ng-container matColumnDef="noticeStatusDescription">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Estado del Aviso</th>
+        <td mat-cell *matCellDef="let element" class="table-cell pointer">
+          {{ element.noticeStatusDescription }}
+        </td>
+      </ng-container>
+
+      <!-- Código del Aviso -->
+      <ng-container matColumnDef="noticeCode">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Código del Aviso</th>
+        <td mat-cell *matCellDef="let element" class="table-cell pointer">
+          {{ element.noticeCode }}
+        </td>
+      </ng-container>
+
+      <!-- Monto Total -->
+      <ng-container matColumnDef="totalNoticeAmount">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Monto Total</th>
+        <td mat-cell *matCellDef="let element" class="table-cell pointer">
+          L. {{ element.totalNoticeAmount | number:'1.2-2' }}
+        </td>
+      </ng-container>
+
+      <!-- Documento -->
+      <ng-container matColumnDef="document">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Documento</th>
+        <td mat-cell *matCellDef="let element" class="table-cell pointer">
+          {{element.documentType}}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <pagination-controls
+      class="my-pagination"
+      (pageChange)="onPageChange($event)"
+      previousLabel="Anterior"
+      nextLabel="Siguiente"
+    ></pagination-controls>
+  </section>
+</div>

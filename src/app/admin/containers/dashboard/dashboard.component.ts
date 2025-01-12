@@ -74,7 +74,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (dates.startDate && dates.endDate) {
       this.start = moment.utc(dates.startDate).format('YYYY-MM-DD');
       this.end = moment.utc(dates.endDate).format('YYYY-MM-DD');
-      console.log(this.start, this.end);
     }
   }
 

@@ -109,3 +109,45 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   left: 4rem;
   bottom: 2rem;
 }
+
+.container {
+  @include flex-center-column;
+  width: 100%;
+}
+
+.table-container {
+  width: 95%;
+
+  .table-cell {
+    text-align: center;
+    font-size: 2rem;
+    color: $dark-blue;
+  }
+
+  .title {
+    font-weight: bold;
+    font-size: 2.5rem;
+  }
+
+  .uil {
+    cursor: pointer;
+    font-size: 3rem;
+  }
+
+  .uil-edit {
+    color: $warning;
+    margin: 0 1rem;
+  }
+
+  .uil-trash-alt {
+    color: $red;
+  }
+
+  .uil-plus-circle {
+    color: $green;
+  }
+}
+
+tr:nth-child(even) {
+  background-color: $light-gray;
+}
