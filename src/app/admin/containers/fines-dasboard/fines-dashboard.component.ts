@@ -110,11 +110,7 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.dashboardQueries.getFines({}).subscribe(response => {
       this.fines = response.data;
-      this.filteredFines = this.fines.filter(fine => {
-        return (
-          moment(fine.startDate).isBetween(this.startDate, this.endDate)
-        );
-      });
+      this.filteredFines = this.fines;
       this.calculateKPIs();
       this.generateCharts();
     });
@@ -125,8 +121,8 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
     this.totalFineRevenue = this.filteredFines
       .filter(fine => fine.fineStatus === 'PAGADA')
       .reduce((sum, fine) => sum + (fine.totalAmount || 0), 0);
-    this.activeFines = this.fines.filter(fine => fine.fineStatus === 'ACTIVA').length;
-    this.totalAmountDue = this.fines
+    this.activeFines = this.filteredFines.filter(fine => fine.fineStatus === 'ACTIVA').length;
+    this.totalAmountDue = this.filteredFines
     .filter(fine => fine.fineStatus === 'ACTIVA')
     .reduce((sum, fine) => sum + (fine.totalAmount || 0), 0);
   }
@@ -135,7 +131,7 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
     this.chartRoots.forEach(root => root.dispose());
     this.chartRoots = [];
 
-    const statusDistribution = this.fines.reduce<Record<string, number>>((acc, fine) => {
+    const statusDistribution = this.filteredFines.reduce<Record<string, number>>((acc, fine) => {
       const status = fine.fineStatus || 'DESCONOCIDO';
       acc[status] = (acc[status] || 0) + 1;
       return acc;
@@ -145,7 +141,7 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
       value: count,
     }));
 
-    const monthlyRevenue = this.fines
+    const monthlyRevenue = this.filteredFines
       .filter(fine => fine.fineStatus === 'PAGADA')
       .reduce<Record<string, number>>((acc, fine) => {
         const month = moment(fine.startDate).format('YYYY-MM');
@@ -157,7 +153,7 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
       value: revenue,
     }));
 
-    const debtByDepartment = this.fines
+    const debtByDepartment = this.filteredFines
       .filter(fine => fine.fineStatus === 'ACTIVA')
       .reduce<Record<string, number>>((acc, fine) => {
         const department = fine.department || 'DESCONOCIDO';
@@ -180,7 +176,7 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
     const now = moment();
     const lastYear = now.clone().subtract(12, 'months');
 
-    const finesLastYear = this.fines.filter(fine => {
+    const finesLastYear = this.filteredFines.filter(fine => {
       const fineDate = moment(fine.startDate);
       return fineDate.isBetween(lastYear, now);
     });

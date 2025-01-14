@@ -51,13 +51,13 @@ export class HeaderComponent implements OnInit {
     const url = this.router.url;
     switch(true) {
       case url.includes('dashboard'):
-        this.title = 'Dashboard' + (this.mode === 'certificates' ? ' de Certificados' : ' de Multas');
+        this.title = 'Dashboard' + (this.mode === 'certificates' ? ' de Certificados, Permisos y Permisos Especiales' : ' de Multas');
         break;
       case url.includes('details'):
-        this.title = 'Lista Detallada' + (this.mode === 'certificates' ? ' de Certificados' : ' de Multas');
+        this.title = 'Lista Detallada' + (this.mode === 'certificates' ? ' de Certificados, Permisos y Permisos Especiales' : ' de Multas');
         break;
       case url.includes('reports'):
-        this.title = 'Reportes' + (this.mode === 'certificates' ? ' de Certificados' : ' de Multas');
+        this.title = 'Reportes' + (this.mode === 'certificates' ? ' de Certificados, Permisos y Permisos Especiales' : ' de Multas');
         break;
       default:
         this.title = 'IHTT';

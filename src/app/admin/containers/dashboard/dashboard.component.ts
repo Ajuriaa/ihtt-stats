@@ -37,7 +37,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public totalProjectedNext12Months = 0;
   public start = moment.utc().startOf('month').format('YYYY-MM-DD');
   public end = moment.utc().format('YYYY-MM-DD');
-  public documentStatuses: string[] = ['EN MOVIMIENTO', 'INVENTARIADO', 'TRASLADADO'];
   public noticeStatuses: string[] = ['ACTIVO', 'ANULADO', 'NO TIENE', 'PAGADO', 'SIN PAGO SEGUN DECRETO #60-2019'];
   public modalities: string[] = [
     'BUS INTERNACIONAL', 'BUS INTERURBANO', 'BUS URBANO',
@@ -54,7 +53,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ];
   public selectedModality = '';
   public selectedDepartment = '';
-  public selectedDocumentStatus = '';
   public selectedNoticeStatus = '';
   private chartRoots: am5.Root[] = [];
 
@@ -85,9 +83,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       case 'department':
         this.selectedDepartment = value || '';
         break;
-      case 'documentStatus':
-        this.selectedDocumentStatus = value || '';
-        break;
       case 'noticeStatus':
         this.selectedNoticeStatus = value || '';
         break;
@@ -101,12 +96,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Update UI with data
     this.dashboardQueries.getCertificates({}).subscribe((response) => {
       this.certificates = response.data;
-      this.filteredCertificates = this.certificates.filter(cert => {
-        return (
-          moment(cert.paymentDate).isBetween(this.start, this.end) || moment(cert.certificateExpirationDate).isBetween(this.start, this.end) ||
-          moment(cert.permissionExpirationDate).isBetween(this.start, this.end)
-        );
-      });
+      this.filteredCertificates = this.certificates;
       this.generateGraphs();
       this.calculateKPIs();
       this.loading = false;
@@ -120,7 +110,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const params: any = {
       modality: this.selectedModality || undefined,
       department: this.selectedDepartment || undefined,
-      documentStatus: this.selectedDocumentStatus || undefined,
       noticeStatus: this.selectedNoticeStatus || undefined,
       startDate: this.start || undefined,
       endDate: this.end || undefined
@@ -156,7 +145,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       value: amount,
     }));
 
-    const debtByDepartment = this.certificates
+    const debtByDepartment = this.filteredCertificates
       .filter(cert => cert.noticeStatusDescription === "ACTIVO") // Solo deuda activa
       .reduce<Record<string, number>>((acc, cert) => {
         const department = cert.department || "NO DEFINIDO";
@@ -185,7 +174,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const now = moment(); // Fecha actual
     const endDate = moment().add(12, 'months'); // Fecha en 12 meses
 
-    const projectionsByMonth = this.certificates.reduce<Record<string, number>>((acc, cert) => {
+    const projectionsByMonth = this.filteredCertificates.reduce<Record<string, number>>((acc, cert) => {
     const certExpDate = cert.certificateExpirationDate ? moment(cert.certificateExpirationDate) : null;
     const permExpDate = cert.permissionExpirationDate ? moment(cert.permissionExpirationDate) : null;
 
@@ -498,11 +487,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .filter(cert => cert.paymentDate !== null && cert.noticeStatusDescription === "PAGADO")
       .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
 
-    this.totalOwed = this.certificates
+    this.totalOwed = this.filteredCertificates
       .filter(cert => cert.noticeStatusDescription === 'ACTIVO')
       .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
 
-    this.upcomingExpirations = this.certificates.filter(cert => {
+    this.upcomingExpirations = this.filteredCertificates.filter(cert => {
       const certExpDate = cert.certificateExpirationDate ? moment(cert.certificateExpirationDate) : null;
       const permExpDate = cert.permissionExpirationDate ? moment(cert.permissionExpirationDate) : null;
 
@@ -518,7 +507,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const now = moment(); // Fecha actual
 
     // Total Pagado en los Últimos 12 Meses
-    this.totalPaidLast12Months = this.certificates
+    this.totalPaidLast12Months = this.filteredCertificates
       .filter(cert => {
         const paymentDate = cert.paymentDate ? moment(cert.paymentDate) : null;
         return paymentDate && paymentDate.isBetween(now.clone().subtract(12, 'months'), now, 'day', '[]');
@@ -526,7 +515,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
 
     // Total Proyectado en los Próximos 12 Meses
-    this.totalProjectedNext12Months = this.certificates
+    this.totalProjectedNext12Months = this.filteredCertificates
       .filter(cert => {
         const certExpDate = cert.certificateExpirationDate ? moment(cert.certificateExpirationDate) : null;
         const permExpDate = cert.permissionExpirationDate ? moment(cert.permissionExpirationDate) : null;
@@ -543,11 +532,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .filter(cert => cert.paymentDate !== null)
       .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
 
-    this.totalOwed = this.certificates
+    this.totalOwed = this.filteredCertificates
       .filter(cert => cert.noticeStatusDescription === 'ACTIVO')
       .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
 
-    this.upcomingExpirations = this.certificates.filter(cert => {
+    this.upcomingExpirations = this.filteredCertificates.filter(cert => {
       const certExpDate = cert.certificateExpirationDate ? moment(cert.certificateExpirationDate) : null;
       const permExpDate = cert.permissionExpirationDate ? moment(cert.permissionExpirationDate) : null;
 

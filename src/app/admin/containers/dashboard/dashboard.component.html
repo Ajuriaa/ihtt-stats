@@ -25,17 +25,6 @@
       </mat-select>
     </mat-form-field>
 
-    <!-- Estado de Documento -->
-    <mat-form-field>
-      <mat-label>Estado de Documento</mat-label>
-      <mat-select [(ngModel)]="selectedDocumentStatus" (selectionChange)="applyFilter('documentStatus', $event.value)">
-        <mat-option value="">TODOS</mat-option>
-        <mat-option *ngFor="let status of documentStatuses" [value]="status">
-          {{ status }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
     <!-- Estado de Aviso de Cobro -->
     <mat-form-field>
       <mat-label>Estado de Aviso</mat-label>
@@ -67,7 +56,7 @@
   </div>
   <div class="graph-container">
     <div id="debtDistributionChart" style="width: 40%; height: 400px;"></div>
-    <div id="monthlyRevenueChart" style="width: 40%; height: 400px;"></div>
+    <div id="monthlyRevenueChart" style="width: 60%; height: 400px;"></div>
   </div>
   <div id="debtByDepartmentChart" style="width: 100%; height: 400px; margin-bottom: 15rem;"></div>
   <div class="kpi-container">
