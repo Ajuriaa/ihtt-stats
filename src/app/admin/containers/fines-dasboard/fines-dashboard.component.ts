@@ -36,6 +36,7 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
   public selectedStatus = '';
   public totalAmountDue = 0;
   public activeFines = 0;
+  public statusWord = 'Activas';
   public startDate = moment().startOf('month').format('YYYY-MM-DD');
   public endDate = moment().format('YYYY-MM-DD');
   public departments: string[] = [
@@ -108,7 +109,7 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
 
   private fetchFines(): void {
     this.loading = true;
-    this.dashboardQueries.getFines({}).subscribe(response => {
+    this.dashboardQueries.getFines({ startDate: this.startDate, endDate: this.endDate }).subscribe(response => {
       this.fines = response.data;
       this.filteredFines = this.fines;
       this.calculateKPIs();
@@ -121,7 +122,9 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
     this.totalFineRevenue = this.filteredFines
       .filter(fine => fine.fineStatus === 'PAGADA')
       .reduce((sum, fine) => sum + (fine.totalAmount || 0), 0);
-    this.activeFines = this.filteredFines.filter(fine => fine.fineStatus === 'ACTIVA').length;
+    const state = this.selectedStatus !== '' ? this.selectedStatus : 'ACTIVA';
+    this.statusWord = state === 'ACTIVA' ? 'Activas' : state === 'PAGADA' ? 'Pagadas' : 'Anuladas';
+    this.activeFines = this.filteredFines.filter(fine => fine.fineStatus === state).length;
     this.totalAmountDue = this.filteredFines
     .filter(fine => fine.fineStatus === 'ACTIVA')
     .reduce((sum, fine) => sum + (fine.totalAmount || 0), 0);
@@ -165,11 +168,107 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
       value: amount,
     }));
 
+    const debtByRegion = this.filteredFines
+    .filter(fine => fine.fineStatus === 'ACTIVA')
+    .reduce<Record<string, { totalAmount: number; count: number }>>((acc, fine) => {
+      const region = fine.region || 'DESCONOCIDO';
+      if (!acc[region]) {
+        acc[region] = { totalAmount: 0, count: 0 };
+      }
+      acc[region].totalAmount += fine.totalAmount || 0;
+      acc[region].count += 1;
+      return acc;
+    }, {});
+    const regionDebtData = Object.entries(debtByRegion).map(([region, { totalAmount, count }]) => ({
+      category: region,
+      value: totalAmount,
+      count: count,
+    }));
+
     this.generatePieChart(statusData, "finesStatusChart", "Distribución por Estado");
     this.generateLineChart(revenueData, "monthlyFineRevenueChart", "Ingresos Mensuales por Multas");
     this.generateBarChart(debtData, "fineDebtByDepartmentChart", "Deuda por Departamento");
+    this.generateFinesByRegionChart(regionDebtData);
     this.generateFinesByDepartmentChart();
     this.loading = false;
+  }
+
+  private generateFinesByRegionChart(data: any[]): void {
+    const root = am5.Root.new('finesByRegionChart');
+    this.chartRoots.push(root);
+
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    const chart = root.container.children.push(
+      am5xy.XYChart.new(root, {
+        layout: root.verticalLayout,
+      })
+    );
+
+    // Agregar título al gráfico
+    chart.children.unshift(
+      am5.Label.new(root, {
+        text: 'Deuda por Regional',
+        fontSize: 20,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        x: am5.p50,
+        centerX: am5.p50,
+      })
+    );
+
+    // Crear ejes
+    const xAxis = chart.xAxes.push(
+      am5xy.CategoryAxis.new(root, {
+        categoryField: 'category',
+        renderer: am5xy.AxisRendererX.new(root, {
+          minGridDistance: 30,
+        }),
+      })
+    );
+
+    const yAxis = chart.yAxes.push(
+      am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, {}),
+        min: 0,
+      })
+    );
+
+    xAxis.data.setAll(data);
+
+    // Crear serie de barras
+    const series = chart.series.push(
+      am5xy.ColumnSeries.new(root, {
+        name: 'Dinero por Multas',
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: 'value',
+        categoryXField: 'category',
+      })
+    );
+
+    series.data.setAll(data);
+
+    // Configurar tooltip
+    series.columns.template.setAll({
+      tooltipText: '{category}: L. {value} ({count} multas)',
+      tooltipY: 0,
+    });
+
+    // Agregar etiquetas de datos encima de las barras
+    series.bullets.push(() =>
+      am5.Bullet.new(root, {
+        locationY: 1,
+        sprite: am5.Label.new(root, {
+          text: 'L. {value}',
+          centerY: am5.p100,
+          centerX: am5.p50,
+          populateText: true,
+        }),
+      })
+    );
+
+    chart.appear(1000, 100);
   }
 
   private generateFinesByDepartmentData(): { category: string, value: number, count: number }[] {

@@ -34,17 +34,6 @@
       </mat-select>
     </mat-form-field>
 
-    <!-- Estado de Documento -->
-    <mat-form-field>
-      <mat-label>Estado de Documento</mat-label>
-      <mat-select [(ngModel)]="selectedDocumentStatus" (selectionChange)="applyFilter('documentStatus', $event.value)">
-        <mat-option value="">TODOS</mat-option>
-        <mat-option *ngFor="let status of documentStatuses" [value]="status">
-          {{ status }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
     <!-- Estado de Aviso de Cobro -->
     <mat-form-field>
       <mat-label>Estado de Aviso</mat-label>
@@ -54,6 +43,11 @@
           {{ noticeStatus }}
         </mat-option>
       </mat-select>
+    </mat-form-field>
+
+    <!-- RTN -->
+    <mat-form-field>
+      <input matInput placeholder="RTN" [(ngModel)]="rtn">
     </mat-form-field>
     <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
     <app-primary-button (btnClick)="generatePDF()">IMPRIMIR LISTADO</app-primary-button>

@@ -12,6 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { PDFHelper } from 'src/app/core/helpers';
+import { MatInputModule } from '@angular/material/input';
 
 const COLUMNS = ['certificateExpirationDate', 'permissionExpirationDate', 'paymentDate', 'areaName', 'department', 'coStatus', 'noticeStatusDescription', 'noticeCode', 'totalNoticeAmount', 'document'];
 @Component({
@@ -20,7 +21,7 @@ const COLUMNS = ['certificateExpirationDate', 'permissionExpirationDate', 'payme
   imports: [
     NgxPaginationModule, MatTableModule, CommonModule, NoResultComponent,
     DateFilterComponent, MatFormFieldModule, MatOptionModule, MatSelectModule,
-    FormsModule, PrimaryButtonComponent, CommonModule
+    FormsModule, PrimaryButtonComponent, CommonModule, MatInputModule
   ],
   templateUrl: './details.component.html',
   styleUrl: './details.component.scss'
@@ -37,8 +38,8 @@ export class DetailsComponent {
   public selectedStatus = '';
   public statuses = ["ENTREGADO", "PENDIENTE", "IMPRESION", "DENEGADO"];
   public end = moment.utc().format('YYYY-MM-DD');
-  public documentStatuses: string[] = ['EN MOVIMIENTO', 'INVENTARIADO', 'TRASLADADO'];
   public globalParams = {};
+  public rtn = '';
   public noticeStatuses: string[] = ['ACTIVO', 'ANULADO', 'NO TIENE', 'PAGADO', 'SIN PAGO SEGUN DECRETO #60-2019'];
   public modalities: string[] = [
     'BUS INTERNACIONAL', 'BUS INTERURBANO', 'BUS URBANO',
@@ -55,7 +56,6 @@ export class DetailsComponent {
   ];
   public selectedModality = '';
   public selectedDepartment = '';
-  public selectedDocumentStatus = '';
   public selectedNoticeStatus = '';
 
   constructor(
@@ -84,9 +84,9 @@ export class DetailsComponent {
       endDate: this.end || undefined,
       modality: this.selectedModality || undefined,
       department: this.selectedDepartment || undefined,
-      documentStatus: this.selectedDocumentStatus || undefined,
       noticeStatus: this.selectedNoticeStatus || undefined,
-      coStatus: this.selectedStatus || undefined
+      coStatus: this.selectedStatus || undefined,
+      rtn: this.rtn !== '' ? this.rtn : undefined
     };
 
     // Limpiar parámetros: elimina claves con valores undefined
@@ -122,9 +122,6 @@ export class DetailsComponent {
         break;
       case 'department':
         this.selectedDepartment = value || '';
-        break;
-      case 'documentStatus':
-        this.selectedDocumentStatus = value || '';
         break;
       case 'noticeStatus':
         this.selectedNoticeStatus = value || '';

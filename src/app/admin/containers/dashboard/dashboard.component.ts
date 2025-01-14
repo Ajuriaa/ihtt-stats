@@ -14,14 +14,14 @@ import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import { PrimaryButtonComponent } from "../../../shared/buttons/components/primary-button/primary-button.component";
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     DateFilterComponent, MatFormFieldModule, MatOptionModule, MatSelectModule, CommonModule, FormsModule,
-    MatCardModule, LoadingComponent,
-    PrimaryButtonComponent
+    MatCardModule, LoadingComponent, PrimaryButtonComponent, MatInputModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -32,6 +32,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public filteredCertificates: Certificate[] = [];
   public totalPaid = 0;
   public totalOwed = 0;
+  public rtn = '';
   public upcomingExpirations = 0;
   public totalPaidLast12Months = 0;
   public totalProjectedNext12Months = 0;
@@ -94,7 +95,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loading = true;
     // Call API to fetch data
     // Update UI with data
-    this.dashboardQueries.getCertificates({}).subscribe((response) => {
+    this.dashboardQueries.getCertificates({ startDate: this.start, endDate: this.end }).subscribe((response) => {
       this.certificates = response.data;
       this.filteredCertificates = this.certificates;
       this.generateGraphs();
@@ -112,7 +113,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       department: this.selectedDepartment || undefined,
       noticeStatus: this.selectedNoticeStatus || undefined,
       startDate: this.start || undefined,
-      endDate: this.end || undefined
+      endDate: this.end || undefined,
+      rtn: this.rtn !== '' ? this.rtn : undefined
     };
 
     // Limpiar parámetros: elimina claves con valores undefined
@@ -175,21 +177,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const endDate = moment().add(12, 'months'); // Fecha en 12 meses
 
     const projectionsByMonth = this.filteredCertificates.reduce<Record<string, number>>((acc, cert) => {
-    const certExpDate = cert.certificateExpirationDate ? moment(cert.certificateExpirationDate) : null;
-    const permExpDate = cert.permissionExpirationDate ? moment(cert.permissionExpirationDate) : null;
+      const certExpDate = cert.certificateExpirationDate ? moment(cert.certificateExpirationDate) : null;
+      const permExpDate = cert.permissionExpirationDate ? moment(cert.permissionExpirationDate) : null;
 
-    const validDate = certExpDate && certExpDate.isBetween(now, endDate, 'month', '[]')
-      ? certExpDate
-      : permExpDate && permExpDate.isBetween(now, endDate, 'month', '[]')
-      ? permExpDate
-      : null;
+      const validDate = certExpDate && certExpDate.isBetween(now, endDate, 'month', '[]')
+        ? certExpDate
+        : permExpDate && permExpDate.isBetween(now, endDate, 'month', '[]')
+        ? permExpDate
+        : null;
 
-      if (validDate) {
-        const monthKey = validDate.format("MM-YYYY"); // Agrupar por año-mes
-        acc[monthKey] = (acc[monthKey] || 0) + (cert.totalNoticeAmount || 0);
-      }
+        if (validDate) {
+          const monthKey = validDate.format("MM-YYYY"); // Agrupar por año-mes
+          acc[monthKey] = (acc[monthKey] || 0) + (cert.totalNoticeAmount || 0);
+        }
 
-      return acc;
+        return acc;
     }, {});
 
     // Convertir los datos a un formato usable por AMCharts
@@ -200,10 +202,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
       value: amount,
     }));
 
+    const certificateByModality =  this.filteredCertificates.reduce<Record<string, { active: number; paid: number }>>(
+      (acc, cert) => {
+        const modality = cert.modality || 'DESCONOCIDO';
+        if (!acc[modality]) {
+          acc[modality] = { active: 0, paid: 0 };
+        }
+        if (cert.noticeStatusDescription === 'ACTIVO') {
+          acc[modality].active += cert.totalNoticeAmount || 0;
+        } else if (cert.noticeStatusDescription === 'PAGADO') {
+          acc[modality].paid += cert.totalNoticeAmount || 0;
+        }
+        return acc;
+      },
+      {}
+    );
+    const modalityChartData = Object.entries(certificateByModality).map(([modality, { active, paid }]) => ({ modality, active, paid }));
+
     this.generateBarChart(barChartData);
     this.generateLineChart(lineChartData);
     this.generatePieChart(pieChartData);
     this.generateProjectionChart(projectionChartData);
+    this.generateCertificatesByModalityChart(modalityChartData);
   }
 
   private generateProjectionChart(data: { category: string; value: number }[]): void {
@@ -301,6 +321,95 @@ export class DashboardComponent implements OnInit, OnDestroy {
     chart.appear(1000, 100);
   }
 
+  private generateCertificatesByModalityChart(data: any[]): void {
+    const root = am5.Root.new('modalityChart');
+    this.chartRoots.push(root);
+
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    const chart = root.container.children.push(
+      am5xy.XYChart.new(root, {
+        layout: root.verticalLayout,
+      })
+    );
+
+    // Agregar título al gráfico
+    chart.children.unshift(
+      am5.Label.new(root, {
+        text: 'Certificados por Modalidad',
+        fontSize: 20,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        x: am5.p50,
+        centerX: am5.p50,
+      })
+    );
+
+    // Crear ejes
+    const xAxis = chart.xAxes.push(
+      am5xy.CategoryAxis.new(root, {
+        categoryField: 'modality',
+        renderer: am5xy.AxisRendererX.new(root, {
+          minGridDistance: 30,
+        }),
+      })
+    );
+
+    const yAxis = chart.yAxes.push(
+      am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, {}),
+        min: 0
+      })
+    );
+
+    xAxis.data.setAll(data);
+
+    // Crear serie para ACTIVO
+    const activeSeries = chart.series.push(
+      am5xy.ColumnSeries.new(root, {
+        name: 'Deuda (ACTIVO)',
+        stacked: true,
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: 'active',
+        categoryXField: 'modality',
+      })
+    );
+
+    // Crear serie para PAGADO
+    const paidSeries = chart.series.push(
+      am5xy.ColumnSeries.new(root, {
+        name: 'Generado (PAGADO)',
+        stacked: true,
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: 'paid',
+        categoryXField: 'modality',
+      })
+    );
+
+    activeSeries.data.setAll(data);
+    paidSeries.data.setAll(data);
+
+    // Configurar tooltips
+    [activeSeries, paidSeries].forEach(series => {
+      series.columns.template.setAll({
+        tooltipText: 'Pagado: L. {paid}\nActivo: L. {active}',
+        tooltipY: 0
+      });
+    });
+
+    // Agregar leyenda
+    const legend = chart.children.push(
+      am5.Legend.new(root, {
+        centerX: am5.p50,
+        x: am5.p50,
+      })
+    );
+
+    legend.data.setAll([activeSeries, paidSeries]);
+    chart.appear(1000, 100);
+  }
 
   private generateLineChart(data: { category: string, value: number }[]): void {
     const rootLine = am5.Root.new("monthlyRevenueChart");
