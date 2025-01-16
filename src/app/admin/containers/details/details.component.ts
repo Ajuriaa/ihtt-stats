@@ -110,6 +110,13 @@ export class DetailsComponent {
     });
   }
 
+  public goToNoticeFile(id: string | null, amount: number): void {
+    if (!id || !amount) {
+      return;
+    }
+    window.open(`https://satt.transporte.gob.hn:90/api_rep.php?action=get-facturaPdf&nu=${id}&va=1`);
+  }
+
   public generateExcel(): void {
     this.isLoading = true;
     const params = {
@@ -127,11 +134,13 @@ export class DetailsComponent {
       Object.entries(params).filter(([_, value]) => value !== undefined)
     );
 
-    console.log(cleanedParams);
+    const filtersString = Object.entries(cleanedParams)
+    .map(([key, value]) => `${value}`)
+    .join('_');
 
     this.certificatesService.getCertificates(cleanedParams).subscribe({
       next: (response) => {
-        this.excelHelper.exportCertificatesToExcel(response.data);
+        this.excelHelper.exportCertificatesToExcel(response.data, `certificados y permisos-${filtersString}.xlsx`);
         this.isLoading = false;
       },
       error: (error) => {

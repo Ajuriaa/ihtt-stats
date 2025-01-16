@@ -7,7 +7,7 @@ import { Certificate, Fine } from 'src/app/admin/interfaces';
   providedIn: 'root'
 })
 export class ExcelHelper {
-  public exportFinesToExcel(fines: Fine[]): void {
+  public exportFinesToExcel(fines: Fine[], name: string): void {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Fines');
 
@@ -74,11 +74,11 @@ export class ExcelHelper {
     // Generate and save the Excel file
     workbook.xlsx.writeBuffer().then(buffer => {
       const blob = new Blob([buffer], { type: 'application/octet-stream' });
-      FileSaver.saveAs(blob, 'fines.xlsx');
+      FileSaver.saveAs(blob, name);
     });
   }
 
-  public exportCertificatesToExcel(certificates: Certificate[]): void {
+  public exportCertificatesToExcel(certificates: Certificate[], name: string): void {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Certificates');
 
@@ -165,7 +165,7 @@ export class ExcelHelper {
     // Generate and save the Excel file
     workbook.xlsx.writeBuffer().then(buffer => {
       const blob = new Blob([buffer], { type: 'application/octet-stream' });
-      FileSaver.saveAs(blob, 'certificates.xlsx');
+      FileSaver.saveAs(blob, name);
     });
   }
 

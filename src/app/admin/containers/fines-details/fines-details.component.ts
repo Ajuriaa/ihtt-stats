@@ -12,17 +12,20 @@ import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ExcelHelper, PDFHelper } from 'src/app/core/helpers';
+import { MatInputModule } from '@angular/material/input';
 
 const COLUMNS = [
-  'fineId', 'totalAmount', 'fineStatus', 'date', 'department', 'region', 'plate', 'rtn'
+  'fineId', 'totalAmount', 'fineStatus', 'date', 'department', 'region', 'plate', 'rtn', 'noticeID'
 ];
+
+
 @Component({
   selector: 'app-fines-details',
   standalone: true,
   imports: [
     NgxPaginationModule, MatTableModule, CommonModule, NoResultComponent,
     DateFilterComponent, MatFormFieldModule, MatOptionModule, MatSelectModule,
-    FormsModule, PrimaryButtonComponent, LoadingComponent
+    FormsModule, PrimaryButtonComponent, LoadingComponent, MatInputModule
   ],
   templateUrl: './fines-details.component.html',
   styleUrl: './fines-details.component.scss'
@@ -30,6 +33,7 @@ const COLUMNS = [
 export class FinesDetailsComponent {
   public fines: Fine[] = [];
   public page = 1;
+  public rtn = '';
   public backendPage = 1;
   public itemsPerPage = 9;
   public totalFines = 0;
@@ -71,6 +75,13 @@ export class FinesDetailsComponent {
     this.pdfHelper.generateFinePDF(this.fines, this.globalParams);
   }
 
+  public goToNoticeFile(id: string | null): void {
+    if (!id) {
+      return;
+    }
+    window.open(`https://satt.transporte.gob.hn:90/api_rep.php?action=get-facturaPdf&nu=${id}&va=1`);
+  }
+
   public generateExcel(): void {
     this.isLoading = true;
     const params = {
@@ -78,16 +89,21 @@ export class FinesDetailsComponent {
       endDate: this.end || undefined,
       status: this.selectedStatus || undefined,
       department: this.selectedDepartment || undefined,
-      region: this.selectedRegion || undefined
+      region: this.selectedRegion || undefined,
+      rtn: this.rtn !== '' ? this.rtn : undefined
     };
 
     const cleanedParams = Object.fromEntries(
       Object.entries(params).filter(([_, value]) => value !== undefined)
     );
 
+    const filtersString = Object.entries(cleanedParams)
+    .map(([key, value]) => `${value}`)
+    .join('_');
+
     this.finesService.getFines(cleanedParams).subscribe({
       next: (response) => {
-        this.excelHelper.exportFinesToExcel(response.data);
+        this.excelHelper.exportFinesToExcel(response.data, `Multas-${filtersString}.xlsx`);
         this.isLoading = false;
       },
       error: (error) => {
@@ -109,7 +125,8 @@ export class FinesDetailsComponent {
       endDate: this.end || undefined,
       status: this.selectedStatus || undefined,
       department: this.selectedDepartment || undefined,
-      region: this.selectedRegion || undefined
+      region: this.selectedRegion || undefined,
+      rtn: this.rtn !== '' ? this.rtn : undefined
     };
     this.globalParams = params;
 
