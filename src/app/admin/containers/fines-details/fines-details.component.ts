@@ -90,7 +90,7 @@ export class FinesDetailsComponent {
       status: this.selectedStatus || undefined,
       department: this.selectedDepartment || undefined,
       region: this.selectedRegion || undefined,
-      rtn: this.rtn !== '' ? this.rtn : undefined
+      dniRtn: this.rtn !== '' ? this.rtn : undefined
     };
 
     const cleanedParams = Object.fromEntries(
@@ -126,7 +126,7 @@ export class FinesDetailsComponent {
       status: this.selectedStatus || undefined,
       department: this.selectedDepartment || undefined,
       region: this.selectedRegion || undefined,
-      rtn: this.rtn !== '' ? this.rtn : undefined
+      dniRtn: this.rtn !== '' ? this.rtn : undefined
     };
     this.globalParams = params;
 

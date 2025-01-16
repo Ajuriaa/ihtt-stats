@@ -13,13 +13,13 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { DateFilterComponent, LoadingComponent, PrimaryButtonComponent } from 'src/app/shared';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   standalone: true,
   imports: [
     DateFilterComponent, MatFormFieldModule, MatOptionModule, MatSelectModule, CommonModule, FormsModule,
-    MatCardModule, LoadingComponent,
-    PrimaryButtonComponent
+    MatCardModule, LoadingComponent, PrimaryButtonComponent, MatInputModule
   ],
   selector: 'app-fines-dashboard',
   templateUrl: './fines-dashboard.component.html',
@@ -33,6 +33,7 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
   public totalFineRevenue = 0;
   public selectedRegion = '';
   public selectedDepartment = '';
+  public rtn = '';
   public selectedStatus = '';
   public totalAmountDue = 0;
   public activeFines = 0;
@@ -93,6 +94,7 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
       region: this.selectedRegion || undefined,
       department: this.selectedDepartment || undefined,
       status: this.selectedStatus || undefined,
+      dniRtn: this.rtn !== '' ? this.rtn : undefined
     };
 
     const cleanedParams = Object.fromEntries(
