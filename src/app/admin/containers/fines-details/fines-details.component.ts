@@ -4,7 +4,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { MatTableModule } from '@angular/material/table';
 import moment from 'moment';
 import { CommonModule } from '@angular/common';
-import { DateFilterComponent, NoResultComponent, PrimaryButtonComponent } from 'src/app/shared';
+import { DateFilterComponent, LoadingComponent, NoResultComponent, PrimaryButtonComponent } from 'src/app/shared';
 import { Fine } from '../../interfaces';
 import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,7 +22,7 @@ const COLUMNS = [
   imports: [
     NgxPaginationModule, MatTableModule, CommonModule, NoResultComponent,
     DateFilterComponent, MatFormFieldModule, MatOptionModule, MatSelectModule,
-    FormsModule, PrimaryButtonComponent
+    FormsModule, PrimaryButtonComponent, LoadingComponent
   ],
   templateUrl: './fines-details.component.html',
   styleUrl: './fines-details.component.scss'
@@ -72,7 +72,29 @@ export class FinesDetailsComponent {
   }
 
   public generateExcel(): void {
-    this.excelHelper.exportFinesToExcel(this.fines);
+    this.isLoading = true;
+    const params = {
+      startDate: this.start || undefined,
+      endDate: this.end || undefined,
+      status: this.selectedStatus || undefined,
+      department: this.selectedDepartment || undefined,
+      region: this.selectedRegion || undefined
+    };
+
+    const cleanedParams = Object.fromEntries(
+      Object.entries(params).filter(([_, value]) => value !== undefined)
+    );
+
+    this.finesService.getFines(cleanedParams).subscribe({
+      next: (response) => {
+        this.excelHelper.exportFinesToExcel(response.data);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this._toaster.error('Error loading fines:', error);
+        this.isLoading = false;
+      }
+    });
   }
 
   public onSubmit(): void {

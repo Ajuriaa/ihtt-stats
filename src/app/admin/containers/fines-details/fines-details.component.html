@@ -1,4 +1,6 @@
-<div class="container">
+<app-loading class="loading" *ngIf="isLoading"></app-loading>
+
+<div class="container" *ngIf="!isLoading">
   <div class="filter-wrapper">
     <app-date-filter (dateRangeChanged)="filterDates($event)"></app-date-filter>
     <!-- Estado -->

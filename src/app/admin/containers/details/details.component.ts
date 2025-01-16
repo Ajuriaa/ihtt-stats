@@ -4,7 +4,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { MatTableModule } from '@angular/material/table';
 import moment from 'moment';
 import { CommonModule } from '@angular/common';
-import { DateFilterComponent, NoResultComponent, PrimaryButtonComponent } from 'src/app/shared';
+import { DateFilterComponent, LoadingComponent, NoResultComponent, PrimaryButtonComponent } from 'src/app/shared';
 import { Certificate } from '../../interfaces';
 import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -21,7 +21,7 @@ const COLUMNS = ['certificateExpirationDate', 'permissionExpirationDate', 'payme
   imports: [
     NgxPaginationModule, MatTableModule, CommonModule, NoResultComponent,
     DateFilterComponent, MatFormFieldModule, MatOptionModule, MatSelectModule,
-    FormsModule, PrimaryButtonComponent, CommonModule, MatInputModule
+    FormsModule, PrimaryButtonComponent, CommonModule, MatInputModule, LoadingComponent
   ],
   templateUrl: './details.component.html',
   styleUrl: './details.component.scss'
@@ -111,7 +111,35 @@ export class DetailsComponent {
   }
 
   public generateExcel(): void {
-    this.excelHelper.exportCertificatesToExcel(this.certificates);
+    this.isLoading = true;
+    const params = {
+      startDate: this.start || undefined,
+      endDate: this.end || undefined,
+      modality: this.selectedModality || undefined,
+      department: this.selectedDepartment || undefined,
+      noticeStatus: this.selectedNoticeStatus || undefined,
+      coStatus: this.selectedStatus || undefined,
+      rtn: this.rtn !== '' ? this.rtn : undefined
+    };
+
+    // Limpiar parámetros: elimina claves con valores undefined
+    const cleanedParams = Object.fromEntries(
+      Object.entries(params).filter(([_, value]) => value !== undefined)
+    );
+
+    console.log(cleanedParams);
+
+    this.certificatesService.getCertificates(cleanedParams).subscribe({
+      next: (response) => {
+        this.excelHelper.exportCertificatesToExcel(response.data);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this._toaster.error('Error loading certificates:', error);
+        this.isLoading = false;
+      }
+    });
+
   }
 
   public filterDates(dates: { startDate: Date | null, endDate: Date | null }): void {
