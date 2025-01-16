@@ -11,7 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { PDFHelper } from 'src/app/core/helpers';
+import { ExcelHelper, PDFHelper } from 'src/app/core/helpers';
 import { MatInputModule } from '@angular/material/input';
 
 const COLUMNS = ['certificateExpirationDate', 'permissionExpirationDate', 'paymentDate', 'areaName', 'department', 'coStatus', 'noticeStatusDescription', 'noticeCode', 'totalNoticeAmount', 'document'];
@@ -61,7 +61,8 @@ export class DetailsComponent {
   constructor(
     private certificatesService: DashboardQueries,
     private _toaster: ToastrService,
-    private pdfHelper: PDFHelper
+    private pdfHelper: PDFHelper,
+    private excelHelper: ExcelHelper
   ) {}
 
   ngOnInit(): void {
@@ -108,6 +109,11 @@ export class DetailsComponent {
       }
     });
   }
+
+  public generateExcel(): void {
+    this.excelHelper.exportCertificatesToExcel(this.certificates);
+  }
+
   public filterDates(dates: { startDate: Date | null, endDate: Date | null }): void {
     if (dates.startDate && dates.endDate) {
       this.start = moment.utc(dates.startDate).format('YYYY-MM-DD');

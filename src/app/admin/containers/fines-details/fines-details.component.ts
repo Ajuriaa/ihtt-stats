@@ -11,7 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { PDFHelper } from 'src/app/core/helpers';
+import { ExcelHelper, PDFHelper } from 'src/app/core/helpers';
 
 const COLUMNS = [
   'fineId', 'totalAmount', 'fineStatus', 'date', 'department', 'region', 'plate', 'rtn'
@@ -59,7 +59,8 @@ export class FinesDetailsComponent {
   constructor(
     private finesService: DashboardQueries,
     private _toaster: ToastrService,
-    private pdfHelper: PDFHelper
+    private pdfHelper: PDFHelper,
+    private excelHelper: ExcelHelper
   ) {}
 
   ngOnInit(): void {
@@ -68,6 +69,10 @@ export class FinesDetailsComponent {
 
   public generatePDF(): void {
     this.pdfHelper.generateFinePDF(this.fines, this.globalParams);
+  }
+
+  public generateExcel(): void {
+    this.excelHelper.exportFinesToExcel(this.fines);
   }
 
   public onSubmit(): void {
