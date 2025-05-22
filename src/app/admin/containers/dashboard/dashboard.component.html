@@ -2,7 +2,7 @@
 
 <div class="container">
   <div class="filter-wrapper">
-    <app-date-filter (dateRangeChanged)="filterDates($event)"></app-date-filter>
+    <app-date-filter [showDateTypeFilter]="true" (dateRangeChanged)="filterDates($event)"></app-date-filter>
     <!-- Modalidad -->
     <mat-form-field>
       <mat-label>Modalidad</mat-label>

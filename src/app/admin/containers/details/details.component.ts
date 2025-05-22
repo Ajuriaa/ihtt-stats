@@ -38,6 +38,7 @@ export class DetailsComponent {
   public selectedStatus = '';
   public statuses = ["ENTREGADO", "PENDIENTE", "IMPRESION", "DENEGADO"];
   public end = moment.utc().format('YYYY-MM-DD');
+  public dateType = 'certificateExpiration';
   public globalParams = {};
   public rtn = '';
   public noticeStatuses: string[] = ['ACTIVO', 'ANULADO', 'NO TIENE', 'PAGADO', 'SIN PAGO SEGUN DECRETO #60-2019'];
@@ -65,6 +66,14 @@ export class DetailsComponent {
     private excelHelper: ExcelHelper
   ) {}
 
+  get startDateObject(): Date {
+    return new Date(this.start);
+  }
+
+  get endDateObject(): Date {
+    return new Date(this.end);
+  }
+
   ngOnInit(): void {
     this.loadCertificates();
   }
@@ -83,6 +92,7 @@ export class DetailsComponent {
       page: this.backendPage || undefined,
       startDate: this.start || undefined,
       endDate: this.end || undefined,
+      dateType: this.dateType || undefined,
       modality: this.selectedModality || undefined,
       department: this.selectedDepartment || undefined,
       noticeStatus: this.selectedNoticeStatus || undefined,
@@ -122,6 +132,7 @@ export class DetailsComponent {
     const params = {
       startDate: this.start || undefined,
       endDate: this.end || undefined,
+      dateType: this.dateType || undefined,
       modality: this.selectedModality || undefined,
       department: this.selectedDepartment || undefined,
       noticeStatus: this.selectedNoticeStatus || undefined,
@@ -151,10 +162,13 @@ export class DetailsComponent {
 
   }
 
-  public filterDates(dates: { startDate: Date | null, endDate: Date | null }): void {
+  public filterDates(dates: { startDate: Date | null, endDate: Date | null, dateType?: string }): void {
     if (dates.startDate && dates.endDate) {
       this.start = moment.utc(dates.startDate).format('YYYY-MM-DD');
       this.end = moment.utc(dates.endDate).format('YYYY-MM-DD');
+    }
+    if (dates.dateType) {
+      this.dateType = dates.dateType;
     }
   }
 

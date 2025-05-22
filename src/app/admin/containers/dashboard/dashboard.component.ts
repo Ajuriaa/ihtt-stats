@@ -38,6 +38,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public totalProjectedNext12Months = 0;
   public start = moment.utc().startOf('month').format('YYYY-MM-DD');
   public end = moment.utc().format('YYYY-MM-DD');
+  public dateType = 'certificateExpiration';
   public noticeStatuses: string[] = ['ACTIVO', 'ANULADO', 'NO TIENE', 'PAGADO', 'SIN PAGO SEGUN DECRETO #60-2019'];
   public modalities: string[] = [
     'BUS INTERNACIONAL', 'BUS INTERURBANO', 'BUS URBANO',
@@ -69,10 +70,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.chartRoots.forEach(root => root.dispose());
   }
 
-  public filterDates(dates: { startDate: Date | null, endDate: Date | null }): void {
+  public filterDates(dates: { startDate: Date | null, endDate: Date | null, dateType?: string }): void {
     if (dates.startDate && dates.endDate) {
       this.start = moment.utc(dates.startDate).format('YYYY-MM-DD');
       this.end = moment.utc(dates.endDate).format('YYYY-MM-DD');
+      this.dateType = dates.dateType || 'certificateExpiration';
     }
   }
 
@@ -95,9 +97,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loading = true;
     // Call API to fetch data
     // Update UI with data
-    this.dashboardQueries.getCertificates({ startDate: this.start, endDate: this.end }).subscribe((response) => {
+    this.dashboardQueries.getCertificates({
+      startDate: this.start,
+      endDate: this.end,
+      dateType: this.dateType
+    }).subscribe((response) => {
       this.certificates = response.data;
       this.filteredCertificates = this.certificates;
+      console.log(this.certificates.length);
       this.generateGraphs();
       this.calculateKPIs();
       this.loading = false;
@@ -114,6 +121,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       noticeStatus: this.selectedNoticeStatus || undefined,
       startDate: this.start || undefined,
       endDate: this.end || undefined,
+      dateType: this.dateType || undefined,
       rtn: this.rtn !== '' ? this.rtn : undefined
     };
 
