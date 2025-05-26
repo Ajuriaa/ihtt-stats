@@ -27,7 +27,7 @@ import { MatInputModule } from '@angular/material/input';
 })
 export class FinesDashboardComponent implements OnInit, OnDestroy {
   public fines: Fine[] = [];
-  public filteredFines: Fine[] = [];
+  public analytics: any = null;
   public loading = false;
   public totalFines = 0;
   public totalFineRevenue = 0;
@@ -38,6 +38,10 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
   public totalAmountDue = 0;
   public activeFines = 0;
   public statusWord = 'Activas';
+  // Global KPIs
+  public globalActiveFines = 0;
+  public globalTotalAmountDue = 0;
+  public globalTotalFines = 0;
   public startDate = moment().startOf('month').format('YYYY-MM-DD');
   public endDate = moment().format('YYYY-MM-DD');
   public departments: string[] = [
@@ -75,6 +79,9 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
       case 'region':
         this.selectedRegion = value || '';
         break;
+      case 'status':
+        this.selectedStatus = value || '';
+        break;
     }
   }
 
@@ -101,99 +108,117 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
       Object.entries(params).filter(([_, value]) => value !== undefined)
     );
 
-    this.dashboardQueries.getFines(cleanedParams).subscribe(response => {
-      this.filteredFines = response.data;
-      this.calculateKPIs(); // Actualizar KPIs
-      this.generateCharts(); // Actualizar gráficos
+    this.dashboardQueries.getFinesAnalytics(cleanedParams).subscribe(response => {
+      this.analytics = response;
+      this.updateKPIsFromAnalytics();
+      this.generateChartsFromAnalytics();
       this.loading = false;
     });
   }
 
   private fetchFines(): void {
     this.loading = true;
-    this.dashboardQueries.getFines({ startDate: this.startDate, endDate: this.endDate }).subscribe(response => {
-      this.fines = response.data;
-      this.filteredFines = this.fines;
-      this.calculateKPIs();
-      this.generateCharts();
+    this.dashboardQueries.getFinesAnalytics({ startDate: this.startDate, endDate: this.endDate }).subscribe(response => {
+      this.analytics = response;
+      this.updateKPIsFromAnalytics();
+      this.generateChartsFromAnalytics();
+      this.loading = false;
     });
   }
 
-  private calculateKPIs(): void {
-    this.totalFines = this.filteredFines.length;
-    this.totalFineRevenue = this.filteredFines
-      .filter(fine => fine.fineStatus === 'PAGADA')
-      .reduce((sum, fine) => sum + (fine.totalAmount || 0), 0);
+  private updateKPIsFromAnalytics(): void {
+    if (!this.analytics?.kpis) return;
+    
+    // Filtered KPIs
+    this.totalFines = this.analytics.kpis.filtered.totalFines;
+    this.totalFineRevenue = this.analytics.kpis.filtered.totalFineRevenue;
+    this.totalAmountDue = this.analytics.kpis.filtered.totalAmountDue;
+    
+    // Global KPIs
+    this.globalActiveFines = this.analytics.kpis.global.activeFines;
+    this.globalTotalAmountDue = this.analytics.kpis.global.totalAmountDue;
+    this.globalTotalFines = this.analytics.kpis.global.totalFines;
+    
+    // Fix status logic - use selected status or default to ACTIVA
     const state = this.selectedStatus !== '' ? this.selectedStatus : 'ACTIVA';
     this.statusWord = state === 'ACTIVA' ? 'Activas' : state === 'PAGADA' ? 'Pagadas' : 'Anuladas';
-    this.activeFines = this.filteredFines.filter(fine => fine.fineStatus === state).length;
-    this.totalAmountDue = this.filteredFines
-    .filter(fine => fine.fineStatus === 'ACTIVA')
-    .reduce((sum, fine) => sum + (fine.totalAmount || 0), 0);
+    
+    switch (state) {
+      case 'ACTIVA':
+        this.activeFines = this.analytics.kpis.filtered.activeFines;
+        break;
+      case 'PAGADA':
+        this.activeFines = this.analytics.kpis.filtered.paidFines;
+        break;
+      case 'ANULADA':
+        this.activeFines = this.analytics.kpis.filtered.cancelledFines;
+        break;
+      default:
+        this.activeFines = this.analytics.kpis.filtered.activeFines;
+    }
   }
 
-  private generateCharts(): void {
+  private generateChartsFromAnalytics(): void {
+    if (!this.analytics?.chartData) return;
+
     this.chartRoots.forEach(root => root.dispose());
     this.chartRoots = [];
 
-    const statusDistribution = this.filteredFines.reduce<Record<string, number>>((acc, fine) => {
-      const status = fine.fineStatus || 'DESCONOCIDO';
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, {});
-    const statusData = Object.entries(statusDistribution).map(([status, count]) => ({
+    const { chartData } = this.analytics;
+
+    // Convert backend data to chart format
+    const statusData = Object.entries(chartData.statusDistribution).map(([status, count]) => ({
       category: status,
-      value: count,
+      value: count as number,
     }));
 
-    const monthlyRevenue = this.filteredFines
-      .filter(fine => fine.fineStatus === 'PAGADA')
-      .reduce<Record<string, number>>((acc, fine) => {
-        const month = moment(fine.startDate).format('YYYY-MM');
-        acc[month] = (acc[month] || 0) + (fine.totalAmount || 0);
-        return acc;
-      }, {});
-    const revenueData = Object.entries(monthlyRevenue).map(([month, revenue]) => ({
+    const revenueData = Object.entries(chartData.monthlyRevenue).map(([month, revenue]) => ({
       category: month,
-      value: revenue,
+      value: revenue as number,
     }));
 
-    const debtByDepartment = this.filteredFines
-      .filter(fine => fine.fineStatus === 'ACTIVA')
-      .reduce<Record<string, number>>((acc, fine) => {
-        const department = fine.department || 'DESCONOCIDO';
-        acc[department] = (acc[department] || 0) + (fine.totalAmount || 0);
-        return acc;
-      }, {});
-    const debtData = Object.entries(debtByDepartment).map(([department, amount]) => ({
+    const debtData = Object.entries(chartData.debtByDepartment).map(([department, amount]) => ({
       category: department,
-      value: amount,
+      value: amount as number,
     }));
 
-    const debtByRegion = this.filteredFines
-    .filter(fine => fine.fineStatus === 'ACTIVA')
-    .reduce<Record<string, { totalAmount: number; count: number }>>((acc, fine) => {
-      const region = fine.region || 'DESCONOCIDO';
-      if (!acc[region]) {
-        acc[region] = { totalAmount: 0, count: 0 };
-      }
-      acc[region].totalAmount += fine.totalAmount || 0;
-      acc[region].count += 1;
-      return acc;
-    }, {});
-    const regionDebtData = Object.entries(debtByRegion).map(([region, { totalAmount, count }]) => ({
+    const regionDebtData = Object.entries(chartData.debtByRegion).map(([region, data]: [string, any]) => ({
       category: region,
-      value: totalAmount,
-      count: count,
+      value: data.totalAmount,
+      count: data.count,
+    }));
+
+    const departmentLast12MonthsData = Object.entries(chartData.finesByDepartmentLast12Months).map(([department, data]: [string, any]) => ({
+      category: department,
+      value: data.value,
+      count: data.count,
+    }));
+
+    // Global chart data
+    const globalDebtDepartmentData = Object.entries(chartData.globalDebtByDepartment).map(([department, amount]) => ({
+      category: department,
+      value: amount as number,
+    }));
+
+    const globalDebtRegionData = Object.entries(chartData.globalDebtByRegion).map(([region, data]: [string, any]) => ({
+      category: region,
+      value: data.totalAmount,
+      count: data.count,
     }));
 
     this.generatePieChart(statusData, "finesStatusChart", "Distribución por Estado");
     this.generateLineChart(revenueData, "monthlyFineRevenueChart", "Ingresos Mensuales por Multas");
-    this.generateBarChart(debtData, "fineDebtByDepartmentChart", "Deuda por Departamento");
+    this.generateBarChart(debtData, "fineDebtByDepartmentChart", "Deuda por Departamento (Filtrada)");
     this.generateFinesByRegionChart(regionDebtData);
-    this.generateFinesByDepartmentChart();
+    this.generateFinesByDepartmentChartOptimized(departmentLast12MonthsData);
+    
+    // Global charts for comparison
+    this.generateBarChart(globalDebtDepartmentData, "globalDebtByDepartmentChart", "Deuda por Departamento (Global)");
+    this.generateFinesByRegionChartGlobal(globalDebtRegionData);
+    
     this.loading = false;
   }
+
 
   private generateFinesByRegionChart(data: any[]): void {
     const root = am5.Root.new('finesByRegionChart');
@@ -273,35 +298,85 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
     chart.appear(1000, 100);
   }
 
-  private generateFinesByDepartmentData(): { category: string, value: number, count: number }[] {
-    const now = moment();
-    const lastYear = now.clone().subtract(12, 'months');
+  private generateFinesByRegionChartGlobal(data: any[]): void {
+    const root = am5.Root.new('globalFinesByRegionChart');
+    this.chartRoots.push(root);
 
-    const finesLastYear = this.filteredFines.filter(fine => {
-      const fineDate = moment(fine.startDate);
-      return fineDate.isBetween(lastYear, now);
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    const chart = root.container.children.push(
+      am5xy.XYChart.new(root, {
+        layout: root.verticalLayout,
+      })
+    );
+
+    // Agregar título al gráfico
+    chart.children.unshift(
+      am5.Label.new(root, {
+        text: 'Deuda por Regional (Global)',
+        fontSize: 20,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        x: am5.p50,
+        centerX: am5.p50,
+      })
+    );
+
+    // Crear ejes
+    const xAxis = chart.xAxes.push(
+      am5xy.CategoryAxis.new(root, {
+        categoryField: 'category',
+        renderer: am5xy.AxisRendererX.new(root, {
+          minGridDistance: 30,
+        }),
+      })
+    );
+
+    const yAxis = chart.yAxes.push(
+      am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, {}),
+        min: 0,
+      })
+    );
+
+    xAxis.data.setAll(data);
+
+    // Crear serie de barras
+    const series = chart.series.push(
+      am5xy.ColumnSeries.new(root, {
+        name: 'Dinero por Multas',
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: 'value',
+        categoryXField: 'category',
+      })
+    );
+
+    series.data.setAll(data);
+
+    // Configurar tooltip
+    series.columns.template.setAll({
+      tooltipText: '{category}: L. {value} ({count} multas)',
+      tooltipY: 0,
     });
 
-    const finesByDepartment = finesLastYear.reduce<Record<string, { value: number, count: number }>>((acc, fine) => {
-      const department = fine.department || 'NO DEFINIDO';
-      if (!acc[department]) {
-        acc[department] = { value: 0, count: 0 };
-      }
-      acc[department].value += fine.totalAmount || 0;
-      acc[department].count += 1;
-      return acc;
-    }, {});
+    // Agregar etiquetas de datos encima de las barras
+    series.bullets.push(() =>
+      am5.Bullet.new(root, {
+        locationY: 1,
+        sprite: am5.Label.new(root, {
+          text: 'L. {value}',
+          centerY: am5.p100,
+          centerX: am5.p50,
+          populateText: true,
+        }),
+      })
+    );
 
-    return Object.entries(finesByDepartment).map(([department, { value, count }]) => ({
-      category: department,
-      value,
-      count,
-    }));
+    chart.appear(1000, 100);
   }
 
-  private generateFinesByDepartmentChart(): void {
-    const data = this.generateFinesByDepartmentData();
-
+  private generateFinesByDepartmentChartOptimized(data: any[]): void {
     const root = am5.Root.new('finesByDepartmentChart');
     this.chartRoots.push(root);
 

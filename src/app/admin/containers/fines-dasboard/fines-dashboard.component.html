@@ -62,7 +62,25 @@
 
     <mat-card class="kpi-card">
       <p class="title">{{ totalAmountDue | currency:'HNL':'L.':'2.2' }}</p>
-      <p>Total Adeudado por Multas Activas</p>
+      <p>Total Adeudado por Multas Activas (Filtrado)</p>
+    </mat-card>
+  </div>
+
+  <!-- Global KPIs Section -->
+  <div class="kpi-container">
+    <mat-card class="kpi-card">
+      <p class="title">{{ globalTotalFines }}</p>
+      <p>Total de Multas (Global)</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ globalActiveFines }}</p>
+      <p>Multas Activas (Global)</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ globalTotalAmountDue | currency:'HNL':'L.':'2.2' }}</p>
+      <p>Total Adeudado Global</p>
     </mat-card>
   </div>
 
@@ -72,5 +90,11 @@
   </div>
   <div id="fineDebtByDepartmentChart" style="width: 100%; height: 400px;"></div>
   <div id="finesByRegionChart" style="width: 100%; height: 400px;"></div>
+
+  <!-- Global Charts Section -->
+  <h3 style="width: 100%; text-align: center; margin: 40px 0 20px 0; color: #666;">Gráficos Globales (Comparación)</h3>
+  <div id="globalDebtByDepartmentChart" style="width: 100%; height: 400px;"></div>
+  <div id="globalFinesByRegionChart" style="width: 100%; height: 400px;"></div>
+
   <div id="finesByDepartmentChart" style="width: 100%; height: 400px; margin-bottom: 15rem;"></div>
 </div>

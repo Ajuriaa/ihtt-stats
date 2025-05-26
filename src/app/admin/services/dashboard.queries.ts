@@ -24,4 +24,9 @@ export class DashboardQueries {
     const queryString = new URLSearchParams(params as any).toString();
     return this.http.get<any>(`${environment.apiUrl}/dashboard-analytics?${queryString}`);
   }
+
+  public getFinesAnalytics(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/fines-analytics?${queryString}`);
+  }
 }
