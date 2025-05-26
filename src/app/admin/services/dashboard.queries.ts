@@ -18,5 +18,10 @@ export class DashboardQueries {
   public getFines(params: Object): Observable<FineResponse> {
     const queryString = new URLSearchParams(params as any).toString();
     return this.http.get<FineResponse>(`${environment.apiUrl}/fines?${queryString}`);
-  };
+  }
+
+  public getDashboardAnalytics(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/dashboard-analytics?${queryString}`);
+  }
 }

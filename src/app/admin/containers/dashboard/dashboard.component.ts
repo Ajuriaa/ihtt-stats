@@ -29,7 +29,7 @@ import { MatInputModule } from '@angular/material/input';
 export class DashboardComponent implements OnInit, OnDestroy {
   public loading = false;
   public certificates: Certificate[] = [];
-  public filteredCertificates: Certificate[] = [];
+  public analytics: any = null;
   public totalPaid = 0;
   public totalOwed = 0;
   public rtn = '';
@@ -95,18 +95,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Fetch data from API and update UI
   public fetchDashboard(): void {
     this.loading = true;
-    // Call API to fetch data
-    // Update UI with data
-    this.dashboardQueries.getCertificates({
+    
+    this.dashboardQueries.getDashboardAnalytics({
       startDate: this.start,
       endDate: this.end,
       dateType: this.dateType
     }).subscribe((response) => {
-      this.certificates = response.data;
-      this.filteredCertificates = this.certificates;
-      console.log(this.certificates.length);
-      this.generateGraphs();
-      this.calculateKPIs();
+      this.analytics = response;
+      this.updateKPIsFromAnalytics();
+      this.generateGraphsFromAnalytics();
       this.loading = false;
     });
   }
@@ -131,112 +128,88 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
 
     // Llamar al servicio con los parámetros construidos
-    this.dashboardQueries.getCertificates(cleanedParams).subscribe((response) => {
-      this.filteredCertificates = response.data;
-      this.calculateKPIs(); // Actualizar KPIs
-      this.generateGraphs(); // Actualizar gráficos
+    this.dashboardQueries.getDashboardAnalytics(cleanedParams).subscribe((response) => {
+      this.analytics = response;
+      this.updateKPIsFromAnalytics();
+      this.generateGraphsFromAnalytics();
       this.loading = false;
     });
   }
 
+  private updateKPIsFromAnalytics(): void {
+    if (!this.analytics?.kpis) return;
+    
+    this.totalPaid = this.analytics.kpis.totalPaid;
+    this.totalOwed = this.analytics.kpis.totalOwed;
+    this.upcomingExpirations = this.analytics.kpis.upcomingExpirations;
+    this.totalPaidLast12Months = this.analytics.kpis.totalPaidLast12Months;
+    this.totalProjectedNext12Months = this.analytics.kpis.totalProjectedNext12Months;
+  }
 
-  private generateGraphs(): void {
+  private generateGraphsFromAnalytics(): void {
+    if (!this.analytics?.chartData) return;
+
     // Limpia gráficos anteriores antes de generar nuevos
     this.chartRoots.forEach(root => root.dispose());
     this.chartRoots = [];
 
-    const debtDistribution = this.filteredCertificates.reduce<Record<string, number>>((acc, cert) => {
-      const status = cert.noticeStatusDescription || "NO DEFINIDO";
-      acc[status] = (acc[status] || 0) + (cert.totalNoticeAmount || 0);
-      return acc;
-    }, {});
-    const pieChartData = Object.entries(debtDistribution).map(([status, amount]) => ({
+    const { chartData } = this.analytics;
+
+    // Convert backend data to chart format
+    const pieChartData = Object.entries(chartData.debtDistribution).map(([status, amount]) => ({
       category: status,
-      value: amount,
+      value: amount as number,
     }));
 
-    const debtByDepartment = this.filteredCertificates
-      .filter(cert => cert.noticeStatusDescription === "ACTIVO") // Solo deuda activa
-      .reduce<Record<string, number>>((acc, cert) => {
-        const department = cert.department || "NO DEFINIDO";
-        acc[department] = (acc[department] || 0) + (cert.totalNoticeAmount || 0);
-        return acc;
-      }, {});
-
-    const barChartData = Object.entries(debtByDepartment).map(([department, amount]) => ({
+    const barChartData = Object.entries(chartData.debtByDepartment).map(([department, amount]) => ({
       category: department,
-      value: amount,
+      value: amount as number,
     }));
 
-    const paidByMonth = this.filteredCertificates
-    .filter(cert => cert.noticeStatusDescription === "PAGADO") // Solo certificados pagados
-    .reduce<Record<string, number>>((acc, cert) => {
-      const month = moment(cert.paymentDate).format("YYYY-MM"); // Agrupar por año-mes
-      acc[month] = (acc[month] || 0) + (cert.totalNoticeAmount || 0);
-      return acc;
-    }, {});
-
-    const lineChartData = Object.entries(paidByMonth).map(([month, amount]) => ({
-      category: month, // Ejemplo: "2024-01"
-      value: amount,
-    }));
-
-    const now = moment(); // Fecha actual
-    const endDate = moment().add(12, 'months'); // Fecha en 12 meses
-
-    const projectionsByMonth = this.filteredCertificates.reduce<Record<string, number>>((acc, cert) => {
-      const certExpDate = cert.certificateExpirationDate ? moment(cert.certificateExpirationDate) : null;
-      const permExpDate = cert.permissionExpirationDate ? moment(cert.permissionExpirationDate) : null;
-
-      const validDate = certExpDate && certExpDate.isBetween(now, endDate, 'month', '[]')
-        ? certExpDate
-        : permExpDate && permExpDate.isBetween(now, endDate, 'month', '[]')
-        ? permExpDate
-        : null;
-
-        if (validDate) {
-          const monthKey = validDate.format("MM-YYYY"); // Agrupar por año-mes
-          acc[monthKey] = (acc[monthKey] || 0) + (cert.totalNoticeAmount || 0);
-        }
-
-        return acc;
-    }, {});
-
-    // Convertir los datos a un formato usable por AMCharts
-    const projectionChartData = Object.entries(projectionsByMonth)
-    .sort(([a], [b]) => moment(a).unix() - moment(b).unix())
-    .map(([month, amount]) => ({
+    const lineChartData = Object.entries(chartData.paidByMonth).map(([month, amount]) => ({
       category: month,
-      value: amount,
+      value: amount as number,
     }));
 
-    const certificateByModality =  this.filteredCertificates.reduce<Record<string, { active: number; paid: number }>>(
-      (acc, cert) => {
-        const modality = cert.modality || 'DESCONOCIDO';
-        if (!acc[modality]) {
-          acc[modality] = { active: 0, paid: 0 };
-        }
-        if (cert.noticeStatusDescription === 'ACTIVO') {
-          acc[modality].active += cert.totalNoticeAmount || 0;
-        } else if (cert.noticeStatusDescription === 'PAGADO') {
-          acc[modality].paid += cert.totalNoticeAmount || 0;
-        }
-        return acc;
-      },
-      {}
-    );
-    const modalityChartData = Object.entries(certificateByModality).map(([modality, { active, paid }]) => ({ modality, active, paid }));
+    console.log('Raw projection data:', chartData.projectionsByMonth);
+    
+    const projectionChartData = Object.entries(chartData.projectionsByMonth)
+      .sort(([a], [b]) => moment(a, "MM-YYYY").unix() - moment(b, "MM-YYYY").unix())
+      .map(([month, amount]) => ({
+        category: month,
+        value: amount as number,
+      }));
+      
+    console.log('Processed projection chart data:', projectionChartData);
+
+    const modalityChartData = Object.entries(chartData.certificateByModality).map(([modality, data]: [string, any]) => ({
+      modality,
+      active: data.active,
+      paid: data.paid
+    }));
 
     this.generateBarChart(barChartData);
     this.generateLineChart(lineChartData);
     this.generatePieChart(pieChartData);
-    this.generateProjectionChart(projectionChartData);
+    
+    console.log('About to generate projection chart with data:', projectionChartData);
+    if (projectionChartData.length > 0) {
+      this.generateProjectionChart(projectionChartData);
+    } else {
+      console.warn('No projection data available for chart generation');
+    }
+    
     this.generateCertificatesByModalityChart(modalityChartData);
   }
 
+
+
   private generateProjectionChart(data: { category: string; value: number }[]): void {
-    const rootProjection = am5.Root.new("projectionsChart");
-    this.chartRoots.push(rootProjection);
+    console.log('generateProjectionChart called with data:', data);
+    
+    try {
+      const rootProjection = am5.Root.new("projectionsChart");
+      this.chartRoots.push(rootProjection);
 
     rootProjection.setThemes([am5themes_Animated.new(rootProjection)]);
 
@@ -327,6 +300,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
 
     chart.appear(1000, 100);
+    console.log('Projection chart generated successfully');
+    
+    } catch (error) {
+      console.error('Error generating projection chart:', error);
+    }
   }
 
   private generateCertificatesByModalityChart(data: any[]): void {
@@ -599,69 +577,4 @@ export class DashboardComponent implements OnInit, OnDestroy {
     series.appear(1000, 100);
   }
 
-  private calculateKPIs(): void {
-    this.totalPaid = this.filteredCertificates
-      .filter(cert => cert.paymentDate !== null && cert.noticeStatusDescription === "PAGADO")
-      .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
-
-    this.totalOwed = this.filteredCertificates
-      .filter(cert => cert.noticeStatusDescription === 'ACTIVO')
-      .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
-
-    this.upcomingExpirations = this.filteredCertificates.filter(cert => {
-      const certExpDate = cert.certificateExpirationDate ? moment(cert.certificateExpirationDate) : null;
-      const permExpDate = cert.permissionExpirationDate ? moment(cert.permissionExpirationDate) : null;
-
-      const now = moment();
-      const threeMonthsFromNow = moment().add(3, 'months');
-
-      return (
-        (certExpDate && certExpDate.isBetween(now, threeMonthsFromNow, 'day', '[]')) ||
-        (permExpDate && permExpDate.isBetween(now, threeMonthsFromNow, 'day', '[]'))
-      );
-    }).length;
-
-    const now = moment(); // Fecha actual
-
-    // Total Pagado en los Últimos 12 Meses
-    this.totalPaidLast12Months = this.filteredCertificates
-      .filter(cert => {
-        const paymentDate = cert.paymentDate ? moment(cert.paymentDate) : null;
-        return paymentDate && paymentDate.isBetween(now.clone().subtract(12, 'months'), now, 'day', '[]');
-      })
-      .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
-
-    // Total Proyectado en los Próximos 12 Meses
-    this.totalProjectedNext12Months = this.filteredCertificates
-      .filter(cert => {
-        const certExpDate = cert.certificateExpirationDate ? moment(cert.certificateExpirationDate) : null;
-        const permExpDate = cert.permissionExpirationDate ? moment(cert.permissionExpirationDate) : null;
-
-        return (
-          (certExpDate && certExpDate.isBetween(now, now.clone().add(12, 'months'), 'day', '[]')) ||
-          (permExpDate && permExpDate.isBetween(now, now.clone().add(12, 'months'), 'day', '[]'))
-        );
-      })
-      .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
-
-    // KPIs Existentes
-    this.totalPaid = this.filteredCertificates
-      .filter(cert => cert.paymentDate !== null)
-      .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
-
-    this.totalOwed = this.filteredCertificates
-      .filter(cert => cert.noticeStatusDescription === 'ACTIVO')
-      .reduce((sum, cert) => sum + (cert.totalNoticeAmount || 0), 0);
-
-    this.upcomingExpirations = this.filteredCertificates.filter(cert => {
-      const certExpDate = cert.certificateExpirationDate ? moment(cert.certificateExpirationDate) : null;
-      const permExpDate = cert.permissionExpirationDate ? moment(cert.permissionExpirationDate) : null;
-
-      const threeMonthsFromNow = now.clone().add(3, 'months');
-      return (
-        (certExpDate && certExpDate.isBetween(now, threeMonthsFromNow, 'day', '[]')) ||
-        (permExpDate && permExpDate.isBetween(now, threeMonthsFromNow, 'day', '[]'))
-      );
-    }).length;
-  }
 }
