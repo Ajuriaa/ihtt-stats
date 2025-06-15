@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import moment from 'moment';
 import { Fine } from '../../interfaces';
 import { DashboardQueries } from '../../services';
 import { ReportesPDFService } from '../../../reports/services/reportes-pdf.service';
@@ -39,6 +40,8 @@ import { LoadingComponent } from '../../../shared/loading/loading.component';
 export class FinesReportsComponent implements OnInit {
   cargando = false;
   multas: Fine[] = [];
+  fechaInicio: Date | null = null;
+  fechaFin: Date | null = null;
   
   // Filtros
   filtros: ReporteParametros = {
@@ -92,10 +95,10 @@ export class FinesReportsComponent implements OnInit {
     const params: any = {};
     
     if (this.filtros.fechaInicio) {
-      params.startDate = this.filtros.fechaInicio;
+      params.startDate = moment.utc(this.filtros.fechaInicio).format('YYYY-MM-DD');
     }
     if (this.filtros.fechaFin) {
-      params.endDate = this.filtros.fechaFin;
+      params.endDate = moment.utc(this.filtros.fechaFin).format('YYYY-MM-DD');
     }
     if (this.filtros.departamento) {
       params.department = this.filtros.departamento;
@@ -112,6 +115,8 @@ export class FinesReportsComponent implements OnInit {
   }
 
   limpiarFiltros(): void {
+    this.fechaInicio = null;
+    this.fechaFin = null;
     this.filtros = {
       fechaInicio: '',
       fechaFin: '',
@@ -133,12 +138,14 @@ export class FinesReportsComponent implements OnInit {
     );
   }
 
-  onFechaInicioChange(fecha: string): void {
-    this.filtros.fechaInicio = fecha;
+  onFechaInicioChange(fecha: Date): void {
+    this.fechaInicio = fecha;
+    this.filtros.fechaInicio = fecha ? moment.utc(fecha).format('YYYY-MM-DD') : '';
   }
 
-  onFechaFinChange(fecha: string): void {
-    this.filtros.fechaFin = fecha;
+  onFechaFinChange(fecha: Date): void {
+    this.fechaFin = fecha;
+    this.filtros.fechaFin = fecha ? moment.utc(fecha).format('YYYY-MM-DD') : '';
   }
 
   // Métodos para obtener estadísticas rápidas

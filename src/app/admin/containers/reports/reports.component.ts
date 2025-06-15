@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import moment from 'moment';
 import { Certificate } from '../../interfaces';
 import { DashboardQueries } from '../../services';
 import { ReportesPDFService } from '../../../reports/services/reportes-pdf.service';
@@ -41,6 +42,8 @@ import { DateFilterComponent } from '../../../shared/date-filter/date-filter.com
 export class ReportsComponent implements OnInit {
   cargando = false;
   certificados: Certificate[] = [];
+  fechaInicio: Date | null = null;
+  fechaFin: Date | null = null;
   
   // Filtros
   filtros: ReporteParametros = {
@@ -48,7 +51,8 @@ export class ReportsComponent implements OnInit {
     fechaFin: '',
     departamento: '',
     tipoDocumento: '',
-    estado: ''
+    estado: '',
+    tipoFecha: 'certificateExpiration'
   };
 
   departamentos = [
@@ -70,6 +74,12 @@ export class ReportsComponent implements OnInit {
     'Vencido',
     'Pendiente',
     'Cancelado'
+  ];
+
+  tiposFecha = [
+    { value: 'certificateExpiration', label: 'Expiración de Certificado' },
+    { value: 'permissionExpiration', label: 'Expiración de Permiso' },
+    { value: 'payment', label: 'Fecha de Pago' }
   ];
 
   constructor(
@@ -101,10 +111,10 @@ export class ReportsComponent implements OnInit {
     const params: any = {};
     
     if (this.filtros.fechaInicio) {
-      params.startDate = this.filtros.fechaInicio;
+      params.startDate = moment.utc(this.filtros.fechaInicio).format('YYYY-MM-DD');
     }
     if (this.filtros.fechaFin) {
-      params.endDate = this.filtros.fechaFin;
+      params.endDate = moment.utc(this.filtros.fechaFin).format('YYYY-MM-DD');
     }
     if (this.filtros.departamento) {
       params.department = this.filtros.departamento;
@@ -115,6 +125,9 @@ export class ReportsComponent implements OnInit {
     if (this.filtros.estado) {
       params.status = this.filtros.estado;
     }
+    if (this.filtros.tipoFecha) {
+      params.dateType = this.filtros.tipoFecha;
+    }
     
     return params;
   }
@@ -124,12 +137,15 @@ export class ReportsComponent implements OnInit {
   }
 
   limpiarFiltros(): void {
+    this.fechaInicio = null;
+    this.fechaFin = null;
     this.filtros = {
       fechaInicio: '',
       fechaFin: '',
       departamento: '',
       tipoDocumento: '',
-      estado: ''
+      estado: '',
+      tipoFecha: 'certificateExpiration'
     };
     this.cargarCertificados();
   }
@@ -152,19 +168,29 @@ export class ReportsComponent implements OnInit {
       return;
     }
 
-    // Aquí se podría generar un reporte más detallado con análisis
-    // Para ahora usamos el mismo método
-    this.reportesPDFService.generarReporteCertificados(
-      this.certificados,
-      this.filtros
-    );
+    // Cargar datos de analytics para reporte detallado
+    const parametros = this.construirParametros();
+    this.dashboardQueries.getCertificatesAnalytics(parametros).subscribe({
+      next: (response) => {
+        this.reportesPDFService.generarReporteCertificadosAnalisis(
+          response,
+          this.filtros
+        );
+      },
+      error: (error) => {
+        console.error('Error al cargar datos de análisis:', error);
+        alert('Error al generar el reporte de análisis');
+      }
+    });
   }
 
-  onFechaInicioChange(fecha: string): void {
-    this.filtros.fechaInicio = fecha;
+  onFechaInicioChange(fecha: Date): void {
+    this.fechaInicio = fecha;
+    this.filtros.fechaInicio = fecha ? moment.utc(fecha).format('YYYY-MM-DD') : '';
   }
 
-  onFechaFinChange(fecha: string): void {
-    this.filtros.fechaFin = fecha;
+  onFechaFinChange(fecha: Date): void {
+    this.fechaFin = fecha;
+    this.filtros.fechaFin = fecha ? moment.utc(fecha).format('YYYY-MM-DD') : '';
   }
 }

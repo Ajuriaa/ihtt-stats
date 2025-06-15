@@ -6,6 +6,7 @@ export interface ReporteParametros {
   region?: string;
   tipoDocumento?: string;
   estado?: string;
+  tipoFecha?: string;
 }
 
 // Interfaces para Dashboard General

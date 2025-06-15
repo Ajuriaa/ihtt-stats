@@ -175,6 +175,126 @@ export class ReportesPDFService {
     doc.output('dataurlnewwindow');
   }
 
+  // 2b. Reporte de Certificados - Análisis Detallado
+  public generarReporteCertificadosAnalisis(
+    datosAnalisis: any, 
+    parametros: ReporteParametros
+  ): void {
+    const doc = this.configurarDocumento();
+    const titulo = 'Análisis Detallado de Certificados';
+
+    let yPosition = 50;
+
+    // Resumen mensual
+    if (datosAnalisis.monthlyBreakdown && datosAnalisis.monthlyBreakdown.length > 0) {
+      doc.text('Desglose Mensual', 14, yPosition);
+      yPosition += 10;
+
+      const datosMenuales = datosAnalisis.monthlyBreakdown.map((mes: any) => [
+        mes.month,
+        mes.quantity.toString(),
+        this.formatearMoneda(mes.totalAmount),
+        this.formatearPorcentaje(mes.variation || 0)
+      ]);
+
+      autoTable(doc, {
+        head: [['Mes', 'Cantidad', 'Monto Total', 'Variación (%)']],
+        body: datosMenuales,
+        startY: yPosition,
+        margin: { left: 14, right: 14 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+        headStyles: { fillColor: '#88CFE0', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 15;
+    }
+
+    // Clasificación por tipo
+    if (datosAnalisis.typeClassification) {
+      doc.text('Clasificación por Tipo de Documento', 14, yPosition);
+      yPosition += 10;
+
+      const datosTipos = Object.entries(datosAnalisis.typeClassification).map(([tipo, data]: [string, any]) => [
+        tipo,
+        data.quantity.toString(),
+        this.formatearPorcentaje(data.percentage),
+        this.formatearMoneda(data.revenue)
+      ]);
+
+      autoTable(doc, {
+        head: [['Tipo de Documento', 'Cantidad', 'Porcentaje (%)', 'Ingresos']],
+        body: datosTipos,
+        startY: yPosition,
+        margin: { left: 14, right: 14 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+        headStyles: { fillColor: '#FFE082', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 15;
+    }
+
+    // Segmentación departamental
+    if (datosAnalisis.departmentSegmentation) {
+      doc.text('Segmentación por Departamento', 14, yPosition);
+      yPosition += 10;
+
+      const datosDepartamentos = Object.entries(datosAnalisis.departmentSegmentation).map(([dept, data]: [string, any]) => [
+        dept,
+        data.quantity.toString(),
+        this.formatearMoneda(data.revenue)
+      ]);
+
+      autoTable(doc, {
+        head: [['Departamento', 'Cantidad', 'Ingresos']],
+        body: datosDepartamentos,
+        startY: yPosition,
+        margin: { left: 14, right: 14 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+        headStyles: { fillColor: '#A5D6A7', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 15;
+    }
+
+    // Observaciones técnicas
+    if (datosAnalisis.observations && datosAnalisis.observations.length > 0) {
+      // Verificar si necesitamos nueva página
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.text('Observaciones Técnicas', 14, yPosition);
+      yPosition += 10;
+
+      const observaciones = datosAnalisis.observations.map((obs: any) => [
+        this.obtenerFecha(obs.date),
+        obs.observation,
+        obs.category,
+        obs.priority
+      ]);
+
+      autoTable(doc, {
+        head: [['Fecha', 'Observación', 'Categoría', 'Prioridad']],
+        body: observaciones,
+        startY: yPosition,
+        margin: { left: 14, right: 14 },
+        styles: { halign: 'left', valign: 'middle', fontSize: 8 },
+        headStyles: { fillColor: '#FFCDD2', fontStyle: 'bold' },
+        columnStyles: {
+          1: { cellWidth: 'wrap' }
+        },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+    }
+
+    this.agregarPiesDePagina(doc, parametros);
+    doc.output('dataurlnewwindow');
+  }
+
   // 3. Reporte de Permisos de Operación
   public generarReportePermisosOperacion(
     datos: PermisosOperacionData, 

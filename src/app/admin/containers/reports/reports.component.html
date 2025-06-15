@@ -17,7 +17,7 @@
               <input 
                 matInput 
                 [matDatepicker]="pickerInicio" 
-                [(ngModel)]="filtros.fechaInicio"
+                [(ngModel)]="fechaInicio"
                 (dateChange)="onFechaInicioChange($event.value)">
               <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
               <mat-datepicker #pickerInicio></mat-datepicker>
@@ -28,10 +28,20 @@
               <input 
                 matInput 
                 [matDatepicker]="pickerFin" 
-                [(ngModel)]="filtros.fechaFin"
+                [(ngModel)]="fechaFin"
                 (dateChange)="onFechaFinChange($event.value)">
               <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
               <mat-datepicker #pickerFin></mat-datepicker>
+            </mat-form-field>
+
+            <!-- Tipo de fecha -->
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Fecha</mat-label>
+              <mat-select [(ngModel)]="filtros.tipoFecha">
+                <mat-option *ngFor="let tipo of tiposFecha" [value]="tipo.value">
+                  {{ tipo.label }}
+                </mat-option>
+              </mat-select>
             </mat-form-field>
           </div>
           

@@ -29,4 +29,19 @@ export class DashboardQueries {
     const queryString = new URLSearchParams(params as any).toString();
     return this.http.get<any>(`${environment.apiUrl}/fines-analytics?${queryString}`);
   }
+
+  public getCertificatesAnalytics(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/certificates-analytics?${queryString}`);
+  }
+
+  public getPermitsAnalytics(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/permits-analytics?${queryString}`);
+  }
+
+  public getRevenueAnalytics(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/revenue-analytics?${queryString}`);
+  }
 }
