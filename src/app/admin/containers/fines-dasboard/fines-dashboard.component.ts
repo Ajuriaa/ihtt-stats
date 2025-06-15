@@ -35,6 +35,8 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
   public selectedDepartment = '';
   public rtn = '';
   public selectedStatus = '';
+  public employeeId = '';
+  public employeeName = '';
   public totalAmountDue = 0;
   public activeFines = 0;
   public statusWord = 'Activas';
@@ -101,7 +103,9 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
       region: this.selectedRegion || undefined,
       department: this.selectedDepartment || undefined,
       status: this.selectedStatus || undefined,
-      dniRtn: this.rtn !== '' ? this.rtn : undefined
+      dniRtn: this.rtn !== '' ? this.rtn : undefined,
+      employeeId: this.employeeId !== '' ? this.employeeId : undefined,
+      employeeName: this.employeeName !== '' ? this.employeeName : undefined
     };
 
     const cleanedParams = Object.fromEntries(

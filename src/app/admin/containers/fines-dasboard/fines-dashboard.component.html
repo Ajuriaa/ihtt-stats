@@ -42,6 +42,16 @@
       <input matInput placeholder="RTN" [(ngModel)]="rtn">
     </mat-form-field>
 
+    <!-- Employee ID -->
+    <mat-form-field>
+      <input matInput placeholder="ID del Empleado" [(ngModel)]="employeeId">
+    </mat-form-field>
+
+    <!-- Employee Name -->
+    <mat-form-field>
+      <input matInput placeholder="Nombre del Empleado" [(ngModel)]="employeeName">
+    </mat-form-field>
+
     <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
   </div>
   <div class="kpi-container">

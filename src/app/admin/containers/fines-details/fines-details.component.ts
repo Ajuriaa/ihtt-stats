@@ -15,7 +15,7 @@ import { ExcelHelper, PDFHelper } from 'src/app/core/helpers';
 import { MatInputModule } from '@angular/material/input';
 
 const COLUMNS = [
-  'fineId', 'totalAmount', 'fineStatus', 'date', 'department', 'region', 'plate', 'rtn', 'noticeID'
+  'fineId', 'totalAmount', 'fineStatus', 'date', 'department', 'region', 'plate', 'rtn', 'employeeId', 'employeeName', 'noticeID'
 ];
 
 
@@ -58,6 +58,8 @@ export class FinesDetailsComponent {
   ];
   public selectedDepartment = '';
   public selectedRegion = '';
+  public employeeId = '';
+  public employeeName = '';
   public globalParams = {};
 
   constructor(
@@ -90,7 +92,9 @@ export class FinesDetailsComponent {
       status: this.selectedStatus || undefined,
       department: this.selectedDepartment || undefined,
       region: this.selectedRegion || undefined,
-      dniRtn: this.rtn !== '' ? this.rtn : undefined
+      dniRtn: this.rtn !== '' ? this.rtn : undefined,
+      employeeId: this.employeeId !== '' ? this.employeeId : undefined,
+      employeeName: this.employeeName !== '' ? this.employeeName : undefined
     };
 
     const cleanedParams = Object.fromEntries(
@@ -126,7 +130,9 @@ export class FinesDetailsComponent {
       status: this.selectedStatus || undefined,
       department: this.selectedDepartment || undefined,
       region: this.selectedRegion || undefined,
-      dniRtn: this.rtn !== '' ? this.rtn : undefined
+      dniRtn: this.rtn !== '' ? this.rtn : undefined,
+      employeeId: this.employeeId !== '' ? this.employeeId : undefined,
+      employeeName: this.employeeName !== '' ? this.employeeName : undefined
     };
     this.globalParams = params;
 

@@ -62,6 +62,8 @@ export interface Fine {
   department?: string;
   municipality?: string;
   place?: string;
+  employeeId?: string;
+  employeeName?: string;
 }
 
 export interface FineResponse {
