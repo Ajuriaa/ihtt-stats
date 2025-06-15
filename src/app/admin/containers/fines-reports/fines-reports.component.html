@@ -35,26 +35,55 @@
             </mat-form-field>
           </div>
           
-          <!-- Filtro de departamento -->
-          <mat-form-field appearance="outline">
-            <mat-label>Departamento</mat-label>
-            <mat-select [(ngModel)]="filtros.departamento">
-              <mat-option value="">Todos los departamentos</mat-option>
-              <mat-option *ngFor="let dept of departamentos" [value]="dept">
-                {{ dept }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          
-          <!-- Filtro de estado -->
+          <!-- Estado de la Multa -->
           <mat-form-field appearance="outline">
             <mat-label>Estado de la Multa</mat-label>
             <mat-select [(ngModel)]="filtros.estado">
-              <mat-option value="">Todos los estados</mat-option>
+              <mat-option value="">TODOS</mat-option>
               <mat-option *ngFor="let estado of estadosMulta" [value]="estado">
                 {{ estado }}
               </mat-option>
             </mat-select>
+          </mat-form-field>
+          
+          <!-- Departamento -->
+          <mat-form-field appearance="outline">
+            <mat-label>Departamento</mat-label>
+            <mat-select [(ngModel)]="filtros.departamento">
+              <mat-option value="">TODOS</mat-option>
+              <mat-option *ngFor="let departamento of departamentos" [value]="departamento">
+                {{ departamento }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Región -->
+          <mat-form-field appearance="outline">
+            <mat-label>Región</mat-label>
+            <mat-select [(ngModel)]="filtros.region">
+              <mat-option value="">TODOS</mat-option>
+              <mat-option *ngFor="let region of regiones" [value]="region">
+                {{ region }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- RTN -->
+          <mat-form-field appearance="outline">
+            <mat-label>RTN</mat-label>
+            <input matInput placeholder="RTN" [(ngModel)]="filtros.rtn">
+          </mat-form-field>
+          
+          <!-- ID del Empleado -->
+          <mat-form-field appearance="outline">
+            <mat-label>ID del Empleado</mat-label>
+            <input matInput placeholder="ID del Empleado" [(ngModel)]="filtros.empleadoId">
+          </mat-form-field>
+          
+          <!-- Nombre del Empleado -->
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del Empleado</mat-label>
+            <input matInput placeholder="Nombre del Empleado" [(ngModel)]="filtros.empleadoNombre">
           </mat-form-field>
         </div>
         

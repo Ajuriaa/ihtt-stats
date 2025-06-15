@@ -4,9 +4,13 @@ export interface ReporteParametros {
   fechaFin?: string;
   departamento?: string;
   region?: string;
-  tipoDocumento?: string;
-  estado?: string;
+  modalidad?: string;
+  estadoAviso?: string;
+  rtn?: string;
   tipoFecha?: string;
+  estado?: string;  // Para compatibility con fines
+  empleadoId?: string;
+  empleadoNombre?: string;
 }
 
 // Interfaces para Dashboard General

@@ -50,30 +50,29 @@ export class ReportsComponent implements OnInit {
     fechaInicio: '',
     fechaFin: '',
     departamento: '',
-    tipoDocumento: '',
-    estado: '',
+    modalidad: '',
+    estadoAviso: '',
+    rtn: '',
     tipoFecha: 'certificateExpiration'
   };
 
   departamentos = [
-    'Atlántida', 'Choluteca', 'Colón', 'Comayagua', 'Copán', 'Cortés',
-    'El Paraíso', 'Francisco Morazán', 'Gracias a Dios', 'Intibucá',
-    'Islas de la Bahía', 'La Paz', 'Lempira', 'Ocotepeque', 'Olancho',
-    'Santa Bárbara', 'Valle', 'Yoro'
+    'ATLANTIDA', 'CHOLUTECA', 'COLON', 'COMAYAGUA', 'COPAN',
+    'CORTES', 'EL PARAISO', 'FRANCISCO MORAZAN', 'GRACIAS A DIOS',
+    'INTIBUCA', 'ISLAS DE LA BAHIA', 'LA PAZ', 'LEMPIRA', 'NACIONAL',
+    'OCOTEPEQUE', 'OLANCHO', 'SANTA BARBARA', 'VALLE', 'YORO'
   ];
 
-  tiposDocumento = [
-    'Certificado de Operación',
-    'Certificado de Habilitación',
-    'Certificado de Inspección',
-    'Certificado de Renovación'
+  modalidades = [
+    'BUS INTERNACIONAL', 'BUS INTERURBANO', 'BUS URBANO',
+    'CARGA ESPECIALIZADA', 'CARGA NO ESPECIALIZADA', 'CARGA PRIVADA ESPECIALIZADA',
+    'ESPECIAL CARGA NO ESPECIALIZADA', 'ESPECIAL EVENTUAL PASAJEROS',
+    'ESPECIAL PASAJEROS', 'MOTOTAXI', 'PRIVADO CARGA',
+    'SERVICIO EJECUTIVO AEREOPORTUARIO', 'TAXI'
   ];
 
-  estados = [
-    'Activo',
-    'Vencido',
-    'Pendiente',
-    'Cancelado'
+  estadosAviso = [
+    'ACTIVO', 'ANULADO', 'NO TIENE', 'PAGADO', 'SIN PAGO SEGUN DECRETO #60-2019'
   ];
 
   tiposFecha = [
@@ -111,19 +110,22 @@ export class ReportsComponent implements OnInit {
     const params: any = {};
     
     if (this.filtros.fechaInicio) {
-      params.startDate = moment.utc(this.filtros.fechaInicio).format('YYYY-MM-DD');
+      params.startDate = this.filtros.fechaInicio;
     }
     if (this.filtros.fechaFin) {
-      params.endDate = moment.utc(this.filtros.fechaFin).format('YYYY-MM-DD');
+      params.endDate = this.filtros.fechaFin;
     }
     if (this.filtros.departamento) {
       params.department = this.filtros.departamento;
     }
-    if (this.filtros.tipoDocumento) {
-      params.documentType = this.filtros.tipoDocumento;
+    if (this.filtros.modalidad) {
+      params.modality = this.filtros.modalidad;
     }
-    if (this.filtros.estado) {
-      params.status = this.filtros.estado;
+    if (this.filtros.estadoAviso) {
+      params.noticeStatus = this.filtros.estadoAviso;
+    }
+    if (this.filtros.rtn) {
+      params.rtn = this.filtros.rtn;
     }
     if (this.filtros.tipoFecha) {
       params.dateType = this.filtros.tipoFecha;
@@ -143,8 +145,9 @@ export class ReportsComponent implements OnInit {
       fechaInicio: '',
       fechaFin: '',
       departamento: '',
-      tipoDocumento: '',
-      estado: '',
+      modalidad: '',
+      estadoAviso: '',
+      rtn: '',
       tipoFecha: 'certificateExpiration'
     };
     this.cargarCertificados();

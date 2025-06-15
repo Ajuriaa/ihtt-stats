@@ -48,22 +48,32 @@ export class FinesReportsComponent implements OnInit {
     fechaInicio: '',
     fechaFin: '',
     departamento: '',
-    estado: ''
+    region: '',
+    estado: '',
+    rtn: '',
+    empleadoId: '',
+    empleadoNombre: ''
   };
 
   departamentos = [
-    'Atlántida', 'Choluteca', 'Colón', 'Comayagua', 'Copán', 'Cortés',
-    'El Paraíso', 'Francisco Morazán', 'Gracias a Dios', 'Intibucá',
-    'Islas de la Bahía', 'La Paz', 'Lempira', 'Ocotepeque', 'Olancho',
-    'Santa Bárbara', 'Valle', 'Yoro'
+    'ATLÁNTIDA', 'COLON', 'YORO', 'OLANCHO',
+    'ISLAS DE LA BAHÍA', 'CORTES', 'FRANCISCO MORAZÁN',
+    'VALLE', 'COPAN', 'LEMPIRA', 'SANTA BARBARÁ', 'OCOTEPEQUE',
+    'CHOLUTECA', 'COMAYAGUA', 'EL PARAÍSO', 'LA PAZ', 'INTIBUCA'
+  ];
+
+  regiones = [
+    'REGIONAL DEL ATLANTICO, OFICINA PRINCIPAL, LA CEIBA',
+    'REGIONAL NOR OCCIDENTAL, OFICINA PRINCIPAL, SAN PEDRO SULA',
+    'REGIONAL OCCIDENTE, SANTA ROSA DE COPAN',
+    'REGIONAL SUR, OFICINA PRINCIPAL, CHOLUTECA',
+    'TEGUCIGALPA, OFICINA PRINCIPAL'
   ];
 
   estadosMulta = [
-    'Pendiente',
-    'Pagada',
-    'Vencida',
-    'En Proceso',
-    'Cancelada'
+    'PAGADA',
+    'ACTIVA', 
+    'ANULADA'
   ];
 
   constructor(
@@ -95,16 +105,28 @@ export class FinesReportsComponent implements OnInit {
     const params: any = {};
     
     if (this.filtros.fechaInicio) {
-      params.startDate = moment.utc(this.filtros.fechaInicio).format('YYYY-MM-DD');
+      params.startDate = this.filtros.fechaInicio;
     }
     if (this.filtros.fechaFin) {
-      params.endDate = moment.utc(this.filtros.fechaFin).format('YYYY-MM-DD');
+      params.endDate = this.filtros.fechaFin;
     }
     if (this.filtros.departamento) {
       params.department = this.filtros.departamento;
     }
+    if (this.filtros.region) {
+      params.region = this.filtros.region;
+    }
     if (this.filtros.estado) {
       params.status = this.filtros.estado;
+    }
+    if (this.filtros.rtn) {
+      params.dniRtn = this.filtros.rtn;
+    }
+    if (this.filtros.empleadoId) {
+      params.employeeId = this.filtros.empleadoId;
+    }
+    if (this.filtros.empleadoNombre) {
+      params.employeeName = this.filtros.empleadoNombre;
     }
     
     return params;
@@ -121,7 +143,11 @@ export class FinesReportsComponent implements OnInit {
       fechaInicio: '',
       fechaFin: '',
       departamento: '',
-      estado: ''
+      region: '',
+      estado: '',
+      rtn: '',
+      empleadoId: '',
+      empleadoNombre: ''
     };
     this.cargarMultas();
   }

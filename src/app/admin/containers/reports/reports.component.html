@@ -10,7 +10,7 @@
         <h3>Filtros de Búsqueda</h3>
         
         <div class="filters-grid">
-          <!-- Filtro de fechas -->
+          <!-- Filtro de fechas con tipo -->
           <div class="date-filters">
             <mat-form-field appearance="outline">
               <mat-label>Fecha Inicio</mat-label>
@@ -34,7 +34,6 @@
               <mat-datepicker #pickerFin></mat-datepicker>
             </mat-form-field>
 
-            <!-- Tipo de fecha -->
             <mat-form-field appearance="outline">
               <mat-label>Tipo de Fecha</mat-label>
               <mat-select [(ngModel)]="filtros.tipoFecha">
@@ -45,37 +44,43 @@
             </mat-form-field>
           </div>
           
-          <!-- Filtro de departamento -->
+          <!-- Modalidad -->
+          <mat-form-field appearance="outline">
+            <mat-label>Modalidad</mat-label>
+            <mat-select [(ngModel)]="filtros.modalidad">
+              <mat-option value="">TODOS</mat-option>
+              <mat-option *ngFor="let modalidad of modalidades" [value]="modalidad">
+                {{ modalidad }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Departamento -->
           <mat-form-field appearance="outline">
             <mat-label>Departamento</mat-label>
             <mat-select [(ngModel)]="filtros.departamento">
-              <mat-option value="">Todos los departamentos</mat-option>
-              <mat-option *ngFor="let dept of departamentos" [value]="dept">
-                {{ dept }}
+              <mat-option value="">TODOS</mat-option>
+              <mat-option *ngFor="let departamento of departamentos" [value]="departamento">
+                {{ departamento }}
               </mat-option>
             </mat-select>
           </mat-form-field>
           
-          <!-- Filtro de tipo de documento -->
+          <!-- Estado de Aviso de Cobro -->
           <mat-form-field appearance="outline">
-            <mat-label>Tipo de Documento</mat-label>
-            <mat-select [(ngModel)]="filtros.tipoDocumento">
-              <mat-option value="">Todos los tipos</mat-option>
-              <mat-option *ngFor="let tipo of tiposDocumento" [value]="tipo">
-                {{ tipo }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          
-          <!-- Filtro de estado -->
-          <mat-form-field appearance="outline">
-            <mat-label>Estado</mat-label>
-            <mat-select [(ngModel)]="filtros.estado">
-              <mat-option value="">Todos los estados</mat-option>
-              <mat-option *ngFor="let estado of estados" [value]="estado">
+            <mat-label>Estado de Aviso</mat-label>
+            <mat-select [(ngModel)]="filtros.estadoAviso">
+              <mat-option value="">TODOS</mat-option>
+              <mat-option *ngFor="let estado of estadosAviso" [value]="estado">
                 {{ estado }}
               </mat-option>
             </mat-select>
+          </mat-form-field>
+          
+          <!-- RTN -->
+          <mat-form-field appearance="outline">
+            <mat-label>RTN</mat-label>
+            <input matInput placeholder="RTN" [(ngModel)]="filtros.rtn">
           </mat-form-field>
         </div>
         
