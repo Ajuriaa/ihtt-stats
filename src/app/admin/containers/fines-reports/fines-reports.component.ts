@@ -42,6 +42,7 @@ export class FinesReportsComponent implements OnInit {
   multas: Fine[] = [];
   fechaInicio: Date | null = null;
   fechaFin: Date | null = null;
+  tipoReporte: 'lista' | 'analisis' = 'analisis'; // Default to analytics report
   
   // Filtros
   filtros: ReporteParametros = {
@@ -153,6 +154,34 @@ export class FinesReportsComponent implements OnInit {
   }
 
   generarReporteMultasPDF(): void {
+    if (this.tipoReporte === 'analisis') {
+      this.generarReporteAnalisisMultas();
+    } else {
+      this.generarReporteListaMultas();
+    }
+  }
+
+  private generarReporteAnalisisMultas(): void {
+    this.cargando = true;
+    const parametros = this.construirParametros();
+    
+    this.dashboardQueries.getFinesAnalyticsReport(parametros).subscribe({
+      next: (datosAnalisis) => {
+        this.reportesPDFService.generarReporteMultasAnalisis(
+          datosAnalisis,
+          this.filtros
+        );
+        this.cargando = false;
+      },
+      error: (error) => {
+        console.error('Error al generar reporte de análisis:', error);
+        alert('Error al generar el reporte de análisis');
+        this.cargando = false;
+      }
+    });
+  }
+
+  private generarReporteListaMultas(): void {
     if (this.multas.length === 0) {
       alert('No hay datos para generar el reporte');
       return;

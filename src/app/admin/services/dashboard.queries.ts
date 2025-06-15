@@ -30,6 +30,11 @@ export class DashboardQueries {
     return this.http.get<any>(`${environment.apiUrl}/fines-analytics?${queryString}`);
   }
 
+  public getFinesAnalyticsReport(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/fines-analytics-report?${queryString}`);
+  }
+
   public getCertificatesAnalytics(params: Object): Observable<any> {
     const queryString = new URLSearchParams(params as any).toString();
     return this.http.get<any>(`${environment.apiUrl}/certificates-analytics?${queryString}`);

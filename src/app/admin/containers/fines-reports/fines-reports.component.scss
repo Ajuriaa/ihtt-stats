@@ -51,7 +51,7 @@
   gap: 8px;
 }
 
-// Tarjetas de estadísticas
+// Tarjetas de estadï¿½sticas
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -137,6 +137,26 @@
   color: #666;
   margin-bottom: 20px;
   line-height: 1.5;
+}
+
+.report-type-selector {
+  margin-bottom: 24px;
+}
+
+.report-type-field {
+  max-width: 350px;
+}
+
+.report-type-field mat-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.report-type-field mat-option mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
 }
 
 .report-buttons {

@@ -170,36 +170,64 @@
       <div *ngIf="!cargando" class="reports-section">
         <h3>Reportes PDF Disponibles</h3>
         <p class="reports-description">
-          Genere reportes detallados en formato PDF que incluyen análisis de infracciones, 
-          reincidencias y estadísticas de recaudación. Los reportes se abrirán en una nueva pestaña.
+          Seleccione el tipo de reporte que desea generar en formato PDF. Los reportes se abrirán en una nueva pestaña.
         </p>
+        
+        <!-- Selector de tipo de reporte -->
+        <div class="report-type-selector">
+          <mat-form-field appearance="outline" class="report-type-field">
+            <mat-label>Tipo de Reporte</mat-label>
+            <mat-select [(ngModel)]="tipoReporte">
+              <mat-option value="analisis">
+                <mat-icon>analytics</mat-icon>
+                Reporte Ejecutivo de Análisis
+              </mat-option>
+              <mat-option value="lista">
+                <mat-icon>list</mat-icon>
+                Lista Detallada de Multas
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
         
         <div class="report-buttons">
           <button 
             mat-raised-button 
             color="accent" 
             (click)="generarReporteMultasPDF()"
-            [disabled]="multas.length === 0">
+            [disabled]="cargando">
             <mat-icon>picture_as_pdf</mat-icon>
-            Reporte Detallado de Multas
+            {{ tipoReporte === 'analisis' ? 'Generar Reporte Ejecutivo' : 'Generar Lista Detallada' }}
           </button>
         </div>
         
-        <div *ngIf="multas.length === 0" class="no-data-message">
+        <div *ngIf="tipoReporte === 'lista' && multas.length === 0" class="no-data-message">
           <mat-icon>info</mat-icon>
           <p>No se encontraron multas con los filtros aplicados.</p>
           <p>Ajuste los filtros de búsqueda para obtener resultados.</p>
         </div>
         
         <!-- Información adicional sobre los reportes -->
-        <div class="report-info" *ngIf="multas.length > 0">
-          <h4>Qué incluye el reporte:</h4>
-          <ul>
+        <div class="report-info">
+          <h4>{{ tipoReporte === 'analisis' ? 'Reporte Ejecutivo incluye:' : 'Lista Detallada incluye:' }}</h4>
+          
+          <ul *ngIf="tipoReporte === 'analisis'">
+            <li><strong>Resumen Ejecutivo:</strong> KPIs principales y métricas de gestión</li>
+            <li><strong>Análisis de Eficiencia:</strong> Tasas de cobro y gestión de recaudación</li>
+            <li><strong>Tendencias:</strong> Comparaciones mensuales e interanuales</li>
+            <li><strong>Top Infractores:</strong> Empresas con mayor número de multas</li>
+            <li><strong>Análisis por Infracciones:</strong> Distribución por tipo de violación</li>
+            <li><strong>Antigüedad de Deuda:</strong> Análisis de cuentas por cobrar</li>
+            <li><strong>Rendimiento de Empleados:</strong> Productividad del personal</li>
+            <li><strong>Insights y Recomendaciones:</strong> Conclusiones estratégicas</li>
+          </ul>
+          
+          <ul *ngIf="tipoReporte === 'lista'">
             <li>Detalle completo de cada multa (fecha, placa, empresa, monto)</li>
-            <li>Agrupación por tipo de infracción</li>
-            <li>Análisis de reincidencias por empresa</li>
-            <li>Estadísticas de recaudación vs proyecciones</li>
-            <li>Distribución por departamento y municipio</li>
+            <li>Estado actual de cada multa (pagada, pendiente, anulada)</li>
+            <li>Información del empleado que emitió la multa</li>
+            <li>Datos de ubicación (departamento, municipio)</li>
+            <li>Códigos de aviso y referencia</li>
           </ul>
         </div>
       </div>

@@ -3,11 +3,11 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import moment from 'moment';
 import { Certificate, Fine } from 'src/app/admin/interfaces';
-import { 
-  DashboardGeneralData, 
-  PermisosOperacionData, 
+import {
+  DashboardGeneralData,
+  PermisosOperacionData,
   IngresosInstitucionalData,
-  ReporteParametros 
+  ReporteParametros
 } from '../interfaces';
 
 @Injectable({
@@ -27,12 +27,12 @@ export class ReportesPDFService {
   }
 
   private crearEncabezadoYPie(
-    doc: jsPDF, 
-    titulo: string, 
+    doc: jsPDF,
+    titulo: string,
     parametros: ReporteParametros
   ): (data: any) => void {
     const azul = '#88CFE0';
-    
+
     return (data: any) => {
       doc.setFontSize(20);
       const tamanioPagina = doc.internal.pageSize;
@@ -57,7 +57,7 @@ export class ReportesPDFService {
   }
 
   private agregarPiesDePagina(
-    doc: jsPDF, 
+    doc: jsPDF,
     parametros: ReporteParametros
   ): void {
     const totalPaginas = (doc as any).internal.getNumberOfPages();
@@ -68,7 +68,7 @@ export class ReportesPDFService {
       doc.setFontSize(10);
       doc.text('Página ' + i + ' de ' + totalPaginas, doc.internal.pageSize.width - 35, alturaPie);
       doc.text('Reporte generado el ' + moment().format('DD/MM/YYYY'), 25, alturaPie);
-      
+
       const textoParametros = this.formatearParametros(parametros);
       if (textoParametros) {
         doc.text('Parámetros: ' + textoParametros, 80, alturaPie);
@@ -105,7 +105,7 @@ export class ReportesPDFService {
   // Método para deduplicar certificados por noticeCode y evitar doble conteo
   private deduplicarCertificados(certificados: Certificate[]): Certificate[] {
     const mapaUnico = new Map<string, Certificate>();
-    
+
     certificados.forEach(cert => {
       const noticeCode = cert.noticeCode?.toString();
       if (noticeCode && !mapaUnico.has(noticeCode)) {
@@ -116,14 +116,14 @@ export class ReportesPDFService {
         mapaUnico.set(uniqueId, cert);
       }
     });
-    
+
     return Array.from(mapaUnico.values());
   }
 
   // Método para deduplicar multas por noticeCode y evitar doble conteo
   private deduplicarMultas(multas: Fine[]): Fine[] {
     const mapaUnico = new Map<string, Fine>();
-    
+
     multas.forEach(multa => {
       const noticeCode = multa.noticeCode?.toString();
       if (noticeCode && !mapaUnico.has(noticeCode)) {
@@ -134,13 +134,13 @@ export class ReportesPDFService {
         mapaUnico.set(uniqueId, multa);
       }
     });
-    
+
     return Array.from(mapaUnico.values());
   }
 
   // 1. Reporte Dashboard General
   public generarReporteDashboardGeneral(
-    datos: DashboardGeneralData, 
+    datos: DashboardGeneralData,
     parametros: ReporteParametros
   ): void {
     const doc = this.configurarDocumento();
@@ -170,7 +170,7 @@ export class ReportesPDFService {
 
   // 2. Reporte de Certificados
   public generarReporteCertificados(
-    certificados: Certificate[], 
+    certificados: Certificate[],
     parametros: ReporteParametros
   ): void {
     const doc = this.configurarDocumento();
@@ -216,7 +216,7 @@ export class ReportesPDFService {
 
   // 2b. Reporte de Certificados - Análisis Detallado
   public generarReporteCertificadosAnalisis(
-    datosAnalisis: any, 
+    datosAnalisis: any,
     parametros: ReporteParametros
   ): void {
     const doc = this.configurarDocumento();
@@ -336,7 +336,7 @@ export class ReportesPDFService {
 
   // 3. Reporte de Permisos de Operación
   public generarReportePermisosOperacion(
-    datos: PermisosOperacionData, 
+    datos: PermisosOperacionData,
     parametros: ReporteParametros
   ): void {
     const doc = this.configurarDocumento();
@@ -365,7 +365,7 @@ export class ReportesPDFService {
 
   // 4. Reporte de Multas
   public generarReporteMultas(
-    multas: Fine[], 
+    multas: Fine[],
     parametros: ReporteParametros
   ): void {
     const doc = this.configurarDocumento();
@@ -409,9 +409,312 @@ export class ReportesPDFService {
     doc.output('dataurlnewwindow');
   }
 
+  // 4b. Reporte de Multas - Análisis Ejecutivo
+  public generarReporteMultasAnalisis(
+    datosAnalisis: any,
+    parametros: ReporteParametros
+  ): void {
+    const doc = this.configurarDocumento();
+    const titulo = 'Reporte Ejecutivo de Multas - Análisis Integral';
+
+    let yPosition = 50;
+
+    // ======== RESUMEN EJECUTIVO ========
+    doc.setFontSize(16);
+    doc.setFont('bold');
+    doc.text('RESUMEN EJECUTIVO', 20, yPosition);
+    yPosition += 15;
+
+    const resumenEjecutivo = [
+      ['Total de Multas Procesadas', datosAnalisis.reportAnalysis.executiveSummary.totalFines.toString()],
+      ['Ingresos por Multas Cobradas', this.formatearMoneda(datosAnalisis.reportAnalysis.executiveSummary.totalRevenue)],
+      ['Deuda Pendiente', this.formatearMoneda(datosAnalisis.reportAnalysis.executiveSummary.outstandingDebt)],
+      ['Tasa de Cobro', this.formatearPorcentaje(datosAnalisis.reportAnalysis.executiveSummary.collectionRate)],
+      ['Período Analizado', `${this.obtenerFecha(datosAnalisis.reportAnalysis.executiveSummary.periodCovered.startDate)} - ${this.obtenerFecha(datosAnalisis.reportAnalysis.executiveSummary.periodCovered.endDate)}`]
+    ];
+
+    autoTable(doc, {
+      body: resumenEjecutivo,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'left', valign: 'middle', fontSize: 11 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 80 },
+        1: { fontStyle: 'normal', cellWidth: 60 }
+      },
+      theme: 'grid',
+      headStyles: { fillColor: '#4CAF50' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE EFICIENCIA DE COBRO ========
+    if (yPosition > 230) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE EFICIENCIA DE COBRO', 20, yPosition);
+    yPosition += 10;
+
+    const analisisCobro = [
+      ['Multas Emitidas', datosAnalisis.reportAnalysis.collectionAnalysis.totalIssued.toString()],
+      ['Multas Cobradas', datosAnalisis.reportAnalysis.collectionAnalysis.totalCollected.toString()],
+      ['Multas Pendientes', datosAnalisis.reportAnalysis.collectionAnalysis.totalPending.toString()],
+      ['Multas Anuladas', datosAnalisis.reportAnalysis.collectionAnalysis.totalCancelled.toString()],
+      ['Eficiencia de Cobro', this.formatearPorcentaje(datosAnalisis.reportAnalysis.collectionAnalysis.collectionRate)]
+    ];
+
+    autoTable(doc, {
+      head: [['Concepto', 'Cantidad']],
+      body: analisisCobro,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#FF9800', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE TENDENCIAS ========
+    if (yPosition > 220) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE TENDENCIAS', 20, yPosition);
+    yPosition += 10;
+
+    const tendencias = [
+      ['Multas Mes Actual', datosAnalisis.reportAnalysis.trends.monthOverMonth.current.toString()],
+      ['Multas Mes Anterior', datosAnalisis.reportAnalysis.trends.monthOverMonth.previous.toString()],
+      ['Variación Mensual (%)', this.formatearPorcentaje(datosAnalisis.reportAnalysis.trends.monthOverMonth.change)],
+      ['Ingresos Mes Actual', this.formatearMoneda(datosAnalisis.reportAnalysis.trends.monthOverMonth.revenue.current)],
+      ['Ingresos Mes Anterior', this.formatearMoneda(datosAnalisis.reportAnalysis.trends.monthOverMonth.revenue.previous)],
+      ['Variación Interanual (%)', this.formatearPorcentaje(datosAnalisis.reportAnalysis.trends.yearOverYear.change)]
+    ];
+
+    autoTable(doc, {
+      head: [['Indicador', 'Valor']],
+      body: tendencias,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#2196F3', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== TOP INFRACTORES ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.topViolators.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('TOP 10 EMPRESAS INFRACTORAS', 20, yPosition);
+    yPosition += 10;
+
+    const topInfractores = datosAnalisis.reportAnalysis.topViolators.slice(0, 10).map((violator: any) => [
+      violator.companyName,
+      violator.dniRtn,
+      violator.violationCount.toString(),
+      this.formatearMoneda(violator.totalAmount)
+    ]);
+
+    autoTable(doc, {
+      head: [['Empresa', 'RTN', 'Multas', 'Monto Total']],
+      body: topInfractores,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+      headStyles: { fillColor: '#F44336', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS POR TIPO DE INFRACCIÓN ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.violationTypes.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS POR TIPO DE INFRACCIÓN', 20, yPosition);
+    yPosition += 10;
+
+    const tiposInfraccion = datosAnalisis.reportAnalysis.violationTypes.map((vt: any) => [
+      vt.type,
+      vt.count.toString(),
+      this.formatearMoneda(vt.totalAmount),
+      this.formatearPorcentaje((vt.count / datosAnalisis.reportAnalysis.executiveSummary.totalFines) * 100)
+    ]);
+
+    autoTable(doc, {
+      head: [['Tipo de Infracción', 'Cantidad', 'Monto Total', '% del Total']],
+      body: tiposInfraccion,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+      headStyles: { fillColor: '#9C27B0', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE ANTIGÜEDAD DE DEUDA ========
+    if (yPosition > 220) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE ANTIGÜEDAD DE DEUDA', 20, yPosition);
+    yPosition += 10;
+
+    const antiguedadDeuda = [
+      ['0-30 días', datosAnalisis.reportAnalysis.debtAging.current.count.toString(), this.formatearMoneda(datosAnalisis.reportAnalysis.debtAging.current.amount)],
+      ['31-60 días', datosAnalisis.reportAnalysis.debtAging.thirtyDays.count.toString(), this.formatearMoneda(datosAnalisis.reportAnalysis.debtAging.thirtyDays.amount)],
+      ['61-90 días', datosAnalisis.reportAnalysis.debtAging.sixtyDays.count.toString(), this.formatearMoneda(datosAnalisis.reportAnalysis.debtAging.sixtyDays.amount)],
+      ['Más de 90 días', datosAnalisis.reportAnalysis.debtAging.ninetyDaysPlus.count.toString(), this.formatearMoneda(datosAnalisis.reportAnalysis.debtAging.ninetyDaysPlus.amount)]
+    ];
+
+    autoTable(doc, {
+      head: [['Rango de Antigüedad', 'Cantidad', 'Monto']],
+      body: antiguedadDeuda,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#FF5722', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== RENDIMIENTO POR EMPLEADO ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.employeePerformance.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('TOP 10 EMPLEADOS POR RENDIMIENTO', 20, yPosition);
+    yPosition += 10;
+
+    const rendimientoEmpleados = datosAnalisis.reportAnalysis.employeePerformance.slice(0, 10).map((emp: any) => [
+      emp.employeeId,
+      emp.employeeName,
+      emp.finesIssued.toString(),
+      this.formatearMoneda(emp.totalAmount)
+    ]);
+
+    autoTable(doc, {
+      head: [['ID Empleado', 'Nombre', 'Multas Emitidas', 'Monto Total']],
+      body: rendimientoEmpleados,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+      headStyles: { fillColor: '#607D8B', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== INSIGHTS Y RECOMENDACIONES ========
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('INSIGHTS CLAVE', 20, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('normal');
+
+    if (datosAnalisis.reportAnalysis.insights.length > 0) {
+      datosAnalisis.reportAnalysis.insights.forEach((insight: string, index: number) => {
+        const textLines = doc.splitTextToSize(`• ${insight}`, 250);
+        doc.text(textLines, 25, yPosition);
+        yPosition += textLines.length * 5 + 3;
+      });
+    } else {
+      doc.text('• No se identificaron insights significativos para el período analizado.', 25, yPosition);
+      yPosition += 8;
+    }
+
+    yPosition += 10;
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('RECOMENDACIONES ESTRATÉGICAS', 20, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('normal');
+
+    if (datosAnalisis.reportAnalysis.recommendations.length > 0) {
+      datosAnalisis.reportAnalysis.recommendations.forEach((recomendacion: string, index: number) => {
+        const textLines = doc.splitTextToSize(`• ${recomendacion}`, 250);
+        doc.text(textLines, 25, yPosition);
+        yPosition += textLines.length * 5 + 3;
+      });
+    } else {
+      doc.text('• Las métricas actuales se encuentran dentro de parámetros aceptables.', 25, yPosition);
+      yPosition += 8;
+    }
+
+    // ======== DATOS DE SOPORTE (MUESTRA) ========
+    if (datosAnalisis.reportAnalysis.sampleFines && datosAnalisis.reportAnalysis.sampleFines.length > 0) {
+      doc.addPage();
+      yPosition = 20;
+
+      doc.setFontSize(14);
+      doc.setFont('bold');
+      doc.text('DATOS DE SOPORTE - MUESTRA DE MULTAS', 20, yPosition);
+      yPosition += 10;
+
+      const multasMuestra = datosAnalisis.reportAnalysis.sampleFines.slice(0, 20).map((multa: any) => [
+        this.obtenerFecha(multa.startDate),
+        multa.plate || 'N/A',
+        multa.origin || 'N/A',
+        multa.companyName?.substring(0, 15) || 'N/A',
+        multa.fineStatus || 'N/A',
+        this.formatearMoneda(multa.totalAmount)
+      ]);
+
+      autoTable(doc, {
+        head: [['Fecha', 'Placa', 'Infracción', 'Empresa', 'Estado', 'Monto']],
+        body: multasMuestra,
+        startY: yPosition,
+        margin: { left: 20, right: 20 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 8 },
+        headStyles: { fillColor: '#78909C', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+    }
+
+    this.agregarPiesDePagina(doc, parametros);
+    doc.output('dataurlnewwindow');
+  }
+
   // 5. Reporte de Ingresos Institucionales
   public generarReporteIngresosInstitucionales(
-    datos: IngresosInstitucionalData, 
+    datos: IngresosInstitucionalData,
     parametros: ReporteParametros
   ): void {
     const doc = this.configurarDocumento();
