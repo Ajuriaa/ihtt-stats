@@ -334,6 +334,342 @@ export class ReportesPDFService {
     doc.output('dataurlnewwindow');
   }
 
+  // 2c. Reporte de Certificados - Análisis Ejecutivo
+  public generarReporteCertificadosAnalisisEjecutivo(
+    datosAnalisis: any,
+    parametros: ReporteParametros
+  ): void {
+    const doc = this.configurarDocumento();
+    const titulo = 'Reporte Ejecutivo de Certificados - Análisis Integral';
+
+    let yPosition = 50;
+
+    // ======== RESUMEN EJECUTIVO ========
+    doc.setFontSize(16);
+    doc.setFont('bold');
+    doc.text('RESUMEN EJECUTIVO', 20, yPosition);
+    yPosition += 15;
+
+    const resumenEjecutivo = [
+      ['Total de Certificados Emitidos', datosAnalisis.reportAnalysis.executiveSummary.totalCertificates.toString()],
+      ['Ingresos Totales', this.formatearMoneda(datosAnalisis.reportAnalysis.executiveSummary.totalRevenue)],
+      ['Tasa de Pago', this.formatearPorcentaje(datosAnalisis.reportAnalysis.executiveSummary.paymentRate)],
+      ['Certificados Vigentes', datosAnalisis.reportAnalysis.executiveSummary.validCertificates.toString()],
+      ['Vencen en 30 días', datosAnalisis.reportAnalysis.executiveSummary.expiringSoon.toString()],
+      ['Período Analizado', `${this.obtenerFecha(datosAnalisis.reportAnalysis.executiveSummary.periodCovered.startDate)} - ${this.obtenerFecha(datosAnalisis.reportAnalysis.executiveSummary.periodCovered.endDate)}`]
+    ];
+
+    autoTable(doc, {
+      body: resumenEjecutivo,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'left', valign: 'middle', fontSize: 11 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 80 },
+        1: { fontStyle: 'normal', cellWidth: 60 }
+      },
+      theme: 'grid',
+      headStyles: { fillColor: '#4CAF50' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE INGRESOS ========
+    if (yPosition > 230) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE INGRESOS Y PAGOS', 20, yPosition);
+    yPosition += 10;
+
+    const analisisIngresos = [
+      ['Certificados Emitidos', datosAnalisis.reportAnalysis.revenueAnalysis.totalIssued.toString()],
+      ['Certificados Pagados', datosAnalisis.reportAnalysis.revenueAnalysis.totalPaid.toString()],
+      ['Certificados Activos', datosAnalisis.reportAnalysis.revenueAnalysis.totalActive.toString()],
+      ['Certificados Anulados', datosAnalisis.reportAnalysis.revenueAnalysis.totalCancelled.toString()],
+      ['Tasa de Pago', this.formatearPorcentaje(datosAnalisis.reportAnalysis.revenueAnalysis.paymentRate)],
+      ['Ingresos Totales', this.formatearMoneda(datosAnalisis.reportAnalysis.revenueAnalysis.totalRevenue)]
+    ];
+
+    autoTable(doc, {
+      head: [['Concepto', 'Valor']],
+      body: analisisIngresos,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#FF9800', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE TENDENCIAS ========
+    if (yPosition > 220) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE TENDENCIAS', 20, yPosition);
+    yPosition += 10;
+
+    const tendencias = [
+      ['Certificados Mes Actual', datosAnalisis.reportAnalysis.trends.monthOverMonth.current.toString()],
+      ['Certificados Mes Anterior', datosAnalisis.reportAnalysis.trends.monthOverMonth.previous.toString()],
+      ['Variación Mensual (%)', this.formatearPorcentaje(datosAnalisis.reportAnalysis.trends.monthOverMonth.change)],
+      ['Ingresos Mes Actual', this.formatearMoneda(datosAnalisis.reportAnalysis.trends.monthOverMonth.revenue.current)],
+      ['Ingresos Mes Anterior', this.formatearMoneda(datosAnalisis.reportAnalysis.trends.monthOverMonth.revenue.previous)],
+      ['Variación Interanual (%)', this.formatearPorcentaje(datosAnalisis.reportAnalysis.trends.yearOverYear.change)]
+    ];
+
+    autoTable(doc, {
+      head: [['Indicador', 'Valor']],
+      body: tendencias,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#2196F3', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== TOP BENEFICIARIOS ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.topBeneficiaries.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('TOP 10 EMPRESAS BENEFICIARIAS', 20, yPosition);
+    yPosition += 10;
+
+    const topBeneficiarios = datosAnalisis.reportAnalysis.topBeneficiaries.slice(0, 10).map((beneficiary: any) => [
+      beneficiary.companyName,
+      beneficiary.rtn,
+      beneficiary.certificateCount.toString(),
+      this.formatearMoneda(beneficiary.totalAmount)
+    ]);
+
+    autoTable(doc, {
+      head: [['Empresa', 'RTN', 'Certificados', 'Monto Total']],
+      body: topBeneficiarios,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+      headStyles: { fillColor: '#4CAF50', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS POR MODALIDAD ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.modalityAnalysis.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS POR MODALIDAD DE TRANSPORTE', 20, yPosition);
+    yPosition += 10;
+
+    const modalidades = datosAnalisis.reportAnalysis.modalityAnalysis.map((ma: any) => [
+      ma.modality,
+      ma.count.toString(),
+      this.formatearMoneda(ma.totalAmount),
+      this.formatearPorcentaje(ma.percentage)
+    ]);
+
+    autoTable(doc, {
+      head: [['Modalidad', 'Cantidad', 'Monto Total', '% del Total']],
+      body: modalidades,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+      headStyles: { fillColor: '#9C27B0', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE VENCIMIENTOS ========
+    if (yPosition > 180) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE VENCIMIENTOS', 20, yPosition);
+    yPosition += 10;
+
+    const vencimientos = [
+      ['Certificados Vigentes', datosAnalisis.reportAnalysis.expirationAnalysis.validCertificates.count.toString(), this.formatearMoneda(datosAnalisis.reportAnalysis.expirationAnalysis.validCertificates.amount)],
+      ['Vencen en 30 días', datosAnalisis.reportAnalysis.expirationAnalysis.expiringSoon.count.toString(), '-'],
+      ['Vencidos (últimos 90 días)', datosAnalisis.reportAnalysis.expirationAnalysis.expiredRecently.count.toString(), this.formatearMoneda(datosAnalisis.reportAnalysis.expirationAnalysis.expiredRecently.amount)]
+    ];
+
+    autoTable(doc, {
+      head: [['Estado', 'Cantidad', 'Monto']],
+      body: vencimientos,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#FF5722', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== CERTIFICADOS POR VENCER (TABLA DETALLADA) ========
+    if (datosAnalisis.reportAnalysis.expirationAnalysis.expiringSoon.certificates.length > 0) {
+      if (yPosition > 150) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(12);
+      doc.setFont('bold');
+      doc.text('CERTIFICADOS QUE VENCEN EN 30 DÍAS', 20, yPosition);
+      yPosition += 10;
+
+      const certificadosVencimiento = datosAnalisis.reportAnalysis.expirationAnalysis.expiringSoon.certificates.map((cert: any) => [
+        cert.certificateNumber || 'N/A',
+        cert.companyName?.substring(0, 20) || 'N/A',
+        this.obtenerFecha(cert.expirationDate),
+        cert.daysToExpire.toString() + ' días'
+      ]);
+
+      autoTable(doc, {
+        head: [['Número Certificado', 'Empresa', 'Fecha Vencimiento', 'Días Restantes']],
+        body: certificadosVencimiento,
+        startY: yPosition,
+        margin: { left: 20, right: 20 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 8 },
+        headStyles: { fillColor: '#FFC107', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+    }
+
+    // ======== RENDIMIENTO POR DEPARTAMENTO ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.departmentPerformance.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('RENDIMIENTO POR DEPARTAMENTO', 20, yPosition);
+    yPosition += 10;
+
+    const rendimientoDepartamentos = datosAnalisis.reportAnalysis.departmentPerformance.slice(0, 10).map((dept: any) => [
+      dept.department,
+      dept.areaName?.substring(0, 20) || 'N/A',
+      dept.certificatesIssued.toString(),
+      this.formatearMoneda(dept.totalAmount)
+    ]);
+
+    autoTable(doc, {
+      head: [['Departamento', 'Área', 'Certificados', 'Monto Total']],
+      body: rendimientoDepartamentos,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+      headStyles: { fillColor: '#607D8B', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== INSIGHTS Y RECOMENDACIONES ========
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('INSIGHTS CLAVE', 20, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('normal');
+
+    if (datosAnalisis.reportAnalysis.insights.length > 0) {
+      datosAnalisis.reportAnalysis.insights.forEach((insight: string, index: number) => {
+        const textLines = doc.splitTextToSize(`• ${insight}`, 250);
+        doc.text(textLines, 25, yPosition);
+        yPosition += textLines.length * 5 + 3;
+      });
+    } else {
+      doc.text('• No se identificaron insights significativos para el período analizado.', 25, yPosition);
+      yPosition += 8;
+    }
+
+    yPosition += 10;
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('RECOMENDACIONES ESTRATÉGICAS', 20, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('normal');
+
+    if (datosAnalisis.reportAnalysis.recommendations.length > 0) {
+      datosAnalisis.reportAnalysis.recommendations.forEach((recomendacion: string, index: number) => {
+        const textLines = doc.splitTextToSize(`• ${recomendacion}`, 250);
+        doc.text(textLines, 25, yPosition);
+        yPosition += textLines.length * 5 + 3;
+      });
+    } else {
+      doc.text('• Las métricas actuales se encuentran dentro de parámetros aceptables.', 25, yPosition);
+      yPosition += 8;
+    }
+
+    // ======== DATOS DE SOPORTE (MUESTRA) ========
+    if (datosAnalisis.reportAnalysis.sampleCertificates && datosAnalisis.reportAnalysis.sampleCertificates.length > 0) {
+      doc.addPage();
+      yPosition = 20;
+
+      doc.setFontSize(14);
+      doc.setFont('bold');
+      doc.text('DATOS DE SOPORTE - MUESTRA DE CERTIFICADOS', 20, yPosition);
+      yPosition += 10;
+
+      const certificadosMuestra = datosAnalisis.reportAnalysis.sampleCertificates.slice(0, 20).map((cert: any) => [
+        cert.certificateNumber || 'N/A',
+        this.obtenerFecha(cert.deliveryDate),
+        cert.modality?.substring(0, 15) || 'N/A',
+        cert.concessionaireName?.substring(0, 15) || 'N/A',
+        cert.noticeStatusDescription || 'N/A',
+        this.formatearMoneda(cert.totalNoticeAmount)
+      ]);
+
+      autoTable(doc, {
+        head: [['Número', 'Fecha Emisión', 'Modalidad', 'Empresa', 'Estado', 'Monto']],
+        body: certificadosMuestra,
+        startY: yPosition,
+        margin: { left: 20, right: 20 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 8 },
+        headStyles: { fillColor: '#78909C', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+    }
+
+    this.agregarPiesDePagina(doc, parametros);
+    doc.output('dataurlnewwindow');
+  }
+
   // 3. Reporte de Permisos de Operación
   public generarReportePermisosOperacion(
     datos: PermisosOperacionData,

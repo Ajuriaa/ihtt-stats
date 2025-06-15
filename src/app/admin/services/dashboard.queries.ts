@@ -40,6 +40,11 @@ export class DashboardQueries {
     return this.http.get<any>(`${environment.apiUrl}/certificates-analytics?${queryString}`);
   }
 
+  public getCertificatesAnalyticsReport(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/certificates-analytics-report?${queryString}`);
+  }
+
   public getPermitsAnalytics(params: Object): Observable<any> {
     const queryString = new URLSearchParams(params as any).toString();
     return this.http.get<any>(`${environment.apiUrl}/permits-analytics?${queryString}`);

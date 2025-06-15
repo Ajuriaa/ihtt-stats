@@ -44,6 +44,7 @@ export class ReportsComponent implements OnInit {
   certificados: Certificate[] = [];
   fechaInicio: Date | null = null;
   fechaFin: Date | null = null;
+  tipoReporte: 'lista' | 'analisis' = 'analisis'; // Default to analytics report
   
   // Filtros
   filtros: ReporteParametros = {
@@ -154,6 +155,34 @@ export class ReportsComponent implements OnInit {
   }
 
   generarReportePDF(): void {
+    if (this.tipoReporte === 'analisis') {
+      this.generarReporteAnalisisCertificados();
+    } else {
+      this.generarReporteListaCertificados();
+    }
+  }
+
+  private generarReporteAnalisisCertificados(): void {
+    this.cargando = true;
+    const parametros = this.construirParametros();
+    
+    this.dashboardQueries.getCertificatesAnalyticsReport(parametros).subscribe({
+      next: (datosAnalisis) => {
+        this.reportesPDFService.generarReporteCertificadosAnalisisEjecutivo(
+          datosAnalisis,
+          this.filtros
+        );
+        this.cargando = false;
+      },
+      error: (error) => {
+        console.error('Error al generar reporte de análisis:', error);
+        alert('Error al generar el reporte de análisis');
+        this.cargando = false;
+      }
+    });
+  }
+
+  private generarReporteListaCertificados(): void {
     if (this.certificados.length === 0) {
       alert('No hay datos para generar el reporte');
       return;
@@ -165,6 +194,7 @@ export class ReportsComponent implements OnInit {
     );
   }
 
+  // Legacy method - kept for backward compatibility
   generarReporteDetalladoPDF(): void {
     if (this.certificados.length === 0) {
       alert('No hay datos para generar el reporte');
