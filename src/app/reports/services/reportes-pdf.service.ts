@@ -102,6 +102,42 @@ export class ReportesPDFService {
     return `${valor.toFixed(2)}%`;
   }
 
+  // Método para deduplicar certificados por noticeCode y evitar doble conteo
+  private deduplicarCertificados(certificados: Certificate[]): Certificate[] {
+    const mapaUnico = new Map<string, Certificate>();
+    
+    certificados.forEach(cert => {
+      const noticeCode = cert.noticeCode?.toString();
+      if (noticeCode && !mapaUnico.has(noticeCode)) {
+        mapaUnico.set(noticeCode, cert);
+      } else if (!noticeCode) {
+        // Si no tiene noticeCode, incluirlo de todas formas pero con ID único
+        const uniqueId = `no-notice-${Math.random()}`;
+        mapaUnico.set(uniqueId, cert);
+      }
+    });
+    
+    return Array.from(mapaUnico.values());
+  }
+
+  // Método para deduplicar multas por noticeCode y evitar doble conteo
+  private deduplicarMultas(multas: Fine[]): Fine[] {
+    const mapaUnico = new Map<string, Fine>();
+    
+    multas.forEach(multa => {
+      const noticeCode = multa.noticeCode?.toString();
+      if (noticeCode && !mapaUnico.has(noticeCode)) {
+        mapaUnico.set(noticeCode, multa);
+      } else if (!noticeCode) {
+        // Si no tiene noticeCode, incluirlo de todas formas pero con ID único
+        const uniqueId = `no-notice-${Math.random()}`;
+        mapaUnico.set(uniqueId, multa);
+      }
+    });
+    
+    return Array.from(mapaUnico.values());
+  }
+
   // 1. Reporte Dashboard General
   public generarReporteDashboardGeneral(
     datos: DashboardGeneralData, 
@@ -140,6 +176,9 @@ export class ReportesPDFService {
     const doc = this.configurarDocumento();
     const titulo = 'Reporte Detallado de Certificados';
 
+    // DEDUPLICAR POR NOTICECODE PARA EVITAR DOBLE CONTEO
+    const certificadosUnicos = this.deduplicarCertificados(certificados);
+
     const columnas = [
       'Fecha Emisión',
       'Número Certificado',
@@ -151,7 +190,7 @@ export class ReportesPDFService {
       'Fecha Vencimiento'
     ];
 
-    const datosFormateados = certificados.map(cert => [
+    const datosFormateados = certificadosUnicos.map(cert => [
       this.obtenerFecha(cert.deliveryDate),
       cert.certificateNumber || 'N/A',
       cert.documentType || 'N/A',
@@ -332,6 +371,9 @@ export class ReportesPDFService {
     const doc = this.configurarDocumento();
     const titulo = 'Reporte Detallado de Multas';
 
+    // DEDUPLICAR POR NOTICECODE PARA EVITAR DOBLE CONTEO
+    const multasUnicas = this.deduplicarMultas(multas);
+
     const columnas = [
       'Fecha',
       'Placa',
@@ -343,7 +385,7 @@ export class ReportesPDFService {
       'Código Aviso'
     ];
 
-    const datosFormateados = multas.map(multa => [
+    const datosFormateados = multasUnicas.map(multa => [
       this.obtenerFecha(multa.startDate),
       multa.plate || 'N/A',
       multa.origin || 'N/A',

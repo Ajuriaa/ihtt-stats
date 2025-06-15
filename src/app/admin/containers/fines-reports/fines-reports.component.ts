@@ -174,20 +174,39 @@ export class FinesReportsComponent implements OnInit {
     this.filtros.fechaFin = fecha ? moment.utc(fecha).format('YYYY-MM-DD') : '';
   }
 
-  // Métodos para obtener estadísticas rápidas
+  // Método auxiliar para deduplicar multas por noticeCode
+  private deduplicarMultas(): any[] {
+    const mapaUnico = new Map();
+    this.multas.forEach(multa => {
+      const noticeCode = multa.noticeCode?.toString();
+      if (noticeCode && !mapaUnico.has(noticeCode)) {
+        mapaUnico.set(noticeCode, multa);
+      } else if (!noticeCode) {
+        // Si no tiene noticeCode, incluirlo de todas formas
+        const uniqueId = `no-notice-${Math.random()}`;
+        mapaUnico.set(uniqueId, multa);
+      }
+    });
+    return Array.from(mapaUnico.values());
+  }
+
+  // Métodos para obtener estadísticas rápidas (usando datos deduplicados)
   get totalMultas(): number {
-    return this.multas.length;
+    return this.deduplicarMultas().length;
   }
 
   get montoTotalMultas(): number {
-    return this.multas.reduce((total, multa) => total + (multa.totalAmount || 0), 0);
+    const multasUnicas = this.deduplicarMultas();
+    return multasUnicas.reduce((total, multa) => total + (multa.totalAmount || 0), 0);
   }
 
   get multasPendientes(): number {
-    return this.multas.filter(multa => multa.fineStatus?.toLowerCase().includes('pendiente')).length;
+    const multasUnicas = this.deduplicarMultas();
+    return multasUnicas.filter(multa => multa.fineStatus?.toLowerCase().includes('activa')).length;
   }
 
   get multasPagadas(): number {
-    return this.multas.filter(multa => multa.fineStatus?.toLowerCase().includes('pagada')).length;
+    const multasUnicas = this.deduplicarMultas();
+    return multasUnicas.filter(multa => multa.fineStatus?.toLowerCase().includes('pagada')).length;
   }
 }
