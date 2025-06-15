@@ -1,1 +1,135 @@
-<p>reports works!</p>
+<div class="reports-container">
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>Reportes de Certificados</mat-card-title>
+      <mat-card-subtitle>Genere reportes detallados de certificados emitidos</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="filters-section">
+        <h3>Filtros de Búsqueda</h3>
+        
+        <div class="filters-grid">
+          <!-- Filtro de fechas -->
+          <div class="date-filters">
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha Inicio</mat-label>
+              <input 
+                matInput 
+                [matDatepicker]="pickerInicio" 
+                [(ngModel)]="filtros.fechaInicio"
+                (dateChange)="onFechaInicioChange($event.value)">
+              <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerInicio></mat-datepicker>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha Fin</mat-label>
+              <input 
+                matInput 
+                [matDatepicker]="pickerFin" 
+                [(ngModel)]="filtros.fechaFin"
+                (dateChange)="onFechaFinChange($event.value)">
+              <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFin></mat-datepicker>
+            </mat-form-field>
+          </div>
+          
+          <!-- Filtro de departamento -->
+          <mat-form-field appearance="outline">
+            <mat-label>Departamento</mat-label>
+            <mat-select [(ngModel)]="filtros.departamento">
+              <mat-option value="">Todos los departamentos</mat-option>
+              <mat-option *ngFor="let dept of departamentos" [value]="dept">
+                {{ dept }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Filtro de tipo de documento -->
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Documento</mat-label>
+            <mat-select [(ngModel)]="filtros.tipoDocumento">
+              <mat-option value="">Todos los tipos</mat-option>
+              <mat-option *ngFor="let tipo of tiposDocumento" [value]="tipo">
+                {{ tipo }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Filtro de estado -->
+          <mat-form-field appearance="outline">
+            <mat-label>Estado</mat-label>
+            <mat-select [(ngModel)]="filtros.estado">
+              <mat-option value="">Todos los estados</mat-option>
+              <mat-option *ngFor="let estado of estados" [value]="estado">
+                {{ estado }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        
+        <!-- Botones de filtros -->
+        <div class="filter-buttons">
+          <button mat-raised-button color="primary" (click)="aplicarFiltros()" [disabled]="cargando">
+            <mat-icon>search</mat-icon>
+            Aplicar Filtros
+          </button>
+          
+          <button mat-stroked-button (click)="limpiarFiltros()" [disabled]="cargando">
+            <mat-icon>clear</mat-icon>
+            Limpiar Filtros
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  
+  <!-- Sección de resultados y reportes -->
+  <mat-card class="results-card">
+    <mat-card-header>
+      <mat-card-title>Resultados</mat-card-title>
+      <mat-card-subtitle>{{ certificados.length }} certificados encontrados</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div *ngIf="cargando" class="loading-section">
+        <app-loading></app-loading>
+        <p>Cargando certificados...</p>
+      </div>
+      
+      <div *ngIf="!cargando" class="reports-section">
+        <h3>Generar Reportes PDF</h3>
+        <p class="reports-description">
+          Genere reportes detallados en formato PDF que se abrirán en una nueva pestaña del navegador.
+        </p>
+        
+        <div class="report-buttons">
+          <button 
+            mat-raised-button 
+            color="accent" 
+            (click)="generarReportePDF()"
+            [disabled]="certificados.length === 0">
+            <mat-icon>picture_as_pdf</mat-icon>
+            Reporte Básico de Certificados
+          </button>
+          
+          <button 
+            mat-raised-button 
+            color="accent" 
+            (click)="generarReporteDetalladoPDF()"
+            [disabled]="certificados.length === 0">
+            <mat-icon>analytics</mat-icon>
+            Reporte Detallado con Análisis
+          </button>
+        </div>
+        
+        <div *ngIf="certificados.length === 0" class="no-data-message">
+          <mat-icon>info</mat-icon>
+          <p>No se encontraron certificados con los filtros aplicados.</p>
+          <p>Ajuste los filtros de búsqueda para obtener resultados.</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

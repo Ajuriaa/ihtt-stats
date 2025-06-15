@@ -1,1 +1,179 @@
-<p>fines-reports works!</p>
+<div class="fines-reports-container">
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>Reportes de Multas</mat-card-title>
+      <mat-card-subtitle>Genere reportes detallados de multas y sanciones aplicadas</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="filters-section">
+        <h3>Filtros de Búsqueda</h3>
+        
+        <div class="filters-grid">
+          <!-- Filtro de fechas -->
+          <div class="date-filters">
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha Inicio</mat-label>
+              <input 
+                matInput 
+                [matDatepicker]="pickerInicio" 
+                [(ngModel)]="filtros.fechaInicio"
+                (dateChange)="onFechaInicioChange($event.value)">
+              <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerInicio></mat-datepicker>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha Fin</mat-label>
+              <input 
+                matInput 
+                [matDatepicker]="pickerFin" 
+                [(ngModel)]="filtros.fechaFin"
+                (dateChange)="onFechaFinChange($event.value)">
+              <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFin></mat-datepicker>
+            </mat-form-field>
+          </div>
+          
+          <!-- Filtro de departamento -->
+          <mat-form-field appearance="outline">
+            <mat-label>Departamento</mat-label>
+            <mat-select [(ngModel)]="filtros.departamento">
+              <mat-option value="">Todos los departamentos</mat-option>
+              <mat-option *ngFor="let dept of departamentos" [value]="dept">
+                {{ dept }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Filtro de estado -->
+          <mat-form-field appearance="outline">
+            <mat-label>Estado de la Multa</mat-label>
+            <mat-select [(ngModel)]="filtros.estado">
+              <mat-option value="">Todos los estados</mat-option>
+              <mat-option *ngFor="let estado of estadosMulta" [value]="estado">
+                {{ estado }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        
+        <!-- Botones de filtros -->
+        <div class="filter-buttons">
+          <button mat-raised-button color="primary" (click)="aplicarFiltros()" [disabled]="cargando">
+            <mat-icon>search</mat-icon>
+            Aplicar Filtros
+          </button>
+          
+          <button mat-stroked-button (click)="limpiarFiltros()" [disabled]="cargando">
+            <mat-icon>clear</mat-icon>
+            Limpiar Filtros
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  
+  <!-- Sección de estadísticas rápidas -->
+  <div class="stats-cards" *ngIf="!cargando && multas.length > 0">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon">receipt</mat-icon>
+          <div class="stat-info">
+            <h3>{{ totalMultas }}</h3>
+            <p>Total Multas</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon">attach_money</mat-icon>
+          <div class="stat-info">
+            <h3>L. {{ montoTotalMultas.toLocaleString('es-HN') }}</h3>
+            <p>Monto Total</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon pending">schedule</mat-icon>
+          <div class="stat-info">
+            <h3>{{ multasPendientes }}</h3>
+            <p>Pendientes</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon paid">check_circle</mat-icon>
+          <div class="stat-info">
+            <h3>{{ multasPagadas }}</h3>
+            <p>Pagadas</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  
+  <!-- Sección de resultados y reportes -->
+  <mat-card class="results-card">
+    <mat-card-header>
+      <mat-card-title>Generar Reportes</mat-card-title>
+      <mat-card-subtitle>{{ multas.length }} multas encontradas</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div *ngIf="cargando" class="loading-section">
+        <app-loading></app-loading>
+        <p>Cargando multas...</p>
+      </div>
+      
+      <div *ngIf="!cargando" class="reports-section">
+        <h3>Reportes PDF Disponibles</h3>
+        <p class="reports-description">
+          Genere reportes detallados en formato PDF que incluyen análisis de infracciones, 
+          reincidencias y estadísticas de recaudación. Los reportes se abrirán en una nueva pestaña.
+        </p>
+        
+        <div class="report-buttons">
+          <button 
+            mat-raised-button 
+            color="accent" 
+            (click)="generarReporteMultasPDF()"
+            [disabled]="multas.length === 0">
+            <mat-icon>picture_as_pdf</mat-icon>
+            Reporte Detallado de Multas
+          </button>
+        </div>
+        
+        <div *ngIf="multas.length === 0" class="no-data-message">
+          <mat-icon>info</mat-icon>
+          <p>No se encontraron multas con los filtros aplicados.</p>
+          <p>Ajuste los filtros de búsqueda para obtener resultados.</p>
+        </div>
+        
+        <!-- Información adicional sobre los reportes -->
+        <div class="report-info" *ngIf="multas.length > 0">
+          <h4>Qué incluye el reporte:</h4>
+          <ul>
+            <li>Detalle completo de cada multa (fecha, placa, empresa, monto)</li>
+            <li>Agrupación por tipo de infracción</li>
+            <li>Análisis de reincidencias por empresa</li>
+            <li>Estadísticas de recaudación vs proyecciones</li>
+            <li>Distribución por departamento y municipio</li>
+          </ul>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

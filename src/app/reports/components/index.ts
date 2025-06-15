@@ -1,0 +1,1 @@
+export * from './dashboard-general-report.component';\nexport * from './permisos-operacion-report.component';\nexport * from './ingresos-institucionales-report.component';
