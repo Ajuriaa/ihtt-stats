@@ -2,11 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { NameHelper } from 'src/app/admin/helpers';
 import { cookieHelper } from 'src/app/core/helpers';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [],
+  imports: [MatFormFieldModule, MatSelectModule, MatOptionModule, FormsModule, CommonModule],
   providers: [NameHelper, cookieHelper],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
@@ -16,6 +21,11 @@ export class HeaderComponent implements OnInit {
   public title = 'Sistema de Estadísticas';
   public name = '';
   public mode = 'certificates';
+  public availableModes = [
+    { value: 'certificates', label: 'Certificados y Permisos' },
+    { value: 'fines', label: 'Multas' },
+    { value: 'eventual-permits', label: 'Permisos Eventuales' }
+  ];
 
   constructor(
     private cookieHelper: cookieHelper,
@@ -35,8 +45,8 @@ export class HeaderComponent implements OnInit {
     this.name = this.nameHelper.getShortName(this.cookieHelper.getName());
   }
 
-  public toggleMode(): void {
-    this.mode = this.mode === 'certificates' ? 'fines' : 'certificates';
+  public onModeChange(newMode: string): void {
+    this.mode = newMode;
 
     // Obtiene la ruta actual sin el parámetro de modo
     const currentUrl = this.router.url.split('/');
@@ -49,15 +59,31 @@ export class HeaderComponent implements OnInit {
 
   private setTitle(): void {
     const url = this.router.url;
+    let modeTitle = '';
+    
+    switch(this.mode) {
+      case 'certificates':
+        modeTitle = ' de Certificados, Permisos y Permisos Especiales';
+        break;
+      case 'fines':
+        modeTitle = ' de Multas';
+        break;
+      case 'eventual-permits':
+        modeTitle = ' de Permisos Eventuales';
+        break;
+      default:
+        modeTitle = '';
+    }
+    
     switch(true) {
       case url.includes('dashboard'):
-        this.title = 'Dashboard' + (this.mode === 'certificates' ? ' de Certificados, Permisos y Permisos Especiales' : ' de Multas');
+        this.title = 'Dashboard' + modeTitle;
         break;
       case url.includes('details'):
-        this.title = 'Lista Detallada' + (this.mode === 'certificates' ? ' de Certificados, Permisos y Permisos Especiales' : ' de Multas');
+        this.title = 'Lista Detallada' + modeTitle;
         break;
       case url.includes('reports'):
-        this.title = 'Reportes' + (this.mode === 'certificates' ? ' de Certificados, Permisos y Permisos Especiales' : ' de Multas');
+        this.title = 'Reportes' + modeTitle;
         break;
       default:
         this.title = 'IHTT';

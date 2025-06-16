@@ -54,4 +54,14 @@ export class DashboardQueries {
     const queryString = new URLSearchParams(params as any).toString();
     return this.http.get<any>(`${environment.apiUrl}/revenue-analytics?${queryString}`);
   }
+
+  public getEventualPermits(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/eventual-permits?${queryString}`);
+  }
+
+  public getEventualPermitsAnalytics(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/eventual-permits-analytics?${queryString}`);
+  }
 }

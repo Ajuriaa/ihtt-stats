@@ -1,7 +1,18 @@
 <div class="container">
   <img class="image" src="assets/logo.png" />
-  <i class="uil uil-exchange" (click)="toggleMode()"></i>
-  <strong>{{title}}</strong>
+  
+  <div class="mode-selector">
+    <mat-form-field appearance="outline" class="mode-field">
+      <mat-select [(value)]="mode" (selectionChange)="onModeChange($event.value)">
+        <mat-option *ngFor="let modeOption of availableModes" [value]="modeOption.value">
+          {{ modeOption.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  
+  <strong class="title">{{title}}</strong>
+  
   <div class="profile-info pointer">
     <span class="labels">
       <strong>{{ name }}</strong>

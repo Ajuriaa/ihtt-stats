@@ -6,3 +6,5 @@ export * from './fines-details/fines-details.component';
 export * from './fines-reports/fines-reports.component';
 export * from './fines-details/fines-details.component';
 export * from './fines-dasboard/fines-dashboard.component';
+export * from './eventual-permits-dashboard/eventual-permits-dashboard.component';
+export * from './eventual-permits-details/eventual-permits-details.component';

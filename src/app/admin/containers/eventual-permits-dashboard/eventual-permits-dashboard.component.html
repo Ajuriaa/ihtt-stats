@@ -1,0 +1,115 @@
+<div class="container">
+  <div class="content">
+    <div class="top-section">
+      <!-- Filtros de fecha -->
+      <app-date-filter 
+        [showDateTypeFilter]="false"
+        (dateRangeChanged)="filterDates($event)">
+      </app-date-filter>
+
+      <!-- Filtros adicionales -->
+      <form (ngSubmit)="onSubmit()" class="filters-form">
+        <!-- RTN del Solicitante -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>RTN del Solicitante</mat-label>
+          <input matInput [(ngModel)]="rtn" name="rtn" placeholder="Ingrese RTN">
+        </mat-form-field>
+
+        <!-- Nombre del Solicitante -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Nombre del Solicitante</mat-label>
+          <input matInput [(ngModel)]="applicantName" name="applicantName" placeholder="Ingrese nombre">
+        </mat-form-field>
+
+        <!-- Estado del Permiso -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Estado del Permiso</mat-label>
+          <mat-select [(value)]="selectedPermitStatus" (selectionChange)="applyFilter('permitStatus', $event.value)">
+            <mat-option value="">Todos</mat-option>
+            <mat-option *ngFor="let status of permitStatuses" [value]="status">{{ status }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Tipo de Servicio -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Tipo de Servicio</mat-label>
+          <mat-select [(value)]="selectedServiceType" (selectionChange)="applyFilter('serviceType', $event.value)">
+            <mat-option value="">Todos</mat-option>
+            <mat-option *ngFor="let serviceType of serviceTypes" [value]="serviceType">{{ serviceType }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Botón de filtro -->
+        <app-primary-button 
+          type="submit" 
+          [disableButton]="loading" 
+          text="Aplicar Filtros">
+        </app-primary-button>
+      </form>
+    </div>
+
+    <!-- Indicadores KPI -->
+    <div class="kpi-section">
+      <mat-card class="kpi-card">
+        <mat-card-content>
+          <h3>Total de Permisos</h3>
+          <p class="kpi-value">{{ totalPermits | number }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-content>
+          <h3>Ingresos Totales</h3>
+          <p class="kpi-value">L. {{ totalRevenue | number:'1.2-2' }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-content>
+          <h3>Permisos Activos</h3>
+          <p class="kpi-value">{{ activePermits | number }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-content>
+          <h3>Permisos Procesados</h3>
+          <p class="kpi-value">{{ processedPermits | number }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-content>
+          <h3>Permisos Anulados</h3>
+          <p class="kpi-value">{{ cancelledPermits | number }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-section">
+      <div class="chart-container">
+        <div id="statusDistributionChart" class="chart"></div>
+      </div>
+
+      <div class="chart-container">
+        <div id="revenueByStatusChart" class="chart"></div>
+      </div>
+
+      <div class="chart-container">
+        <div id="serviceTypeChart" class="chart"></div>
+      </div>
+
+      <div class="chart-container">
+        <div id="monthlyRevenueChart" class="chart"></div>
+      </div>
+
+      <div class="chart-container">
+        <div id="regionalOfficeChart" class="chart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <app-loading *ngIf="loading"></app-loading>
+</div>

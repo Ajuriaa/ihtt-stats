@@ -1,0 +1,122 @@
+.container {
+  padding: 1rem;
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.top-section {
+  margin-bottom: 2rem;
+}
+
+.filters-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+  margin-top: 1rem;
+}
+
+.filter-field {
+  min-width: 200px;
+  flex: 1;
+}
+
+.kpi-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+
+  mat-card-content {
+    padding: 1.5rem;
+
+    h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 0.9rem;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    .kpi-value {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+  }
+}
+
+.charts-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 2rem;
+}
+
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  min-height: 400px;
+}
+
+.chart {
+  width: 100%;
+  height: 350px;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .filters-form {
+    flex-direction: column;
+  }
+
+  .filter-field {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .kpi-section {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .charts-section {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-container {
+    min-height: 300px;
+  }
+
+  .chart {
+    height: 250px;
+  }
+}
+
+// Loading styles
+app-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}

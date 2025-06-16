@@ -17,11 +17,38 @@
     height: 6rem;
   }
 
-  .uil {
+  .mode-selector {
     position: absolute;
     left: 15rem;
-    font-size: 3rem;
-    cursor: pointer;
+    
+    .mode-field {
+      .mat-mdc-form-field-wrapper {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+      }
+      
+      .mat-mdc-select {
+        color: white;
+        font-size: 1.4rem;
+        font-weight: 500;
+      }
+      
+      .mat-mdc-select-arrow {
+        color: white;
+      }
+      
+      .mat-mdc-form-field-outline {
+        color: rgba(255, 255, 255, 0.3);
+      }
+      
+      &.mat-focused .mat-mdc-form-field-outline {
+        color: white;
+      }
+    }
+  }
+
+  .title {
+    margin-left: 2rem;
   }
 
   .profile {
