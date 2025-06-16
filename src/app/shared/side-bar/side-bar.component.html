@@ -13,6 +13,7 @@
       (click)="selectOption('details')"
     />
     <app-side-nav-button
+      *ngIf="currentMode !== 'eventual-permits'"
       icon='reports'
       label='Reportes'
       [selected]="selectedOption === 'reports'"
