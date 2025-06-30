@@ -98,7 +98,7 @@ export class EventualPermitsDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  public onSubmit(): void {
+  public applyFilters(): void {
     this.loading = true;
 
     const params: any = {

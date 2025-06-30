@@ -1,51 +1,52 @@
 <div class="container">
   <div class="content">
     <div class="top-section">
-      <!-- Filtros de fecha -->
-      <app-date-filter
-        [showDateTypeFilter]="false"
-        (dateRangeChanged)="filterDates($event)">
-      </app-date-filter>
-
       <!-- Filtros adicionales -->
-      <form (ngSubmit)="onSubmit()" class="filters-form">
-        <!-- RTN del Solicitante -->
-        <mat-form-field class="filter-field">
-          <mat-label>RTN del Solicitante</mat-label>
-          <input matInput [(ngModel)]="rtn" name="rtn" placeholder="Ingrese RTN">
-        </mat-form-field>
+      <div class="filters-container">
+        <div class="filter-row">
+          <!-- Filtros de fecha -->
+          <app-date-filter
+            [showDateTypeFilter]="false"
+            (dateRangeChanged)="filterDates($event)">
+          </app-date-filter>
+          <!-- RTN del Solicitante -->
+          <mat-form-field class="filter-field">
+            <mat-label>RTN del Solicitante</mat-label>
+            <input matInput [(ngModel)]="rtn" name="rtn" placeholder="Ingrese RTN">
+          </mat-form-field>
+        </div>
 
-        <!-- Nombre del Solicitante -->
-        <mat-form-field class="filter-field">
-          <mat-label>Nombre del Solicitante</mat-label>
-          <input matInput [(ngModel)]="applicantName" name="applicantName" placeholder="Ingrese nombre">
-        </mat-form-field>
+        <div class="filter-row">
+          <!-- Nombre del Solicitante -->
+          <mat-form-field class="filter-field">
+            <mat-label>Nombre del Solicitante</mat-label>
+            <input matInput [(ngModel)]="applicantName" name="applicantName" placeholder="Ingrese nombre">
+          </mat-form-field>
 
-        <!-- Estado del Permiso -->
-        <mat-form-field class="filter-field">
-          <mat-label>Estado del Permiso</mat-label>
-          <mat-select [(value)]="selectedPermitStatus" (selectionChange)="applyFilter('permitStatus', $event.value)">
-            <mat-option value="">Todos</mat-option>
-            <mat-option *ngFor="let status of permitStatuses" [value]="status">{{ status }}</mat-option>
-          </mat-select>
-        </mat-form-field>
+          <!-- Estado del Permiso -->
+          <mat-form-field class="filter-field">
+            <mat-label>Estado del Permiso</mat-label>
+            <mat-select [(value)]="selectedPermitStatus" (selectionChange)="applyFilter('permitStatus', $event.value)">
+              <mat-option value="">Todos</mat-option>
+              <mat-option *ngFor="let status of permitStatuses" [value]="status">{{ status }}</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-        <!-- Tipo de Servicio -->
-        <mat-form-field class="filter-field">
-          <mat-label>Tipo de Servicio</mat-label>
-          <mat-select [(value)]="selectedServiceType" (selectionChange)="applyFilter('serviceType', $event.value)">
-            <mat-option value="">Todos</mat-option>
-            <mat-option *ngFor="let serviceType of serviceTypes" [value]="serviceType">{{ serviceType }}</mat-option>
-          </mat-select>
-        </mat-form-field>
+          <!-- Tipo de Servicio -->
+          <mat-form-field class="filter-field">
+            <mat-label>Tipo de Servicio</mat-label>
+            <mat-select [(value)]="selectedServiceType" (selectionChange)="applyFilter('serviceType', $event.value)">
+              <mat-option value="">Todos</mat-option>
+              <mat-option *ngFor="let serviceType of serviceTypes" [value]="serviceType">{{ serviceType }}</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-        <!-- Botón de filtro -->
-        <app-primary-button
-          type="submit"
-          [disableButton]="loading"
-          text="Aplicar Filtros">
-        </app-primary-button>
-      </form>
+          <!-- Botón de filtro -->
+          <app-primary-button [disableButton]="loading">
+            Aplicar Filtros
+          </app-primary-button>
+        </div>
+      </div>
     </div>
 
     <!-- Sección de estadísticas rápidas -->

@@ -1,22 +1,26 @@
+@import 'global';
+
 .content {
   width: 90%;
+  margin-bottom: 15rem;
 }
 
 .top-section {
   margin-bottom: 2rem;
 }
 
-.filters-form {
-  display: flex;
-  flex-wrap: wrap;
+.filters-container {
+  @include flex-center-column;
   gap: 1rem;
-  align-items: end;
   margin-top: 1rem;
 }
-
 .filter-field {
-  min-width: 200px;
-  flex: 1;
+  margin: 0;
+}
+
+.filter-row {
+  @include flex-center;
+  gap: 1rem;
 }
 
 // Tarjetas de estadsticas
