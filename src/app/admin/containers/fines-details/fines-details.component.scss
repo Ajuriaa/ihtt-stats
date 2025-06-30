@@ -1,8 +1,14 @@
 @import 'global';
 
 .filter-wrapper {
-  @include flex-center;
+  @include flex-center-column;
   gap: 2rem;
   margin: 2rem 0;
-  width: 80%;
+  width: 100%;
+}
+
+.filter-row {
+  width: 70%;
+  @include flex-center;
+  justify-content: space-between;
 }

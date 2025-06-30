@@ -2,70 +2,74 @@
 
 <div class="container" *ngIf="!isLoading">
   <div class="filter-wrapper">
-    <app-date-filter [showDateTypeFilter]="true" [dateType]="dateType" [startDate]="startDateObject" [endDate]="endDateObject" (dateRangeChanged)="filterDates($event)"></app-date-filter>
-    <!-- Modalidad -->
-    <mat-form-field>
-      <mat-label>Modalidad</mat-label>
-      <mat-select [(ngModel)]="selectedModality" (selectionChange)="applyFilter('modality', $event.value)">
-        <mat-option value="">TODOS</mat-option>
-        <mat-option *ngFor="let modality of modalities" [value]="modality">
-          {{ modality }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <div class="filter-row">
+      <app-date-filter [showDateTypeFilter]="true" [dateType]="dateType" [startDate]="startDateObject" [endDate]="endDateObject" (dateRangeChanged)="filterDates($event)"></app-date-filter>
+      <!-- Modalidad -->
+      <mat-form-field>
+        <mat-label>Modalidad</mat-label>
+        <mat-select [(ngModel)]="selectedModality" (selectionChange)="applyFilter('modality', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let modality of modalities" [value]="modality">
+            {{ modality }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-    <!-- Departamento -->
-    <mat-form-field>
-      <mat-label>Departamento</mat-label>
-      <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="applyFilter('department', $event.value)">
-        <mat-option value="">TODOS</mat-option>
-        <mat-option *ngFor="let department of departments" [value]="department">
-          {{ department }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+      <!-- Departamento -->
+      <mat-form-field>
+        <mat-label>Departamento</mat-label>
+        <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="applyFilter('department', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let department of departments" [value]="department">
+            {{ department }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="filter-row">
+      <!-- ESTADO -->
+      <mat-form-field>
+        <mat-label>Estado del Certificado</mat-label>
+        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter('coStatus', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let status of statuses" [value]="status">
+            {{ status }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-    <!-- ESTADO -->
-    <mat-form-field>
-      <mat-label>Estado del Certificado</mat-label>
-      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter('coStatus', $event.value)">
-        <mat-option value="">TODOS</mat-option>
-        <mat-option *ngFor="let status of statuses" [value]="status">
-          {{ status }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+      <!-- Estado de Aviso de Cobro -->
+      <mat-form-field>
+        <mat-label>Estado de Aviso</mat-label>
+        <mat-select [(ngModel)]="selectedNoticeStatus" (selectionChange)="applyFilter('noticeStatus', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let noticeStatus of noticeStatuses" [value]="noticeStatus">
+            {{ noticeStatus }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-    <!-- Estado de Aviso de Cobro -->
-    <mat-form-field>
-      <mat-label>Estado de Aviso</mat-label>
-      <mat-select [(ngModel)]="selectedNoticeStatus" (selectionChange)="applyFilter('noticeStatus', $event.value)">
-        <mat-option value="">TODOS</mat-option>
-        <mat-option *ngFor="let noticeStatus of noticeStatuses" [value]="noticeStatus">
-          {{ noticeStatus }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+      <!-- RTN -->
+      <mat-form-field>
+        <input matInput placeholder="RTN" [(ngModel)]="rtn">
+      </mat-form-field>
 
-    <!-- RTN -->
-    <mat-form-field>
-      <input matInput placeholder="RTN" [(ngModel)]="rtn">
-    </mat-form-field>
-
-    <!-- Renovación automática -->
-    <mat-form-field>
-      <mat-label>Renovación automática</mat-label>
-      <mat-select [(ngModel)]="selectedAutomaticRenewal" (selectionChange)="applyFilter('automaticRenewal', $event.value)">
-        <mat-option value="">TODOS</mat-option>
-        <mat-option *ngFor="let estado of estadosRenovacion" [value]="estado.value">
-          {{ estado.label }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
-    <app-primary-button (btnClick)="generatePDF()">IMPRIMIR LISTADO</app-primary-button>
-    <app-primary-button (btnClick)="generateExcel()">EXPORTAR EXCEL</app-primary-button>
+      <!-- Renovación automática -->
+      <mat-form-field>
+        <mat-label>Renovación automática</mat-label>
+        <mat-select [(ngModel)]="selectedAutomaticRenewal" (selectionChange)="applyFilter('automaticRenewal', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let estado of estadosRenovacion" [value]="estado.value">
+            {{ estado.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="filter-row">
+      <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
+      <app-primary-button (btnClick)="generatePDF()">IMPRIMIR LISTADO</app-primary-button>
+      <app-primary-button (btnClick)="generateExcel()">EXPORTAR EXCEL</app-primary-button>
+    </div>
   </div>
   <section class="table-container">
     <app-no-result *ngIf="certificates.length === 0"></app-no-result>

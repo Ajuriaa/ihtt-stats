@@ -8,9 +8,15 @@
 }
 
 .filter-wrapper {
-  @include flex-center;
+  @include flex-center-column;
   gap: 2rem;
+  width: 100%;
+}
+
+.filter-row {
   width: 70%;
+  @include flex-center;
+  justify-content: space-between;
 }
 
 .kpi-container {

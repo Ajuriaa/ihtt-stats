@@ -2,57 +2,59 @@
 
 <div class="container">
   <div class="filter-wrapper">
-    <app-date-filter (dateRangeChanged)="filterDates($event)"></app-date-filter>
+    <div class="filter-row">
+      <app-date-filter (dateRangeChanged)="filterDates($event)"></app-date-filter>
 
-    <!-- Estado -->
-    <mat-form-field>
-      <mat-label>Estado</mat-label>
-      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter('status', $event.value)">
-        <mat-option value="">TODOS</mat-option>
-        <mat-option *ngFor="let status of statuses" [value]="status">
-          {{ status }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+      <!-- Estado -->
+      <mat-form-field>
+        <mat-label>Estado</mat-label>
+        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter('status', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let status of statuses" [value]="status">
+            {{ status }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-    <!-- Region -->
-    <mat-form-field>
-      <mat-label>Región</mat-label>
-      <mat-select [(ngModel)]="selectedRegion" (selectionChange)="applyFilter('region', $event.value)">
-        <mat-option value="">TODOS</mat-option>
-        <mat-option *ngFor="let region of regions" [value]="region">
-          {{ region }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+      <!-- Region -->
+      <mat-form-field>
+        <mat-label>Región</mat-label>
+        <mat-select [(ngModel)]="selectedRegion" (selectionChange)="applyFilter('region', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let region of regions" [value]="region">
+            {{ region }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-    <!-- Departamento -->
-    <mat-form-field>
-      <mat-label>Departamento</mat-label>
-      <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="applyFilter('department', $event.value)">
-        <mat-option value="">TODOS</mat-option>
-        <mat-option *ngFor="let department of departments" [value]="department">
-          {{ department }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+      <!-- Departamento -->
+      <mat-form-field>
+        <mat-label>Departamento</mat-label>
+        <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="applyFilter('department', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let department of departments" [value]="department">
+            {{ department }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="filter-row">
+      <!-- RTN -->
+      <mat-form-field>
+        <input matInput placeholder="RTN" [(ngModel)]="rtn">
+      </mat-form-field>
 
-    <!-- RTN -->
-    <mat-form-field>
-      <input matInput placeholder="RTN" [(ngModel)]="rtn">
-    </mat-form-field>
+      <!-- Employee ID -->
+      <mat-form-field>
+        <input matInput placeholder="ID del Empleado" [(ngModel)]="employeeId">
+      </mat-form-field>
 
-    <!-- Employee ID -->
-    <mat-form-field>
-      <input matInput placeholder="ID del Empleado" [(ngModel)]="employeeId">
-    </mat-form-field>
-
-    <!-- Employee Name -->
-    <mat-form-field>
-      <input matInput placeholder="Nombre del Empleado" [(ngModel)]="employeeName">
-    </mat-form-field>
-
-    <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
+      <!-- Employee Name -->
+      <mat-form-field>
+        <input matInput placeholder="Nombre del Empleado" [(ngModel)]="employeeName">
+      </mat-form-field>
+      <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
+    </div>
   </div>
   <div class="kpi-container">
     <mat-card class="kpi-card">
