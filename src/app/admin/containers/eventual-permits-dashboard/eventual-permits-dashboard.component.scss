@@ -1,14 +1,3 @@
-.container {
-  padding: 1rem;
-  height: 100%;
-  overflow-y: auto;
-  position: relative;
-}
-
-.content {
-  max-width: 1200px;
-  margin: 0 auto;
-}
 
 .top-section {
   margin-bottom: 2rem;
@@ -81,42 +70,4 @@
 .chart {
   width: 100%;
   height: 350px;
-}
-
-// Responsive design
-@media (max-width: 768px) {
-  .filters-form {
-    flex-direction: column;
-  }
-
-  .filter-field {
-    min-width: unset;
-    width: 100%;
-  }
-
-  .kpi-section {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  }
-
-  .charts-section {
-    grid-template-columns: 1fr;
-  }
-
-  .chart-container {
-    min-height: 300px;
-  }
-
-  .chart {
-    height: 250px;
-  }
-}
-
-// Loading styles
-app-loading {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
 }
