@@ -169,6 +169,60 @@ export class ExcelHelper {
     });
   }
 
+  public exportEventualPermitsToExcel(permits: any[], name: string): void {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Permisos Eventuales');
+
+    const headers = [
+      'Fecha del Sistema',
+      'Código de Permiso',
+      'RTN',
+      'Nombre del Solicitante',
+      'Placa',
+      'Estado del Permiso',
+      'Tipo de Servicio',
+      'Oficina Regional',
+      'Monto',
+      'Código de Aviso'
+    ];
+
+    worksheet.addRow(headers);
+
+    permits.forEach(permit => {
+      worksheet.addRow([
+        this.getDate(permit.systemDate),
+        permit.permitCode || 'N/A',
+        permit.rtn || 'N/A',
+        permit.applicantName || 'N/A',
+        permit.plate || 'N/A',
+        permit.permitStatus || 'N/A',
+        permit.serviceTypeDescription || 'N/A',
+        permit.regionalOffice || 'N/A',
+        permit.amount || 0,
+        permit.noticeCode || 'N/A'
+      ]);
+    });
+
+    worksheet.columns.forEach(column => {
+      let maxLength = 0;
+      if (!column.eachCell) {
+        return;
+      }
+      column.eachCell({ includeEmpty: true }, cell => {
+        if (cell.value) {
+          const cellValue = cell.value.toString();
+          maxLength = Math.max(maxLength, cellValue.length);
+        }
+      });
+      column.width = maxLength + 2;
+    });
+
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/octet-stream' });
+      FileSaver.saveAs(blob, name);
+    });
+  }
+
   private getDate(date: Date | null | undefined | string): Date | null {
     if (!date) {
       return null; // Si la fecha es null o undefined, retorna null (celda vacía en Excel)

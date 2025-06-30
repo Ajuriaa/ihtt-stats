@@ -65,6 +65,32 @@ export class PDFHelper {
     doc.output('dataurlnewwindow');
   }
 
+  public generateEventualPermitsPDF(permits: any[], params: {}): void {
+    const columns = [
+      'Fecha Sistema',
+      'Código Permiso',
+      'Solicitante',
+      'RTN',
+      'Tipo Servicio',
+      'Estado',
+      'Oficina Regional',
+      'Monto',
+      'Código Aviso'
+    ];
+    const formattedPermits = permits.map(permit => [
+      this.getDate(permit.systemDate),
+      permit.permitCode || 'N/A',
+      permit.applicantName || 'N/A',
+      permit.rtn || 'N/A',
+      permit.serviceTypeDescription || 'N/A',
+      permit.permitStatus || 'N/A',
+      permit.regionalOffice || 'N/A',
+      permit.amount || 0,
+      permit.noticeCode || 'N/A'
+    ]);
+    this.generatePDF(formattedPermits, columns, 'Listado de Permisos Eventuales', params);
+  }
+
   public generateCertificatePDF(certificates: Certificate[], params: {}): void {
     const columns = [
       'Fecha Exp. Certificado', // certificateExpirationDate

@@ -138,6 +138,24 @@ export class ReportesPDFService {
     return Array.from(mapaUnico.values());
   }
 
+  // Método para deduplicar permisos eventuales por noticeCode y evitar doble conteo
+  private deduplicarEventualPermits(permits: any[]): any[] {
+    const mapaUnico = new Map<string, any>();
+
+    permits.forEach(permit => {
+      const noticeCode = permit.noticeCode?.toString();
+      if (noticeCode && !mapaUnico.has(noticeCode)) {
+        mapaUnico.set(noticeCode, permit);
+      } else if (!noticeCode) {
+        // Si no tiene noticeCode, incluirlo de todas formas pero con ID único
+        const uniqueId = `no-notice-${Math.random()}`;
+        mapaUnico.set(uniqueId, permit);
+      }
+    });
+
+    return Array.from(mapaUnico.values());
+  }
+
   // 1. Reporte Dashboard General
   public generarReporteDashboardGeneral(
     datos: DashboardGeneralData,
@@ -571,7 +589,7 @@ export class ReportesPDFService {
     doc.text('RENDIMIENTO POR DEPARTAMENTO', 20, yPosition);
     yPosition += 10;
 
-    const rendimientoDepartamentos = datosAnalisis.reportAnalysis.departmentPerformance.slice(0, 10).map((dept: any) => [
+    const rendimientoDepartamentos = datosAnalisis.reportAnalysis.departmentPerformance.map((dept: any) => [
       dept.department,
       dept.areaName?.substring(0, 20) || 'N/A',
       dept.certificatesIssued.toString(),
@@ -949,7 +967,7 @@ export class ReportesPDFService {
     doc.text('TOP 10 EMPLEADOS POR RENDIMIENTO', 20, yPosition);
     yPosition += 10;
 
-    const rendimientoEmpleados = datosAnalisis.reportAnalysis.employeePerformance.slice(0, 10).map((emp: any) => [
+    const rendimientoEmpleados = datosAnalisis.reportAnalysis.employeePerformance.map((emp: any) => [
       emp.employeeId,
       emp.employeeName,
       emp.finesIssued.toString(),
@@ -1070,6 +1088,52 @@ export class ReportesPDFService {
       startY: 50,
       margin: { top: 45, right: 10, bottom: 20, left: 20 },
       styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#88CFE0', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    this.agregarPiesDePagina(doc, parametros);
+    doc.output('dataurlnewwindow');
+  }
+
+  public generateEventualPermitsPDF(
+    permits: any[],
+    parametros: any
+  ): void {
+    const doc = this.configurarDocumento();
+    const titulo = 'Reporte Detallado de Permisos Eventuales';
+
+    const permitsUnicos = this.deduplicarEventualPermits(permits);
+
+    const columnas = [
+      'Fecha Sistema',
+      'Código Permiso',
+      'Solicitante',
+      'RTN',
+      'Tipo Servicio',
+      'Estado',
+      'Oficina Regional',
+      'Monto',
+      'Código Aviso'
+    ];
+
+    const datosFormateados = permitsUnicos.map(permit => [
+      this.obtenerFecha(permit.systemDate),
+      permit.permitCode || 'N/A',
+      permit.applicantName || 'N/A',
+      permit.rtn || 'N/A',
+      permit.serviceTypeDescription || 'N/A',
+      permit.permitStatus || 'N/A',
+      permit.regionalOffice || 'N/A',
+      this.formatearMoneda(permit.amount),
+      permit.noticeCode || 'N/A'
+    ]);
+
+    autoTable(doc, {
+      head: [columnas],
+      body: datosFormateados,
+      margin: { top: 45, right: 10, bottom: 20, left: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 8 },
       headStyles: { fillColor: '#88CFE0', fontStyle: 'bold' },
       didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
     });

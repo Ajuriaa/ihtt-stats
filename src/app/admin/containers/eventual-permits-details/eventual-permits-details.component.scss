@@ -1,44 +1,21 @@
+@import 'global';
+
 .container {
   padding: 1rem;
   height: 100%;
-  margin-top: 30rem;
+  margin-top: 20rem;
+  margin-bottom: 25rem;
 }
 
-.filters-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: end;
-  margin: 1rem 0 2rem 0;
-}
-
-.filter-field {
-  min-width: 200px;
-  flex: 1;
-}
-
-.table-container {
-  margin-bottom: 15rem;
-}
-
-.permits-table {
+.filter-wrapper {
+  @include flex-center-column;
+  gap: 2rem;
+  margin: 2rem 0;
   width: 100%;
+}
 
-  th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #495057;
-    padding: 1rem;
-    border-bottom: 2px solid #e9ecef;
-  }
-
-  td {
-    padding: 1rem;
-    border-bottom: 1px solid #e9ecef;
-    vertical-align: middle;
-  }
-
-  tr:hover {
-    background-color: #f8f9fa;
-  }
+.filter-row {
+  width: 70%;
+  @include flex-center;
+  justify-content: space-between;
 }

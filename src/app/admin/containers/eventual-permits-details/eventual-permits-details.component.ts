@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { MatInputModule } from '@angular/material/input';
+import { ExcelHelper, PDFHelper } from 'src/app/core/helpers';
 
 const COLUMNS = ['systemDate', 'permitCode', 'applicantName', 'rtn', 'serviceTypeDescription', 'permitStatus', 'regionalOffice', 'amount', 'noticeCode'];
 
@@ -49,7 +50,9 @@ export class EventualPermitsDetailsComponent implements OnInit {
 
   constructor(
     private permitService: DashboardQueries,
-    private _toaster: ToastrService
+    private _toaster: ToastrService,
+    private pdfHelper: PDFHelper,
+    private excelHelper: ExcelHelper
   ) {}
 
   get startDateObject(): Date {
@@ -92,6 +95,14 @@ export class EventualPermitsDetailsComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  public generatePDF(): void {
+    this.pdfHelper.generateEventualPermitsPDF(this.permits, {});
+  }
+
+  public generateExcel(): void {
+    this.excelHelper.exportEventualPermitsToExcel(this.permits, 'permisos-eventuales.xlsx');
   }
 
   public filterDates(dates: { startDate: Date | null, endDate: Date | null, dateType?: string }): void {
