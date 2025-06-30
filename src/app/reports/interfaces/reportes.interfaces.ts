@@ -10,6 +10,7 @@ export interface ReporteParametros {
   tipoFecha?: string;
   estado?: string;  // Para compatibility con fines
   empleadoId?: string;
+  isAutomaticRenewal?: string; // Para certificados
   empleadoNombre?: string;
 }
 
@@ -63,10 +64,10 @@ export interface AlertaData {
 export interface PermisosOperacionData {
   // Clasificación por tipo de transporte
   tiposTransporte: TipoTransporteData[];
-  
+
   // Segmentación opcional por región
   regiones?: RegionData[];
-  
+
   // Análisis de variación mensual
   totalPermisosActual: number;
   totalPermisosAnterior: number;
@@ -89,12 +90,12 @@ export interface RegionData {
 export interface IngresosInstitucionalData {
   // Ingresos consolidados por fuente
   fuentesIngreso: FuenteIngresoData[];
-  
+
   // Comparación presupuesto vs ingresos reales
   presupuestoTotal: number;
   ingresosRealesTotal: number;
   porcentajeCumplimientoTotal: number;
-  
+
   // KPIs por fuente
   kpisPorFuente: KPIData[];
 }
@@ -118,10 +119,10 @@ export interface KPIData {
 export interface MultasAnalisisData {
   // Agrupación por tipo de infracción
   tiposInfraccion: InfraccionData[];
-  
+
   // Conteo de reincidencias
   reincidencias: ReincidenciaData[];
-  
+
   // Ingresos recaudados vs proyectados
   ingresosRecaudados: number;
   ingresosProyectados: number;
@@ -147,13 +148,13 @@ export interface ReincidenciaData {
 export interface CertificadosAnalisisData {
   // Desglose mensual de emisión
   desglosexMensual: CertificadoMensualData[];
-  
+
   // Clasificación por tipo
   tiposCertificado: TipoCertificadoData[];
-  
+
   // Segmentación por departamento
   departamentos: DepartamentoCertificadoData[];
-  
+
   // Observaciones técnicas
   observaciones: ObservacionData[];
 }

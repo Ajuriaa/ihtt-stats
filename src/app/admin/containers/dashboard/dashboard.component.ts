@@ -56,6 +56,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public selectedModality = '';
   public selectedDepartment = '';
   public selectedNoticeStatus = '';
+  public selectedAutomaticRenewal = '';
+  public estadosRenovacion = [
+    { value: '1', label: 'Sí' },
+    { value: '0', label: 'No' }
+  ];
   private chartRoots: am5.Root[] = [];
 
   constructor(
@@ -89,6 +94,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       case 'noticeStatus':
         this.selectedNoticeStatus = value || '';
         break;
+      case 'automaticRenewal':
+        this.selectedAutomaticRenewal = value || '';
+        break;
     }
   }
 
@@ -119,7 +127,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       startDate: this.start || undefined,
       endDate: this.end || undefined,
       dateType: this.dateType || undefined,
-      rtn: this.rtn !== '' ? this.rtn : undefined
+      rtn: this.rtn !== '' ? this.rtn : undefined,
+      isAutomaticRenewal: this.selectedAutomaticRenewal || undefined
     };
 
     // Limpiar parámetros: elimina claves con valores undefined

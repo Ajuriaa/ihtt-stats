@@ -58,6 +58,11 @@ export class DetailsComponent {
   public selectedModality = '';
   public selectedDepartment = '';
   public selectedNoticeStatus = '';
+  public selectedAutomaticRenewal = '';
+  public estadosRenovacion = [
+    { value: '1', label: 'Sí' },
+    { value: '0', label: 'No' }
+  ];
 
   constructor(
     private certificatesService: DashboardQueries,
@@ -97,7 +102,8 @@ export class DetailsComponent {
       department: this.selectedDepartment || undefined,
       noticeStatus: this.selectedNoticeStatus || undefined,
       coStatus: this.selectedStatus || undefined,
-      rtn: this.rtn !== '' ? this.rtn : undefined
+      rtn: this.rtn !== '' ? this.rtn : undefined,
+      isAutomaticRenewal: this.selectedAutomaticRenewal || undefined
     };
 
     // Limpiar parámetros: elimina claves con valores undefined
@@ -137,7 +143,8 @@ export class DetailsComponent {
       department: this.selectedDepartment || undefined,
       noticeStatus: this.selectedNoticeStatus || undefined,
       coStatus: this.selectedStatus || undefined,
-      rtn: this.rtn !== '' ? this.rtn : undefined
+      rtn: this.rtn !== '' ? this.rtn : undefined,
+      isAutomaticRenewal: this.selectedAutomaticRenewal || undefined
     };
 
     // Limpiar parámetros: elimina claves con valores undefined
@@ -185,6 +192,9 @@ export class DetailsComponent {
         break;
       case 'coStatus':
         this.selectedStatus = value || '';
+        break;
+      case 'automaticRenewal':
+        this.selectedAutomaticRenewal = value || '';
         break;
     }
   }

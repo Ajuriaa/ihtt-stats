@@ -51,6 +51,18 @@
     <mat-form-field>
       <input matInput placeholder="RTN" [(ngModel)]="rtn">
     </mat-form-field>
+
+    <!-- Renovación automática -->
+    <mat-form-field>
+      <mat-label>Renovación automática</mat-label>
+      <mat-select [(ngModel)]="selectedAutomaticRenewal" (selectionChange)="applyFilter('automaticRenewal', $event.value)">
+        <mat-option value="">TODOS</mat-option>
+        <mat-option *ngFor="let estado of estadosRenovacion" [value]="estado.value">
+          {{ estado.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
     <app-primary-button (btnClick)="generatePDF()">IMPRIMIR LISTADO</app-primary-button>
     <app-primary-button (btnClick)="generateExcel()">EXPORTAR EXCEL</app-primary-button>

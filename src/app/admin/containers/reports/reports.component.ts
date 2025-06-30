@@ -54,7 +54,8 @@ export class ReportsComponent implements OnInit {
     modalidad: '',
     estadoAviso: '',
     rtn: '',
-    tipoFecha: 'certificateExpiration'
+    tipoFecha: 'certificateExpiration',
+    isAutomaticRenewal: ''
   };
 
   departamentos = [
@@ -74,6 +75,11 @@ export class ReportsComponent implements OnInit {
 
   estadosAviso = [
     'ACTIVO', 'ANULADO', 'NO TIENE', 'PAGADO', 'SIN PAGO SEGUN DECRETO #60-2019'
+  ];
+
+  estadosRenovacion = [
+    { value: '1', label: 'Sí' },
+    { value: '0', label: 'No' }
   ];
 
   tiposFecha = [
@@ -131,6 +137,9 @@ export class ReportsComponent implements OnInit {
     if (this.filtros.tipoFecha) {
       params.dateType = this.filtros.tipoFecha;
     }
+    if (this.filtros.isAutomaticRenewal) {
+      params.isAutomaticRenewal = this.filtros.isAutomaticRenewal;
+    }
     
     return params;
   }
@@ -149,7 +158,8 @@ export class ReportsComponent implements OnInit {
       modalidad: '',
       estadoAviso: '',
       rtn: '',
-      tipoFecha: 'certificateExpiration'
+      tipoFecha: 'certificateExpiration',
+      isAutomaticRenewal: ''
     };
     this.cargarCertificados();
   }

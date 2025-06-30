@@ -82,6 +82,16 @@
             <mat-label>RTN</mat-label>
             <input matInput placeholder="RTN" [(ngModel)]="filtros.rtn">
           </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Renovación automática</mat-label>
+            <mat-select [(ngModel)]="filtros.isAutomaticRenewal">
+              <mat-option value="">TODOS</mat-option>
+              <mat-option *ngFor="let estado of estadosRenovacion" [value]="estado.value">
+                {{ estado.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
         
         <!-- Botones de filtros -->
