@@ -14,13 +14,14 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import { PrimaryButtonComponent } from "../../../shared/buttons/components/primary-button/primary-button.component";
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-eventual-permits-dashboard',
   standalone: true,
   imports: [
     DateFilterComponent, MatFormFieldModule, MatOptionModule, MatSelectModule, CommonModule, FormsModule,
-    MatCardModule, LoadingComponent, PrimaryButtonComponent, MatInputModule
+    MatCardModule, LoadingComponent, PrimaryButtonComponent, MatInputModule, MatIconModule
   ],
   templateUrl: './eventual-permits-dashboard.component.html',
   styleUrls: ['./eventual-permits-dashboard.component.scss']
@@ -84,7 +85,7 @@ export class EventualPermitsDashboardComponent implements OnInit, OnDestroy {
 
   public fetchDashboard(): void {
     this.loading = true;
-    
+
     this.dashboardQueries.getEventualPermitsAnalytics({
       startDate: this.start,
       endDate: this.end,
@@ -124,7 +125,7 @@ export class EventualPermitsDashboardComponent implements OnInit, OnDestroy {
 
   private updateKPIsFromAnalytics(): void {
     if (!this.analytics?.kpis) return;
-    
+
     this.totalPermits = this.analytics.kpis.totalPermits;
     this.totalRevenue = this.analytics.kpis.totalRevenue;
     this.activePermits = this.analytics.kpis.activePermits;

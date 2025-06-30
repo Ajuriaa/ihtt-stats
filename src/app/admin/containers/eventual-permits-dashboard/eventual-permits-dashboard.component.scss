@@ -1,3 +1,6 @@
+.content {
+  width: 90%;
+}
 
 .top-section {
   margin-bottom: 2rem;
@@ -16,39 +19,62 @@
   flex: 1;
 }
 
-.kpi-section {
+// Tarjetas de estadsticas
+.stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
-.kpi-card {
-  text-align: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+.stat-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    transform: translateY(-5px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
-  mat-card-content {
-    padding: 1.5rem;
+  .stat-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px;
+  }
 
-    h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 0.9rem;
-      font-weight: 500;
-      opacity: 0.9;
+  .stat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: #2196F3;
+
+    &.active {
+      color: #4CAF50;
     }
 
-    .kpi-value {
+    &.processed {
+      color: #FF9800;
+    }
+
+    &.cancelled {
+      color: #F44336;
+    }
+  }
+
+  .stat-info {
+    h3 {
       margin: 0;
-      font-size: 2rem;
-      font-weight: bold;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    p {
+      margin: 4px 0 0 0;
+      color: #666;
+      font-size: 0.9rem;
     }
   }
 }

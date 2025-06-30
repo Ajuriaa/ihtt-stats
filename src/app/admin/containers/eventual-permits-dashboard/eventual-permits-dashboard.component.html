@@ -2,7 +2,7 @@
   <div class="content">
     <div class="top-section">
       <!-- Filtros de fecha -->
-      <app-date-filter 
+      <app-date-filter
         [showDateTypeFilter]="false"
         (dateRangeChanged)="filterDates($event)">
       </app-date-filter>
@@ -10,19 +10,19 @@
       <!-- Filtros adicionales -->
       <form (ngSubmit)="onSubmit()" class="filters-form">
         <!-- RTN del Solicitante -->
-        <mat-form-field appearance="outline" class="filter-field">
+        <mat-form-field class="filter-field">
           <mat-label>RTN del Solicitante</mat-label>
           <input matInput [(ngModel)]="rtn" name="rtn" placeholder="Ingrese RTN">
         </mat-form-field>
 
         <!-- Nombre del Solicitante -->
-        <mat-form-field appearance="outline" class="filter-field">
+        <mat-form-field class="filter-field">
           <mat-label>Nombre del Solicitante</mat-label>
           <input matInput [(ngModel)]="applicantName" name="applicantName" placeholder="Ingrese nombre">
         </mat-form-field>
 
         <!-- Estado del Permiso -->
-        <mat-form-field appearance="outline" class="filter-field">
+        <mat-form-field class="filter-field">
           <mat-label>Estado del Permiso</mat-label>
           <mat-select [(value)]="selectedPermitStatus" (selectionChange)="applyFilter('permitStatus', $event.value)">
             <mat-option value="">Todos</mat-option>
@@ -31,7 +31,7 @@
         </mat-form-field>
 
         <!-- Tipo de Servicio -->
-        <mat-form-field appearance="outline" class="filter-field">
+        <mat-form-field class="filter-field">
           <mat-label>Tipo de Servicio</mat-label>
           <mat-select [(value)]="selectedServiceType" (selectionChange)="applyFilter('serviceType', $event.value)">
             <mat-option value="">Todos</mat-option>
@@ -40,48 +40,73 @@
         </mat-form-field>
 
         <!-- Botón de filtro -->
-        <app-primary-button 
-          type="submit" 
-          [disableButton]="loading" 
+        <app-primary-button
+          type="submit"
+          [disableButton]="loading"
           text="Aplicar Filtros">
         </app-primary-button>
       </form>
     </div>
 
-    <!-- Indicadores KPI -->
-    <div class="kpi-section">
-      <mat-card class="kpi-card">
+    <!-- Sección de estadísticas rápidas -->
+    <div class="stats-cards" *ngIf="!loading && (totalPermits > 0 || totalRevenue > 0 || activePermits > 0 || processedPermits > 0 || cancelledPermits > 0)">
+      <mat-card class="stat-card">
         <mat-card-content>
-          <h3>Total de Permisos</h3>
-          <p class="kpi-value">{{ totalPermits | number }}</p>
+          <div class="stat-content">
+            <mat-icon class="stat-icon">description</mat-icon>
+            <div class="stat-info">
+              <h3>{{ totalPermits | number }}</h3>
+              <p>Total Permisos</p>
+            </div>
+          </div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card">
+      <mat-card class="stat-card">
         <mat-card-content>
-          <h3>Ingresos Totales</h3>
-          <p class="kpi-value">L. {{ totalRevenue | number:'1.2-2' }}</p>
+          <div class="stat-content">
+            <mat-icon class="stat-icon">attach_money</mat-icon>
+            <div class="stat-info">
+              <h3>L. {{ totalRevenue | number:'1.2-2' }}</h3>
+              <p>Ingresos Totales</p>
+            </div>
+          </div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card">
+      <mat-card class="stat-card">
         <mat-card-content>
-          <h3>Permisos Activos</h3>
-          <p class="kpi-value">{{ activePermits | number }}</p>
+          <div class="stat-content">
+            <mat-icon class="stat-icon active">check_circle</mat-icon>
+            <div class="stat-info">
+              <h3>{{ activePermits | number }}</h3>
+              <p>Activos</p>
+            </div>
+          </div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card">
+      <mat-card class="stat-card">
         <mat-card-content>
-          <h3>Permisos Procesados</h3>
-          <p class="kpi-value">{{ processedPermits | number }}</p>
+          <div class="stat-content">
+            <mat-icon class="stat-icon processed">hourglass_empty</mat-icon>
+            <div class="stat-info">
+              <h3>{{ processedPermits | number }}</h3>
+              <p>Procesados</p>
+            </div>
+          </div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card">
+      <mat-card class="stat-card">
         <mat-card-content>
-          <h3>Permisos Anulados</h3>
-          <p class="kpi-value">{{ cancelledPermits | number }}</p>
+          <div class="stat-content">
+            <mat-icon class="stat-icon cancelled">cancel</mat-icon>
+            <div class="stat-info">
+              <h3>{{ cancelledPermits | number }}</h3>
+              <p>Anulados</p>
+            </div>
+          </div>
         </mat-card-content>
       </mat-card>
     </div>
