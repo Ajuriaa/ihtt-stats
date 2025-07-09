@@ -28,7 +28,9 @@ export class ExcelHelper {
       'Monto Total',
       'Departamento',
       'Municipio',
-      'Lugar'
+      'Lugar',
+      'Número de empleado',
+      'Nombre del Empleado'
     ];
 
     // Add headers to the worksheet
@@ -53,6 +55,8 @@ export class ExcelHelper {
         fine.department || 'N/A', // Departamento
         fine.municipality || 'N/A', // Municipio
         fine.place || 'N/A', // Lugar
+        fine.employeeId || 'N/A', //ID de Empleado
+        fine.employeeName || 'N/A' // Nombre del Empleado
       ]);
     });
 
