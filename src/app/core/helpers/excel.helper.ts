@@ -13,24 +13,24 @@ export class ExcelHelper {
 
     // Define headers for all the fields in the Fine object
     const headers = [
-      'ID',
+      'Regional',
+      'Lugar',
       'ID de Operación',
-      'Estado de la Multa',
-      'Placa del Vehículo',
-      'Fecha de Multa',
       'Nombre Concesionario',
       'DNI/RTN',
-      'Teléfono',
-      'Email',
-      'Certificado',
-      'Regional',
-      'Codigo Aviso de Cobro',
+      'ID',
+      'Fecha de Multa',
       'Monto Total',
       'Departamento',
       'Municipio',
-      'Lugar',
       'Número de empleado',
-      'Nombre del Empleado'
+      'Nombre del Empleado',
+      'Estado de la Multa',
+      'Placa del Vehículo',
+      'Teléfono',
+      'Email',
+      'Certificado',
+      'Codigo Aviso de Cobro',
     ];
 
     // Add headers to the worksheet
@@ -39,24 +39,24 @@ export class ExcelHelper {
     // Add rows of data
     fines.forEach(fine => {
       worksheet.addRow([
-        fine.fineId || 'N/A', // ID,
+        fine.region || 'N/A', // Regional
+        fine.place || 'N/A', // Lugar
         fine.operationId || 'N/A', // ID de Operación
-        fine.fineStatus || 'N/A', // Estado de la Multa
-        fine.plate || 'N/A', // Placa del Vehículo
-        this.getDate(fine.startDate), // Fecha de Multa
         fine.companyName || 'N/A', // Nombre del Infractor
         fine.dniRtn || 'N/A', // DNI/RTN
-        fine.phone || 'N/A', // Teléfono
-        fine.email || 'N/A', // Email
-        fine.certificate || 'N/A', // Certificado
-        fine.region || 'N/A', // Regional
-        fine.noticeCode || 'N/A', // Codigo Aviso de Cobro
+        fine.fineId || 'N/A', // ID,
+        this.getDate(fine.startDate), // Fecha de Multa
         fine.totalAmount || 0, // Monto Total
         fine.department || 'N/A', // Departamento
         fine.municipality || 'N/A', // Municipio
-        fine.place || 'N/A', // Lugar
         fine.employeeId || 'N/A', //ID de Empleado
-        fine.employeeName || 'N/A' // Nombre del Empleado
+        fine.employeeName || 'N/A', // Nombre del Empleado
+        fine.fineStatus || 'N/A', // Estado de la Multa
+        fine.plate || 'N/A', // Placa del Vehículo
+        fine.phone || 'N/A', // Teléfono
+        fine.email || 'N/A', // Email
+        fine.certificate || 'N/A', // Certificado
+        fine.noticeCode || 'N/A', // Codigo Aviso de Cobro
       ]);
     });
 
