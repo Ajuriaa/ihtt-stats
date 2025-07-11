@@ -1,0 +1,129 @@
+<div class="reports-container">
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>Reportes de Solicitudes</mat-card-title>
+      <mat-card-subtitle>Genere reportes detallados de solicitudes procesadas</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="filters-section">
+        <h3>Filtros de Búsqueda</h3>
+        
+        <div class="filters-grid">
+          <!-- Filtro de fechas -->
+          <div class="date-filters">
+            <app-date-filter 
+              [showDateTypeFilter]="false" 
+              (dateRangeChanged)="filtrarDatos($event)">
+            </app-date-filter>
+          </div>
+          
+          <!-- Estado de Solicitud -->
+          <mat-form-field appearance="outline">
+            <mat-label>Estado de Solicitud</mat-label>
+            <mat-select [(ngModel)]="filtros.fileStatus">
+              <mat-option value="">Todos los Estados</mat-option>
+              <mat-option *ngFor="let estado of estadosSolicitud" [value]="estado">
+                {{ estado }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Tipo de Trámite -->
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Trámite</mat-label>
+            <mat-select [(ngModel)]="filtros.procedureType">
+              <mat-option value="">Todos los Trámites</mat-option>
+              <mat-option *ngFor="let tipo of tiposTramine" [value]="tipo">
+                {{ tipo }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Categoría -->
+          <mat-form-field appearance="outline">
+            <mat-label>Categoría</mat-label>
+            <mat-select [(ngModel)]="filtros.categoryId">
+              <mat-option value="">Todas las Categorías</mat-option>
+              <mat-option *ngFor="let categoria of categorias" [value]="categoria">
+                {{ categoria }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Nombre del Solicitante -->
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del Solicitante</mat-label>
+            <input matInput [(ngModel)]="filtros.applicantName" placeholder="Ingrese nombre">
+          </mat-form-field>
+          
+          <!-- Nombre de la Empresa -->
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre de la Empresa</mat-label>
+            <input matInput [(ngModel)]="filtros.companyName" placeholder="Ingrese empresa">
+          </mat-form-field>
+        </div>
+        
+        <div class="filter-actions">
+          <button mat-raised-button color="primary" (click)="aplicarFiltros()">
+            <mat-icon>search</mat-icon>
+            Aplicar Filtros
+          </button>
+          <button mat-outlined-button (click)="limpiarFiltros()">
+            <mat-icon>clear</mat-icon>
+            Limpiar
+          </button>
+        </div>
+      </div>
+      
+      <!-- Selector de tipo de reporte -->
+      <div class="report-type-section">
+        <h3>Tipo de Reporte</h3>
+        <div class="report-toggle">
+          <button 
+            mat-button 
+            [class.active]="tipoReporte === 'analisis'"
+            (click)="tipoReporte = 'analisis'">
+            <mat-icon>analytics</mat-icon>
+            Reporte Analítico
+          </button>
+          <button 
+            mat-button 
+            [class.active]="tipoReporte === 'lista'"
+            (click)="tipoReporte = 'lista'">
+            <mat-icon>list</mat-icon>
+            Lista Detallada
+          </button>
+        </div>
+        <p class="report-description">{{ obtenerDescripcionReporte() }}</p>
+      </div>
+      
+      <!-- Información de datos -->
+      <div class="data-info" *ngIf="!cargando">
+        <mat-icon>info</mat-icon>
+        <span>{{ solicitudes.length }} solicitudes encontradas con los filtros aplicados</span>
+      </div>
+      
+      <!-- Mensaje sin datos -->
+      <div class="no-data-message" *ngIf="solicitudes.length === 0 && !cargando">
+        <mat-icon>warning</mat-icon>
+        <p>No se encontraron solicitudes con los filtros especificados.</p>
+        <p>Ajuste los criterios de búsqueda y vuelva a intentar.</p>
+      </div>
+    </mat-card-content>
+    
+    <mat-card-actions>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="generarReporte()"
+        [disabled]="cargando || solicitudes.length === 0">
+        <mat-icon>picture_as_pdf</mat-icon>
+        {{ obtenerTextoBoton() }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
+  
+  <!-- Loading indicator -->
+  <app-loading *ngIf="cargando"></app-loading>
+</div>

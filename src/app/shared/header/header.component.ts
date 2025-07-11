@@ -24,7 +24,8 @@ export class HeaderComponent implements OnInit {
   public availableModes = [
     { value: 'certificates', label: 'Certificados y Permisos' },
     { value: 'fines', label: 'Multas' },
-    { value: 'eventual-permits', label: 'Permisos Eventuales' }
+    { value: 'eventual-permits', label: 'Permisos Eventuales' },
+    { value: 'applications', label: 'Solicitudes' }
   ];
 
   constructor(
@@ -70,6 +71,9 @@ export class HeaderComponent implements OnInit {
         break;
       case 'eventual-permits':
         modeTitle = ' de Permisos Eventuales';
+        break;
+      case 'applications':
+        modeTitle = ' de Solicitudes';
         break;
       default:
         modeTitle = '';

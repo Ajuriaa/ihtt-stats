@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import moment from 'moment';
-import { Certificate, Fine } from 'src/app/admin/interfaces';
+import { Certificate, Fine, Application } from 'src/app/admin/interfaces';
 import {
   DashboardGeneralData,
   PermisosOperacionData,
@@ -150,6 +150,24 @@ export class ReportesPDFService {
         // Si no tiene noticeCode, incluirlo de todas formas pero con ID único
         const uniqueId = `no-notice-${Math.random()}`;
         mapaUnico.set(uniqueId, permit);
+      }
+    });
+
+    return Array.from(mapaUnico.values());
+  }
+
+  // Método para deduplicar solicitudes por applicationId y evitar doble conteo
+  private deduplicarSolicitudes(solicitudes: Application[]): Application[] {
+    const mapaUnico = new Map<string, Application>();
+
+    solicitudes.forEach(solicitud => {
+      const applicationId = solicitud.applicationId?.toString();
+      if (applicationId && !mapaUnico.has(applicationId)) {
+        mapaUnico.set(applicationId, solicitud);
+      } else if (!applicationId) {
+        // Si no tiene applicationId, incluirlo de todas formas pero con ID único
+        const uniqueId = `no-app-${Math.random()}`;
+        mapaUnico.set(uniqueId, solicitud);
       }
     });
 
@@ -1137,6 +1155,354 @@ export class ReportesPDFService {
       headStyles: { fillColor: '#88CFE0', fontStyle: 'bold' },
       didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
     });
+
+    this.agregarPiesDePagina(doc, parametros);
+    doc.output('dataurlnewwindow');
+  }
+
+  // 6. Reporte de Solicitudes
+  public generarReporteSolicitudes(
+    solicitudes: Application[],
+    parametros: ReporteParametros
+  ): void {
+    const doc = this.configurarDocumento();
+    const titulo = 'Reporte Detallado de Solicitudes';
+
+    // DEDUPLICAR POR APPLICATIONID PARA EVITAR DOBLE CONTEO
+    const solicitudesUnicas = this.deduplicarSolicitudes(solicitudes);
+
+    const columnas = [
+      'Fecha Recepción',
+      'Código Solicitud',
+      'Solicitante',
+      'Empresa',
+      'Tipo Procedimiento',
+      'Categoría',
+      'Estado',
+      'Renovación Automática'
+    ];
+
+    const datosFormateados = solicitudesUnicas.map(solicitud => [
+      this.obtenerFecha(solicitud.receivedDate),
+      solicitud.applicationCode || 'N/A',
+      solicitud.applicantName || 'N/A',
+      solicitud.companyName || 'N/A',
+      solicitud.procedureTypeDescription || 'N/A',
+      solicitud.categoryDescription || 'N/A',
+      solicitud.fileStatus || 'N/A',
+      solicitud.isAutomaticRenewal ? 'Sí' : 'No'
+    ]);
+
+    autoTable(doc, {
+      head: [columnas],
+      body: datosFormateados,
+      margin: { top: 45, right: 10, bottom: 20, left: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 8 },
+      headStyles: { fillColor: '#88CFE0', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    this.agregarPiesDePagina(doc, parametros);
+    doc.output('dataurlnewwindow');
+  }
+
+  // 6b. Reporte de Solicitudes - Análisis Ejecutivo
+  public generarReporteSolicitudesAnalisis(
+    datosAnalisis: any,
+    parametros: ReporteParametros
+  ): void {
+    const doc = this.configurarDocumento();
+    const titulo = 'Reporte Ejecutivo de Solicitudes - Análisis Integral';
+
+    let yPosition = 50;
+
+    // ======== RESUMEN EJECUTIVO ========
+    doc.setFontSize(16);
+    doc.setFont('bold');
+    doc.text('RESUMEN EJECUTIVO', 20, yPosition);
+    yPosition += 15;
+
+    const resumenEjecutivo = [
+      ['Total de Solicitudes', datosAnalisis.reportAnalysis.executiveSummary.totalApplications.toString()],
+      ['Tasa de Aprobación', this.formatearPorcentaje(datosAnalisis.reportAnalysis.executiveSummary.approvalRate)],
+      ['Tasa de Rechazo', this.formatearPorcentaje(datosAnalisis.reportAnalysis.executiveSummary.rejectionRate)],
+      ['Solicitudes Pendientes', datosAnalisis.reportAnalysis.executiveSummary.pendingApplications.toString()],
+      ['Renovaciones Automáticas', this.formatearPorcentaje(datosAnalisis.reportAnalysis.executiveSummary.automaticRenewalRate)],
+      ['Período Analizado', `${this.obtenerFecha(datosAnalisis.reportAnalysis.executiveSummary.periodCovered.startDate)} - ${this.obtenerFecha(datosAnalisis.reportAnalysis.executiveSummary.periodCovered.endDate)}`]
+    ];
+
+    autoTable(doc, {
+      body: resumenEjecutivo,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'left', valign: 'middle', fontSize: 11 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 80 },
+        1: { fontStyle: 'normal', cellWidth: 60 }
+      },
+      theme: 'grid',
+      headStyles: { fillColor: '#4CAF50' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE PROCESAMIENTO ========
+    if (yPosition > 230) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE PROCESAMIENTO', 20, yPosition);
+    yPosition += 10;
+
+    const analisisProcesamiento = [
+      ['Solicitudes Totales', datosAnalisis.reportAnalysis.processingAnalysis.totalApplications.toString()],
+      ['Solicitudes Pendientes', datosAnalisis.reportAnalysis.processingAnalysis.pendingApplications.toString()],
+      ['Solicitudes Aprobadas', datosAnalisis.reportAnalysis.processingAnalysis.approvedApplications.toString()],
+      ['Solicitudes Rechazadas', datosAnalisis.reportAnalysis.processingAnalysis.rejectedApplications.toString()],
+      ['Solicitudes en Proceso', datosAnalisis.reportAnalysis.processingAnalysis.inProcessApplications.toString()],
+      ['Tasa de Aprobación', this.formatearPorcentaje(datosAnalisis.reportAnalysis.processingAnalysis.approvalRate)],
+      ['Tasa de Rechazo', this.formatearPorcentaje(datosAnalisis.reportAnalysis.processingAnalysis.rejectionRate)]
+    ];
+
+    autoTable(doc, {
+      head: [['Concepto', 'Valor']],
+      body: analisisProcesamiento,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#FF9800', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE TENDENCIAS ========
+    if (yPosition > 220) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE TENDENCIAS', 20, yPosition);
+    yPosition += 10;
+
+    const tendencias = [
+      ['Solicitudes Mes Actual', datosAnalisis.reportAnalysis.trends.monthOverMonth.current.toString()],
+      ['Solicitudes Mes Anterior', datosAnalisis.reportAnalysis.trends.monthOverMonth.previous.toString()],
+      ['Variación Mensual (%)', this.formatearPorcentaje(datosAnalisis.reportAnalysis.trends.monthOverMonth.change)],
+      ['Solicitudes Año Actual', datosAnalisis.reportAnalysis.trends.yearOverYear.current.toString()],
+      ['Solicitudes Año Anterior', datosAnalisis.reportAnalysis.trends.yearOverYear.previous.toString()],
+      ['Variación Interanual (%)', this.formatearPorcentaje(datosAnalisis.reportAnalysis.trends.yearOverYear.change)]
+    ];
+
+    autoTable(doc, {
+      head: [['Indicador', 'Valor']],
+      body: tendencias,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#2196F3', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE RENOVACIONES ========
+    if (yPosition > 220) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE RENOVACIONES', 20, yPosition);
+    yPosition += 10;
+
+    const analisisRenovaciones = [
+      ['Renovaciones Automáticas', datosAnalisis.reportAnalysis.renewalAnalysis.automaticRenewals.toString()],
+      ['Solicitudes Manuales', datosAnalisis.reportAnalysis.renewalAnalysis.manualApplications.toString()],
+      ['Tasa de Renovación Automática', this.formatearPorcentaje(datosAnalisis.reportAnalysis.renewalAnalysis.automaticRenewalRate)]
+    ];
+
+    autoTable(doc, {
+      head: [['Concepto', 'Valor']],
+      body: analisisRenovaciones,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#9C27B0', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== TOP SOLICITANTES ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.topApplicants.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('TOP 10 SOLICITANTES', 20, yPosition);
+    yPosition += 10;
+
+    const topSolicitantes = datosAnalisis.reportAnalysis.topApplicants.slice(0, 10).map((applicant: any) => [
+      applicant.applicantName,
+      applicant.companyName || 'N/A',
+      applicant.applicationCount.toString()
+    ]);
+
+    autoTable(doc, {
+      head: [['Solicitante', 'Empresa', 'Solicitudes']],
+      body: topSolicitantes,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+      headStyles: { fillColor: '#4CAF50', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS POR TIPO DE PROCEDIMIENTO ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.procedureTypeAnalysis.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS POR TIPO DE PROCEDIMIENTO', 20, yPosition);
+    yPosition += 10;
+
+    const tiposProcedimiento = datosAnalisis.reportAnalysis.procedureTypeAnalysis.map((pt: any) => [
+      pt.procedureType,
+      pt.count.toString(),
+      this.formatearPorcentaje(pt.percentage)
+    ]);
+
+    autoTable(doc, {
+      head: [['Tipo de Procedimiento', 'Cantidad', '% del Total']],
+      body: tiposProcedimiento,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+      headStyles: { fillColor: '#FF5722', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== RENDIMIENTO POR CIUDAD ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.cityPerformance.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('RENDIMIENTO POR CIUDAD', 20, yPosition);
+    yPosition += 10;
+
+    const rendimientoCiudades = datosAnalisis.reportAnalysis.cityPerformance.map((city: any) => [
+      city.cityCode,
+      city.applicationsCount.toString(),
+      this.formatearPorcentaje(city.percentage)
+    ]);
+
+    autoTable(doc, {
+      head: [['Ciudad', 'Solicitudes', '% del Total']],
+      body: rendimientoCiudades,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+      headStyles: { fillColor: '#607D8B', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== INSIGHTS Y RECOMENDACIONES ========
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('INSIGHTS CLAVE', 20, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('normal');
+
+    if (datosAnalisis.reportAnalysis.insights.length > 0) {
+      datosAnalisis.reportAnalysis.insights.forEach((insight: string, index: number) => {
+        const textLines = doc.splitTextToSize(`• ${insight}`, 250);
+        doc.text(textLines, 25, yPosition);
+        yPosition += textLines.length * 5 + 3;
+      });
+    } else {
+      doc.text('• No se identificaron insights significativos para el período analizado.', 25, yPosition);
+      yPosition += 8;
+    }
+
+    yPosition += 10;
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('RECOMENDACIONES ESTRATÉGICAS', 20, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('normal');
+
+    if (datosAnalisis.reportAnalysis.recommendations.length > 0) {
+      datosAnalisis.reportAnalysis.recommendations.forEach((recomendacion: string, index: number) => {
+        const textLines = doc.splitTextToSize(`• ${recomendacion}`, 250);
+        doc.text(textLines, 25, yPosition);
+        yPosition += textLines.length * 5 + 3;
+      });
+    } else {
+      doc.text('• Las métricas actuales se encuentran dentro de parámetros aceptables.', 25, yPosition);
+      yPosition += 8;
+    }
+
+    // ======== DATOS DE SOPORTE (MUESTRA) ========
+    if (datosAnalisis.reportAnalysis.sampleApplications && datosAnalisis.reportAnalysis.sampleApplications.length > 0) {
+      doc.addPage();
+      yPosition = 20;
+
+      doc.setFontSize(14);
+      doc.setFont('bold');
+      doc.text('DATOS DE SOPORTE - MUESTRA DE SOLICITUDES', 20, yPosition);
+      yPosition += 10;
+
+      const solicitudesMuestra = datosAnalisis.reportAnalysis.sampleApplications.slice(0, 20).map((solicitud: any) => [
+        solicitud.applicationCode || 'N/A',
+        this.obtenerFecha(solicitud.receivedDate),
+        solicitud.applicantName?.substring(0, 15) || 'N/A',
+        solicitud.companyName?.substring(0, 15) || 'N/A',
+        solicitud.procedureTypeDescription?.substring(0, 15) || 'N/A',
+        solicitud.fileStatus || 'N/A'
+      ]);
+
+      autoTable(doc, {
+        head: [['Código', 'Fecha', 'Solicitante', 'Empresa', 'Tipo', 'Estado']],
+        body: solicitudesMuestra,
+        startY: yPosition,
+        margin: { left: 20, right: 20 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 8 },
+        headStyles: { fillColor: '#78909C', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+    }
 
     this.agregarPiesDePagina(doc, parametros);
     doc.output('dataurlnewwindow');

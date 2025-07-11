@@ -10,8 +10,23 @@ export interface ReporteParametros {
   tipoFecha?: string;
   estado?: string;  // Para compatibility con fines
   empleadoId?: string;
-  isAutomaticRenewal?: string; // Para certificados
+  isAutomaticRenewal?: string | boolean; // Para certificados y solicitudes
   empleadoNombre?: string;
+  // Campos adicionales para solicitudes
+  applicationId?: string;
+  applicantName?: string;
+  companyName?: string;
+  startDate?: string;
+  endDate?: string;
+  fileStatus?: string;
+  procedureType?: string;
+  categoryId?: string;
+  plateId?: string;
+  cityCode?: string;
+  tipoReporte?: 'lista' | 'analisis';
+  paginated?: boolean;
+  page?: number;
+  limit?: number;
 }
 
 // Interfaces para Dashboard General

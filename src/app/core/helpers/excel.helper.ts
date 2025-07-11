@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
 import moment from 'moment';
-import { Certificate, Fine } from 'src/app/admin/interfaces';
+import { Certificate, Fine, Application } from 'src/app/admin/interfaces';
 @Injectable({
   providedIn: 'root'
 })
@@ -204,6 +204,88 @@ export class ExcelHelper {
         permit.regionalOffice || 'N/A',
         permit.amount || 0,
         permit.noticeCode || 'N/A'
+      ]);
+    });
+
+    worksheet.columns.forEach(column => {
+      let maxLength = 0;
+      if (!column.eachCell) {
+        return;
+      }
+      column.eachCell({ includeEmpty: true }, cell => {
+        if (cell.value) {
+          const cellValue = cell.value.toString();
+          maxLength = Math.max(maxLength, cellValue.length);
+        }
+      });
+      column.width = maxLength + 2;
+    });
+
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/octet-stream' });
+      FileSaver.saveAs(blob, name);
+    });
+  }
+
+  public generateApplicationsExcel(applications: Application[], name: string): void {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Solicitudes');
+
+    const headers = [
+      'ID de Solicitud',
+      'Código de Solicitud',
+      'ID del Solicitante',
+      'Nombre del Solicitante',
+      'Empresa',
+      'Folio',
+      'Fecha de Recepción',
+      'Preforma',
+      'Placa Ingresada',
+      'Placa Efectiva',
+      'Permiso de Operación',
+      'Certificado de Operación',
+      'Observación',
+      'Nombre del Representante Legal',
+      'Teléfono',
+      'Email',
+      'Categoría',
+      'Tipo de Procedimiento',
+      'Modalidad',
+      'Estado del Expediente',
+      'Renovación Automática',
+      'Fecha del Sistema',
+      'Código de Ciudad',
+      'Aldea'
+    ];
+
+    worksheet.addRow(headers);
+
+    applications.forEach(application => {
+      worksheet.addRow([
+        application.applicationId || 'N/A',
+        application.applicationCode || 'N/A',
+        application.applicantId || 'N/A',
+        application.applicantName || 'N/A',
+        application.companyName || 'N/A',
+        application.folio || 'N/A',
+        this.getDate(application.receivedDate),
+        application.preform || 'N/A',
+        application.enteredPlate || 'N/A',
+        application.effectivePlate || 'N/A',
+        application.operationPermit || 'N/A',
+        application.operationCertificate || 'N/A',
+        application.observation || 'N/A',
+        application.legalRepresentativeName || 'N/A',
+        application.phone || 'N/A',
+        application.email || 'N/A',
+        application.categoryDescription || 'N/A',
+        application.procedureTypeDescription || 'N/A',
+        application.modalityDescription || 'N/A',
+        application.fileStatus || 'N/A',
+        application.isAutomaticRenewal ? 'Sí' : 'No',
+        this.getDate(application.systemDate),
+        application.cityCode || 'N/A',
+        application.village || 'N/A'
       ]);
     });
 

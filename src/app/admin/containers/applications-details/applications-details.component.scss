@@ -1,0 +1,160 @@
+@import 'global';
+
+.container {
+  @include flex-center-column;
+  margin: 2rem 0;
+  gap: 2rem;
+  width: 100%;
+}
+
+.filter-wrapper {
+  @include flex-center-column;
+  gap: 2rem;
+  width: 100%;
+}
+
+.filter-row {
+  width: 85%;
+  @include flex-center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.controls {
+  @include flex-center;
+  justify-content: space-between;
+  width: 85%;
+
+  .export-buttons {
+    @include flex-center;
+    gap: 1rem;
+  }
+
+  .result-count {
+    font-weight: bold;
+    color: $blue;
+  }
+}
+
+.table-container {
+  width: 95%;
+  margin: 2rem 0;
+
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  
+  &.status-approved {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+  }
+  
+  &.status-rejected {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+  
+  &.status-pending {
+    background-color: #fff3e0;
+    color: #ef6c00;
+  }
+  
+  &.status-processing {
+    background-color: #e3f2fd;
+    color: #1565c0;
+  }
+  
+  &.status-unknown {
+    background-color: #f5f5f5;
+    color: #757575;
+  }
+}
+
+.renewal-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  
+  &.renewal-automatic {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+  }
+  
+  &.renewal-manual {
+    background-color: #fff3e0;
+    color: #ef6c00;
+  }
+}
+
+.pagination {
+  margin: 2rem 0;
+  @include flex-center;
+  
+  ::ng-deep .ngx-pagination {
+    @include flex-center;
+    gap: 0.5rem;
+    
+    li {
+      display: flex;
+      align-items: center;
+      
+      a, span {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #ddd;
+        color: #333;
+        text-decoration: none;
+        border-radius: 4px;
+      }
+      
+      &.current {
+        a, span {
+          background-color: $blue;
+          color: white;
+          border-color: $blue;
+        }
+      }
+      
+      &:hover:not(.disabled):not(.current) {
+        a, span {
+          background-color: $light-gray;
+        }
+      }
+    }
+  }
+}
+
+.backend-pagination {
+  @include flex-center;
+  gap: 1rem;
+  margin: 1rem 0;
+  
+  button {
+    padding: 0.5rem 1rem;
+    border: 1px solid $blue;
+    background-color: $blue;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    
+    &:disabled {
+      background-color: #ccc;
+      border-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    &:hover:not(:disabled) {
+      background-color: $opaque-blue;
+    }
+  }
+  
+  p {
+    margin: 0;
+    font-weight: bold;
+  }
+}

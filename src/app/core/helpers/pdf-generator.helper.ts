@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import moment from 'moment';
-import { Fine, Certificate } from 'src/app/admin/interfaces';
+import { Fine, Certificate, Application } from 'src/app/admin/interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -140,6 +140,36 @@ export class PDFHelper {
       ];
     });
 
+  }
+
+  public generateApplicationsPDF(applications: Application[], params: {}): void {
+    const columns = [
+      'Fecha Recepción',
+      'Código Solicitud',
+      'Solicitante',
+      'Empresa',
+      'Tipo Procedimiento',
+      'Categoría',
+      'Estado',
+      'Renovación Automática'
+    ];
+    const formattedApplications = this.formatApplicationsForPDF(applications);
+    this.generatePDF(formattedApplications, columns, 'Listado de Solicitudes', params);
+  }
+
+  private formatApplicationsForPDF(applications: Application[]) {
+    return applications.map(application => {
+      return [
+        this.getDate(application.receivedDate),
+        application.applicationCode || 'N/A',
+        application.applicantName || 'N/A',
+        application.companyName || 'N/A',
+        application.procedureTypeDescription || 'N/A',
+        application.categoryDescription || 'N/A',
+        application.fileStatus || 'N/A',
+        application.isAutomaticRenewal ? 'Sí' : 'No'
+      ];
+    });
   }
 
   private getDate(date: Date | null | undefined | string): string {
