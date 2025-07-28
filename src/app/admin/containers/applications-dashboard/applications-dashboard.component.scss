@@ -2,7 +2,7 @@
 
 .container {
   @include flex-center-column;
-  margin: 2rem 0;
+  margin: 2rem 0 15rem 0;
   gap: 2rem;
   width: 100%;
 }

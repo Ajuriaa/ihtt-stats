@@ -51,12 +51,14 @@ export interface ApplicationResponse {
 export interface ApplicationAnalytics {
   kpis: {
     totalApplications: number;
-    pendingApplications: number;
-    approvedApplications: number;
-    rejectedApplications: number;
-    inProcessApplications: number;
+    activeApplications: number;
+    finalizedApplications: number;
+    inactiveApplications: number;
+    errorApplications: number;
+    estado020Applications: number;
     automaticRenewals: number;
     manualApplications: number;
+    totalProcedures?: number;
   };
   chartData: {
     statusDistribution: { [key: string]: number };
@@ -73,10 +75,13 @@ export interface ApplicationAnalytics {
 export interface ApplicationDashboard {
   dashboardKpis: {
     totalApplications: number;
+    totalProcedures?: number;
     recentApplications: number;
-    pendingApplications: number;
-    approvedApplications: number;
-    rejectedApplications: number;
+    activeApplications: number;
+    finalizedApplications: number;
+    inactiveApplications: number;
+    errorApplications: number;
+    estado020Applications: number;
     stalledApplications: number;
     automaticRenewals: number;
     averageProcessingTime: number;
@@ -94,9 +99,10 @@ export interface ApplicationDashboard {
 export interface ApplicationReportAnalysis {
   executiveSummary: {
     totalApplications: number;
-    approvalRate: number;
-    rejectionRate: number;
-    pendingApplications: number;
+    totalProcedures: number;
+    activeRate: number;
+    finalizedRate: number;
+    activeApplications: number;
     automaticRenewalRate: number;
     periodCovered: {
       startDate?: string;
@@ -105,12 +111,14 @@ export interface ApplicationReportAnalysis {
   };
   processingAnalysis: {
     totalApplications: number;
-    pendingApplications: number;
-    approvedApplications: number;
-    rejectedApplications: number;
-    inProcessApplications: number;
-    approvalRate: number;
-    rejectionRate: number;
+    activeApplications: number;
+    finalizedApplications: number;
+    inactiveApplications: number;
+    errorApplications: number;
+    estado020Applications: number;
+    activeRate: number;
+    finalizedRate: number;
+    totalProcedures: number;
   };
   trends: {
     monthOverMonth: {

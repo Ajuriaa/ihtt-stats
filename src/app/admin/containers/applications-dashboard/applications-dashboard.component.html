@@ -3,7 +3,7 @@
 <div class="container">
   <div class="filter-wrapper">
     <div class="filter-row">
-      <app-date-filter [showDateTypeFilter]="true" (dateRangeChanged)="filterDates($event)"></app-date-filter>
+      <app-date-filter [showDateTypeFilter]="false" (dateRangeChanged)="filterDates($event)"></app-date-filter>
       <!-- Estado de Solicitud -->
       <mat-form-field>
         <mat-label>Estado de Solicitud</mat-label>
@@ -24,17 +24,43 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-    </div>
-    <div class="filter-row">
-      <!-- Categoría -->
+      
+      <!-- Código de Ciudad -->
       <mat-form-field>
-        <mat-label>Categoría</mat-label>
-        <mat-select [(ngModel)]="selectedCategory" (selectionChange)="applyFilter('category', $event.value)">
-          <mat-option value="">TODAS</mat-option>
-          <mat-option *ngFor="let category of categories" [value]="category">
-            {{ category }}
+        <mat-label>Regional</mat-label>
+        <mat-select [(ngModel)]="selectedCityCode" (selectionChange)="applyFilter('cityCode', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let city of cityOptions" [value]="city">
+            {{ city }}
           </mat-option>
         </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="filter-row">
+      <!-- Categoría - Autocomplete for large dataset -->
+      <mat-form-field>
+        <mat-label>Categoría de Transporte</mat-label>
+        <input matInput [(ngModel)]="selectedCategory" (input)="filterCategories($any($event.target).value)" 
+               [matAutocomplete]="categoryAuto" placeholder="Buscar categoría...">
+        <mat-autocomplete #categoryAuto="matAutocomplete" (optionSelected)="applyFilter('category', $event.option.value)">
+          <mat-option value="">TODAS</mat-option>
+          <mat-option *ngFor="let category of filteredCategories" [value]="category">
+            {{ category }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+      
+      <!-- Clase de Trámite - Autocomplete for large dataset -->
+      <mat-form-field>
+        <mat-label>Clase de Trámite</mat-label>
+        <input matInput [(ngModel)]="selectedProcedureClass" (input)="filterProcedureClasses($any($event.target).value)" 
+               [matAutocomplete]="procedureClassAuto" placeholder="Buscar clase de trámite...">
+        <mat-autocomplete #procedureClassAuto="matAutocomplete" (optionSelected)="applyFilter('procedureClass', $event.option.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let procedureClass of filteredProcedureClasses" [value]="procedureClass">
+            {{ procedureClass }}
+          </mat-option>
+        </mat-autocomplete>
       </mat-form-field>
 
       <!-- Nombre del Solicitante -->
@@ -68,18 +94,23 @@
     </mat-card>
 
     <mat-card class="kpi-card">
-      <p class="title">{{ pendingApplications }}</p>
-      <p>Solicitudes Pendientes</p>
+      <p class="title">{{ activeApplications }}</p>
+      <p>Solicitudes Activas</p>
     </mat-card>
 
     <mat-card class="kpi-card">
-      <p class="title">{{ approvedApplications }}</p>
-      <p>Solicitudes Aprobadas</p>
+      <p class="title">{{ finalizedApplications }}</p>
+      <p>Solicitudes Finalizadas</p>
     </mat-card>
 
     <mat-card class="kpi-card">
-      <p class="title">{{ rejectedApplications }}</p>
-      <p>Solicitudes Rechazadas</p>
+      <p class="title">{{ inactiveApplications }}</p>
+      <p>Solicitudes Inactivas</p>
+    </mat-card>
+    
+    <mat-card class="kpi-card" *ngIf="analytics?.kpis?.totalProcedures">
+      <p class="title">{{ analytics?.kpis?.totalProcedures }}</p>
+      <p>Total de Trámites</p>
     </mat-card>
   </div>
 
@@ -104,6 +135,16 @@
     <mat-card class="kpi-card">
       <p class="title">{{ manualApplications }}</p>
       <p>Solicitudes Manuales</p>
+    </mat-card>
+    
+    <mat-card class="kpi-card" *ngIf="errorApplications > 0">
+      <p class="title">{{ errorApplications }}</p>
+      <p>Con Error de Usuario</p>
+    </mat-card>
+    
+    <mat-card class="kpi-card" *ngIf="estado020Applications > 0">
+      <p class="title">{{ estado020Applications }}</p>
+      <p>Estado 020</p>
     </mat-card>
   </div>
 </div>

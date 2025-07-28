@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ExcelHelper, PDFHelper } from 'src/app/core/helpers';
 import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 const COLUMNS = ['receivedDate', 'applicationId', 'applicantName', 'companyName', 'fileStatus', 'procedureTypeDescription', 'categoryDescription', 'isAutomaticRenewal', 'cityCode'];
 
@@ -22,7 +23,7 @@ const COLUMNS = ['receivedDate', 'applicationId', 'applicantName', 'companyName'
   imports: [
     NgxPaginationModule, MatTableModule, CommonModule, NoResultComponent,
     DateFilterComponent, MatFormFieldModule, MatOptionModule, MatSelectModule,
-    FormsModule, PrimaryButtonComponent, CommonModule, MatInputModule, LoadingComponent
+    FormsModule, PrimaryButtonComponent, CommonModule, MatInputModule, LoadingComponent, MatAutocompleteModule
   ],
   templateUrl: './applications-details.component.html',
   styleUrl: './applications-details.component.scss'
@@ -42,21 +43,156 @@ export class ApplicationsDetailsComponent implements OnInit {
   public companyName = '';
   public applicationId = '';
 
-  public fileStatuses: string[] = ['PENDIENTE', 'APROBADO', 'RECHAZADO', 'EN PROCESO'];
-  public procedureTypes: string[] = [
-    'CERTIFICADO DE OPERACION',
-    'PERMISO DE EXPLOTACION',
-    'RENOVACION DE CERTIFICADO',
-    'RENOVACION DE PERMISO',
-    'CAMBIO DE MODALIDAD',
-    'CAMBIO DE RUTA'
+  // Filter options from documentation
+  public fileStatuses: string[] = [
+    'ACTIVO',
+    'ESTADO-020', 
+    'INACTIVO',
+    'RETROTRAIDO POR ERROR DE USUARIO',
+    'FINALIZADO'
   ];
+  
+  public procedureTypes: string[] = [
+    'NUEVO',
+    'MODIFICACIÓN',
+    'RENOVACIÓN',
+    'REPOSICIÓN',
+    'CANCELACIÓN',
+    'DENUNCIA',
+    'HISTORICO DGT',
+    'INCREMENTO',
+    'AUTORIZACION',
+    'SUSPENSIÓN',
+    'RENUNCIA',
+    'OPOSICIÓN',
+    'IMPUGNACIÓN'
+  ];
+  
   public categories: string[] = [
-    'TRANSPORTE PUBLICO',
-    'TRANSPORTE PRIVADO',
-    'CARGA',
-    'ESPECIAL',
-    'EJECUTIVO'
+    'BUS NACIONAL EJECUTIVO AEROPORTUARIO',
+    'TAXI DIRECTO O DE BARRIDO',
+    'CARGA GENERAL',
+    'MOTOTAXI',
+    'CARGA PRIVADA GENERAL',
+    'BUS INTERURBANO REGULAR',
+    'CARGA GENERAL REMOLQUE/PLATAFORMA',
+    'DENUNCIA',
+    'TRANSPORTE DE GRUPO RELIGIOSOS',
+    'TRANSPORTE DE TURISMO',
+    'CARGA ESPECIALIZADA REMOLQUE',
+    'BUS URBANO REGULAR',
+    'TRANSPORTE DE ESTUDIANTES',
+    'TRANSPORTE DE TRABAJADORES',
+    'CARGA PRIVADA GENERAL REMOLQUE/PLATAFORMA',
+    'HISTORICO DGT',
+    'BUS URBANO RÁPIDO',
+    'TRANSPORTE DE GRUPO  EXCURSIONES',
+    'TAXI COLECTIVO O DE PUNTO',
+    'CARGA ESPECIALIZADA NO ARTICULADA',
+    'INTERNACIONAL DE CARGA EN TRANSITO POR HONDURAS.',
+    'CARGA PRIVADA ESPECIALIZADA',
+    'CERTIFICACION DE TALLER',
+    'BUS SUB URBANO REGULAR',
+    'BUS INTERNACIONAL CON DESTINO/SALIDA HONDURAS',
+    'CARGA PRIVADA ESPECIALIZADA REMOLQUE',
+    'BUS INTERURBANO EJECUTIVO',
+    'TAXI EJECUTIVO AEROPORTUARIO',
+    'TRANSPORTE DE GRUPOS SOCIALES',
+    'BUS DE TRANSPORTE RÁPIDO',
+    'BUS CO URBANO',
+    'BUS INTERURBANO DIRECTO',
+    'AUTORIZACION DE ESCUELA PRIVADA DE PILOTOS - ESCUELA NACIONAL DE TRANSPORTE TERRESTRE',
+    'PROCEDIMIENTO DE OFICIO',
+    'TAXI SERVICIO DE RADIO',
+    'TAXI SERVICIO EJECUTIVO',
+    'AUTORIZACIÓN Y REGISTRO DE CONSORCIO OPERATIVO',
+    'TRANSPORTE PRIVADO DE CARGA',
+    'BUS URBANO EJECUTIVO',
+    'INTERNACIONAL DE CARGA CON DESTINO/SALIDA DE HONDURAS',
+    'TRANSPORTE DE EQUIPO Y MAQUINARIA AGRÍCOLA',
+    'BUS INTERNACIONAL EN TRANSITO POR HONDURAS',
+    'TRANSPORTE GRUA',
+    'PERFORADORA Y SIMILARES',
+    'DICTAMEN TÉCNICO PRE-CERTIFICACIÓN',
+    'BUS SUB URBANO RÁPIDO',
+    'MOTOCARGA',
+    'CARGA GENERAL NO ARTICULADA'
+  ];
+  
+  public procedureClasses: string[] = [
+    'PERMISO DE EXPLOTACIÓN',
+    'CAMBIO DE PLACA',
+    'CERTIFICADO DE OPERACIÓN',
+    'INCREMENTO DE CERTIFICADO DE OPERACIÓN AL PERMISO DE EXPLOTACION',
+    'DESVINCULACION DE UNIDAD',
+    'ESTUDIO DE FACTIBILIDAD',
+    'PERMISO ESPECIAL PARA EL SERVICIO DE TRANSPORTE ESPECIAL',
+    'LEGALIZACIÓN',
+    'CAMBIO DE UNIDAD',
+    'DENUNCIA TRANSPORTISTA',
+    'CESIÓN DE DERECHO POR RAZÓN DE CENSO',
+    'CANTIDAD DE PASAJEROS',
+    'CESIÓN DE DERECHO',
+    'SOCIO',
+    'CAMBIO DE EJES',
+    'CAMBIO DE MOTOR',
+    'DENUNCIA CIUDADANA',
+    'RAZON SOCIAL O DENOMINACION SOCIAL',
+    'CAMBIO DE CATEGORIA',
+    'DENUNCIA PERDIDA/EXTRAVIO C.O/P.E',
+    'HISTORICO DGT',
+    'CAMBIOS DE HORARIOS',
+    'CAMBIO DE TARIFA',
+    'CAMBIO DE RUTA',
+    'CERTIFICACION DE TALLER AUTOMOTRIZ MIXTO',
+    'CAMBIO DE COLOR',
+    'RECORTE DE RUTA',
+    'CAMBIO DE TIPO DE VEHICULO',
+    'EXTENSION DE RUTA',
+    'CERTIFICACION DE TALLER AUTOMOTRIZ PUBLICO',
+    'CERTIFICACION DE TALLER AUTOMOTRIZ PRIVADO',
+    'CERTIFICADO DE OPERACIÓN PROCESO PERIODO TAXI',
+    'PERMISO DE EXPLOTACIÓN PROCESO PERIODO TAXI',
+    'CAMBIO DE PILOTO',
+    'AUTORIZACION DE ESCUELA PRIVADA DE PILOTOS - ESCUELA NACIONAL DE TRANSPORTE TERRESTRE',
+    'RECONSTRUCCIÓN DE EXPEDIENTE',
+    'RECTIFICACION DE CERTIFICADO DE OPERACION O PERMISO DE EXPLOTACION',
+    'CAMBIO DE CHASIS',
+    'CODIGO ADUANERO HN',
+    'UNIFICACION DE PERMISOS DE EXPLOTACION CON INCORPORACION DE CERTIFICADOS DE OPERACIÓN',
+    'PROCEDIMIENTO DE OFICIO IHTT',
+    'TEMPORAL',
+    'INCLUSION DE PUNTOS INTERMEDIOS',
+    'REPRESENTANTE  LEGAL',
+    'AUTORIZACIÓN Y REGISTRO DE CONSORCIO OPERATIVO',
+    'CAMBIO DE CARROCERIA',
+    'CAMBIO DE DESCRIPCION',
+    'PROCEDIMIENTO DE DESVINCULACION DE UNIDAD DE OFICIO IHTT',
+    'DESBLOQUEO DE VEHICULO',
+    'DENUNCIA INCUMPLIMIENTO TARIFAS MÍNIMAS',
+    'DICTAMEN TÉCNICO PRE-CERTIFICACIÓN',
+    'TARJETA INTELIGENTE',
+    'SOLICITUD APROBACIÓN E INSCRIPCIÓN DE CONTRATO',
+    'PERMISO EVENTUAL PARA OPERAR CARGA SOBREDIMENSIONADA',
+    'BENEFICIO DE REACTIVACION',
+    'COMPENSACION DE TASA UNICA VEHICULAR ANUAL',
+    'CAMBIOS DE ITINERARIOS',
+    'INCORPORACION AL PROYECTO TAXI ROSA',
+    'CERTIFICADO UNIFICACION DE FECHAS',
+    'CONVERSIÓN  DE SISTEMA DE COMBUSTION',
+    'PERMISO DE EXPLOTACION UNIFICACION DE FECHAS',
+    'PERMISO ESPECIAL EVENTUAL',
+    'PETICIÓN DE CENSO STPP',
+    'REGULARIZACION DE LA PROPIEDAD DE LA CONCESION',
+    'SOLICITUD EN TRAMITE',
+    'ACTO ADMINISTRATIVO EMITIDO'
+  ];
+  
+  public cityOptions: string[] = [
+    'Regional SPS',
+    'Regional TGU', 
+    'Regional CHO',
+    'Regional CEI'
   ];
   public renewalStates = [
     { value: true, label: 'Sí' },
@@ -65,8 +201,14 @@ export class ApplicationsDetailsComponent implements OnInit {
 
   public selectedFileStatus = '';
   public selectedProcedureType = '';
+  public selectedProcedureClass = '';
   public selectedCategory = '';
+  public selectedCityCode = '';
   public selectedRenewalState: boolean | null = null;
+  
+  // Filtered options for autocomplete
+  public filteredCategories = this.categories;
+  public filteredProcedureClasses = this.procedureClasses;
 
   constructor(
     private applicationsService: ApplicationsQueries,
@@ -133,8 +275,10 @@ export class ApplicationsDetailsComponent implements OnInit {
       startDate: this.start || undefined,
       endDate: this.end || undefined,
       fileStatus: this.selectedFileStatus || undefined,
-      procedureType: this.selectedProcedureType || undefined,
-      categoryId: this.selectedCategory || undefined,
+      procedureTypeDescription: this.selectedProcedureType || undefined,
+      procedureClassDescription: this.selectedProcedureClass || undefined,
+      categoryDescription: this.selectedCategory || undefined,
+      cityCode: this.selectedCityCode || undefined,
       applicantName: this.applicantName !== '' ? this.applicantName : undefined,
       companyName: this.companyName !== '' ? this.companyName : undefined,
       applicationId: this.applicationId !== '' ? this.applicationId : undefined,
@@ -166,8 +310,10 @@ export class ApplicationsDetailsComponent implements OnInit {
       startDate: this.start || undefined,
       endDate: this.end || undefined,
       fileStatus: this.selectedFileStatus || undefined,
-      procedureType: this.selectedProcedureType || undefined,
-      categoryId: this.selectedCategory || undefined,
+      procedureTypeDescription: this.selectedProcedureType || undefined,
+      procedureClassDescription: this.selectedProcedureClass || undefined,
+      categoryDescription: this.selectedCategory || undefined,
+      cityCode: this.selectedCityCode || undefined,
       applicantName: this.applicantName !== '' ? this.applicantName : undefined,
       companyName: this.companyName !== '' ? this.companyName : undefined,
       applicationId: this.applicationId !== '' ? this.applicationId : undefined,
@@ -213,17 +359,39 @@ export class ApplicationsDetailsComponent implements OnInit {
 
   public getStatusBadgeClass(status: string | null): string {
     switch (status) {
-      case 'APROBADO':
-        return 'status-approved';
-      case 'RECHAZADO':
-        return 'status-rejected';
-      case 'PENDIENTE':
-        return 'status-pending';
-      case 'EN PROCESO':
-        return 'status-processing';
+      case 'ACTIVO':
+        return 'status-active';
+      case 'FINALIZADO':
+        return 'status-finalized';
+      case 'INACTIVO':
+        return 'status-inactive';
+      case 'RETROTRAIDO POR ERROR DE USUARIO':
+        return 'status-error';
+      case 'ESTADO-020':
+        return 'status-020';
       default:
         return 'status-unknown';
     }
+  }
+  
+  public filterCategories(value: string): void {
+    if (!value) {
+      this.filteredCategories = this.categories;
+      return;
+    }
+    this.filteredCategories = this.categories.filter(category =>
+      category.toLowerCase().includes(value.toLowerCase())
+    );
+  }
+  
+  public filterProcedureClasses(value: string): void {
+    if (!value) {
+      this.filteredProcedureClasses = this.procedureClasses;
+      return;
+    }
+    this.filteredProcedureClasses = this.procedureClasses.filter(procedureClass => 
+      procedureClass.toLowerCase().includes(value.toLowerCase())
+    );
   }
 
   public getRenewalText(isAutomatic: boolean): string {

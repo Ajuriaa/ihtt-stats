@@ -25,17 +25,43 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-    </div>
-    <div class="filter-row">
-      <!-- Categoría -->
+      
+      <!-- Código de Ciudad -->
       <mat-form-field>
-        <mat-label>Categoría</mat-label>
-        <mat-select [(ngModel)]="selectedCategory">
-          <mat-option value="">TODAS</mat-option>
-          <mat-option *ngFor="let category of categories" [value]="category">
-            {{ category }}
+        <mat-label>Regional</mat-label>
+        <mat-select [(ngModel)]="selectedCityCode">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let city of cityOptions" [value]="city">
+            {{ city }}
           </mat-option>
         </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="filter-row">
+      <!-- Categoría - Autocomplete for large dataset -->
+      <mat-form-field>
+        <mat-label>Categoría de Transporte</mat-label>
+        <input matInput [(ngModel)]="selectedCategory" (input)="filterCategories($any($event.target).value)" 
+               [matAutocomplete]="categoryAuto" placeholder="Buscar categoría...">
+        <mat-autocomplete #categoryAuto="matAutocomplete">
+          <mat-option value="">TODAS</mat-option>
+          <mat-option *ngFor="let category of filteredCategories" [value]="category">
+            {{ category }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+      
+      <!-- Clase de Trámite - Autocomplete for large dataset -->
+      <mat-form-field>
+        <mat-label>Clase de Trámite</mat-label>
+        <input matInput [(ngModel)]="selectedProcedureClass" (input)="filterProcedureClasses($any($event.target).value)" 
+               [matAutocomplete]="procedureClassAuto" placeholder="Buscar clase de trámite...">
+        <mat-autocomplete #procedureClassAuto="matAutocomplete">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let procedureClass of filteredProcedureClasses" [value]="procedureClass">
+            {{ procedureClass }}
+          </mat-option>
+        </mat-autocomplete>
       </mat-form-field>
 
       <!-- ID de Solicitud -->
