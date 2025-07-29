@@ -118,7 +118,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       this.filteredCategories = this.categories;
       return;
     }
-    
+
     const filterValue = value.toLowerCase();
     this.filteredCategories = this.categories.filter(category =>
       category.toLowerCase().includes(filterValue)
@@ -127,7 +127,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
 
   public loadAnalytics(): void {
     this.loading = true;
-    
+
     const params = {
       startDate: this.startDate || undefined,
       endDate: this.endDate || undefined,
@@ -198,7 +198,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
     if (!this.analytics) return;
 
     this.disposeCharts();
-    
+
     // Create all charts
     this.createMonthlyRevenueChart();
     this.createStatusDistributionChart();
@@ -216,7 +216,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       console.warn('Chart element monthlyRevenueChart not found');
       return;
     }
-    
+
     const root = am5.Root.new("monthlyRevenueChart");
     root.setThemes([am5themes_Animated.new(root)]);
 
@@ -263,9 +263,25 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       valueYField: "amount",
       categoryXField: "month",
       tooltip: am5.Tooltip.new(root, {
-        labelText: "{categoryX}: L. {valueY}"
+        labelText: "[bold fontSize: 2rem]{categoryX}: L. {valueY}[/]"
       })
     }));
+
+    // Add data labels on points
+    series.bullets.push(() =>
+      am5.Bullet.new(root, {
+        locationY: 0,
+        sprite: am5.Label.new(root, {
+          text: "L. {valueY}",
+          centerY: am5.p100,
+          centerX: am5.p50,
+          dy: -10,
+          fontSize: 12,
+          fontWeight: "bold",
+          populateText: true
+        })
+      })
+    );
 
     const data = this.analytics.chartData.filtered.monthlyRevenue || [];
     xAxis.data.setAll(data);
@@ -280,7 +296,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       console.warn('Chart element statusChart not found');
       return;
     }
-    
+
     const root = am5.Root.new("statusChart");
     root.setThemes([am5themes_Animated.new(root)]);
 
@@ -302,8 +318,18 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
 
     const series = chart.series.push(am5percent.PieSeries.new(root, {
       valueField: "count",
-      categoryField: "status"
+      categoryField: "status",
+      tooltip: am5.Tooltip.new(root, {
+        labelText: "[bold fontSize: 2rem]{category}: {value}[/]"
+      })
     }));
+
+    // Add data labels on slices
+    series.labels.template.setAll({
+      text: "{category}: {value}",
+      fontSize: 12,
+      fontWeight: "bold"
+    });
 
     const statusData = this.analytics.chartData.filtered.statusDistribution || {};
     const data = Object.entries(statusData).map(([status, count]) => ({
@@ -321,7 +347,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       console.warn('Chart element transportChart not found');
       return;
     }
-    
+
     const root = am5.Root.new("transportChart");
     root.setThemes([am5themes_Animated.new(root)]);
 
@@ -359,8 +385,27 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       xAxis: xAxis,
       yAxis: yAxis,
       valueYField: "count",
-      categoryXField: "type"
+      categoryXField: "type",
+      tooltip: am5.Tooltip.new(root, {
+        labelText: "[bold fontSize: 2rem]{categoryX}: {valueY} certificados[/]"
+      })
     }));
+
+    // Add data labels on top of bars
+    series.bullets.push(() =>
+      am5.Bullet.new(root, {
+        locationY: 1,
+        sprite: am5.Label.new(root, {
+          text: "{valueY}",
+          centerY: am5.p100,
+          centerX: am5.p50,
+          dy: -5,
+          fontSize: 12,
+          fontWeight: "bold",
+          populateText: true
+        })
+      })
+    );
 
     const transportData = this.analytics.chartData.filtered.transportTypeBreakdown || {};
     const data = Object.entries(transportData).map(([type, count]) => ({
@@ -379,7 +424,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       console.warn('Chart element categoryChart not found');
       return;
     }
-    
+
     const root = am5.Root.new("categoryChart");
     root.setThemes([am5themes_Animated.new(root)]);
 
@@ -419,8 +464,27 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       xAxis: xAxis,
       yAxis: yAxis,
       valueYField: "count",
-      categoryXField: "category"
+      categoryXField: "category",
+      tooltip: am5.Tooltip.new(root, {
+        labelText: "[bold fontSize: 2rem]{categoryX}: {valueY} certificados[/]"
+      })
     }));
+
+    // Add data labels on top of bars
+    series.bullets.push(() =>
+      am5.Bullet.new(root, {
+        locationY: 1,
+        sprite: am5.Label.new(root, {
+          text: "{valueY}",
+          centerY: am5.p100,
+          centerX: am5.p50,
+          dy: -5,
+          fontSize: 12,
+          fontWeight: "bold",
+          populateText: true
+        })
+      })
+    );
 
     const categoryData = this.analytics.chartData.filtered.categoryDistribution || {};
     const data = Object.entries(categoryData).map(([category, count]) => ({
@@ -439,7 +503,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       console.warn('Chart element annualChart not found');
       return;
     }
-    
+
     const root = am5.Root.new("annualChart");
     root.setThemes([am5themes_Animated.new(root)]);
 
@@ -475,8 +539,27 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       xAxis: xAxis,
       yAxis: yAxis,
       valueYField: "count",
-      categoryXField: "year"
+      categoryXField: "year",
+      tooltip: am5.Tooltip.new(root, {
+        labelText: "[bold fontSize: 2rem]{categoryX}: {valueY} certificados[/]"
+      })
     }));
+
+    // Add data labels on top of bars
+    series.bullets.push(() =>
+      am5.Bullet.new(root, {
+        locationY: 1,
+        sprite: am5.Label.new(root, {
+          text: "{valueY}",
+          centerY: am5.p100,
+          centerX: am5.p50,
+          dy: -5,
+          fontSize: 12,
+          fontWeight: "bold",
+          populateText: true
+        })
+      })
+    );
 
     const data = this.analytics.chartData.global.annualOverview || [];
     xAxis.data.setAll(data);
@@ -490,7 +573,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       console.warn('Chart element categoryPerformanceChart not found');
       return;
     }
-    
+
     const root = am5.Root.new("categoryPerformanceChart");
     root.setThemes([am5themes_Animated.new(root)]);
 
@@ -529,7 +612,10 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       yAxis: yAxis,
       valueYField: "paid",
       categoryXField: "category",
-      stacked: true
+      stacked: true,
+      tooltip: am5.Tooltip.new(root, {
+        labelText: "[bold fontSize: 2rem]{categoryX}[/]\n[bold]Pagados:[/] {paid}\n[bold]Sin Pagar:[/] {unpaid}\n[bold]Total:[/] {total}"
+      })
     }));
 
     const unpaidSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
@@ -538,16 +624,59 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       yAxis: yAxis,
       valueYField: "unpaid",
       categoryXField: "category",
-      stacked: true
+      stacked: true,
+      tooltip: am5.Tooltip.new(root, {
+        labelText: "[bold fontSize: 2rem]{categoryX}[/]\n[bold]Pagados:[/] {paid}\n[bold]Sin Pagar:[/] {unpaid}\n[bold]Total:[/] {total}"
+      })
     }));
+
+    // Add single data label on top of the entire stacked bar
+    unpaidSeries.bullets.push(() =>
+      am5.Bullet.new(root, {
+        locationY: 1,
+        sprite: am5.Label.new(root, {
+          text: "P: {paid}, NP: {unpaid}",
+          centerY: am5.p100,
+          centerX: am5.p50,
+          dy: -5,
+          fontSize: 12,
+          fontWeight: "bold",
+          fill: am5.color("#000000"),
+          populateText: true
+        })
+      })
+    );
 
     const performanceData = this.analytics.chartData.global.categoryPerformance || {};
-    const data = Object.entries(performanceData).map(([category, stats]: [string, any]) => ({
+    
+    // First, map and truncate categories
+    const rawData = Object.entries(performanceData).map(([category, stats]: [string, any]) => ({
       category: category.length > 15 ? category.substring(0, 12) + '...' : category,
       paid: stats.paid || 0,
-      unpaid: stats.unpaid || 0
+      unpaid: stats.unpaid || 0,
+      total: (stats.paid || 0) + (stats.unpaid || 0)
     }));
 
+    // Then, aggregate duplicate truncated categories
+    const aggregatedData = new Map();
+    
+    rawData.forEach(item => {
+      if (aggregatedData.has(item.category)) {
+        const existing = aggregatedData.get(item.category);
+        aggregatedData.set(item.category, {
+          category: item.category,
+          paid: existing.paid + item.paid,
+          unpaid: existing.unpaid + item.unpaid,
+          total: existing.total + item.total
+        });
+      } else {
+        aggregatedData.set(item.category, item);
+      }
+    });
+
+    // Convert back to array
+    const data = Array.from(aggregatedData.values());
+    console.log('Aggregated data:', data);
     xAxis.data.setAll(data);
     paidSeries.data.setAll(data);
     unpaidSeries.data.setAll(data);
@@ -560,7 +689,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       console.warn('Chart element processingChart not found');
       return;
     }
-    
+
     const root = am5.Root.new("processingChart");
     root.setThemes([am5themes_Animated.new(root)]);
 
@@ -600,8 +729,27 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       xAxis: xAxis,
       yAxis: yAxis,
       valueYField: "avgDays",
-      categoryXField: "month"
+      categoryXField: "month",
+      tooltip: am5.Tooltip.new(root, {
+        labelText: "[bold fontSize: 2rem]{categoryX}: {valueY} días[/]"
+      })
     }));
+
+    // Add data labels on points
+    series.bullets.push(() =>
+      am5.Bullet.new(root, {
+        locationY: 0,
+        sprite: am5.Label.new(root, {
+          text: "{valueY} días",
+          centerY: am5.p100,
+          centerX: am5.p50,
+          dy: -10,
+          fontSize: 12,
+          fontWeight: "bold",
+          populateText: true
+        })
+      })
+    );
 
     const data = this.analytics.chartData.global.processingEfficiency || [];
     xAxis.data.setAll(data);
@@ -615,7 +763,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       console.warn('Chart element globalTransportChart not found');
       return;
     }
-    
+
     const root = am5.Root.new("globalTransportChart");
     root.setThemes([am5themes_Animated.new(root)]);
 
@@ -637,8 +785,18 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
 
     const series = chart.series.push(am5percent.PieSeries.new(root, {
       valueField: "count",
-      categoryField: "type"
+      categoryField: "type",
+      tooltip: am5.Tooltip.new(root, {
+        labelText: "[bold fontSize: 2rem]{category}: {value}[/]"
+      })
     }));
+
+    // Add data labels on slices
+    series.labels.template.setAll({
+      text: "{category}: {value}",
+      fontSize: 12,
+      fontWeight: "bold"
+    });
 
     const transportData = this.analytics.chartData.global.globalTransportDistribution || {};
     const data = Object.entries(transportData).map(([type, count]) => ({
