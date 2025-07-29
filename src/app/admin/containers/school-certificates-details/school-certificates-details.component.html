@@ -1,0 +1,181 @@
+<app-loading class="loading" *ngIf="isLoading"></app-loading>
+
+<div class="container" *ngIf="!isLoading">
+  <div class="filter-wrapper">
+    <div class="filter-row">
+      <app-date-filter
+        [showDateTypeFilter]="true"
+        [dateType]="dateType"
+        [dateTypeOptions]="[
+          {value: 'issueDate', label: 'Fecha de Emisión'},
+          {value: 'preRegistration', label: 'Fecha de Pre-registro'},
+          {value: 'paid', label: 'Fecha de Pago'},
+          {value: 'delivery', label: 'Fecha de Entrega'}
+        ]"
+        [startDate]="startDateObject"
+        [endDate]="endDateObject"
+        (dateRangeChanged)="filterDates($event)">
+      </app-date-filter>
+
+      <!-- Estado del Aviso -->
+      <mat-form-field>
+        <mat-label>Estado</mat-label>
+        <mat-select [(ngModel)]="selectedNoticeStatus" (selectionChange)="applyFilter('noticeStatus', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let status of noticeStatuses" [value]="status">
+            {{ status }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Tipo de Transporte -->
+      <mat-form-field>
+        <mat-label>Tipo de Transporte</mat-label>
+        <mat-select [(ngModel)]="selectedTransportType" (selectionChange)="applyFilter('transportType', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let transport of transportTypes" [value]="transport">
+            {{ transport }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Búsqueda Universal -->
+      <mat-form-field>
+        <mat-label>Buscar</mat-label>
+        <input matInput 
+               [(ngModel)]="searchTerm" 
+               placeholder="RTN, Distribuidor o Código de Certificado">
+      </mat-form-field>
+    </div>
+
+    <div class="filter-row">
+      <!-- Categoría - Autocomplete -->
+      <mat-form-field>
+        <mat-label>Categoría del Vehículo</mat-label>
+        <input matInput
+               [(ngModel)]="selectedCategory"
+               (input)="filterCategories($any($event.target).value)"
+               [matAutocomplete]="categoryAuto"
+               placeholder="Buscar categoría...">
+        <mat-autocomplete #categoryAuto="matAutocomplete" (optionSelected)="applyFilter('categoryDescription', $event.option.value)">
+          <mat-option value="">TODAS</mat-option>
+          <mat-option *ngFor="let category of filteredCategories" [value]="category">
+            {{ category }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <!-- Tipo -->
+      <mat-form-field>
+        <mat-label>Tipo</mat-label>
+        <mat-select [(ngModel)]="selectedType" (selectionChange)="applyFilter('type', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let type of types" [value]="type">
+            {{ type }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-row">
+      <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
+      <app-primary-button (btnClick)="generatePDF()">IMPRIMIR LISTADO</app-primary-button>
+      <app-primary-button (btnClick)="generateExcel()">EXPORTAR EXCEL</app-primary-button>
+    </div>
+  </div>
+
+  <section class="table-container">
+    <app-no-result *ngIf="schoolCertificates.length === 0"></app-no-result>
+    <table mat-table [dataSource]="schoolCertificates | paginate: { itemsPerPage, currentPage: page }" class="table" *ngIf="schoolCertificates.length > 0">
+
+      <!-- Código de Pre-registro -->
+      <ng-container matColumnDef="preRegistrationCode">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Código Pre-registro</th>
+        <td mat-cell *matCellDef="let element" class="table-cell">
+          {{ element.preRegistrationCode || 'N/A' }}
+        </td>
+      </ng-container>
+
+      <!-- Nombre del Distribuidor -->
+      <ng-container matColumnDef="dealerName">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Distribuidor</th>
+        <td mat-cell *matCellDef="let element" class="table-cell">
+          {{ element.dealerName || 'N/A' }}
+        </td>
+      </ng-container>
+
+      <!-- Monto -->
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Monto</th>
+        <td mat-cell *matCellDef="let element" class="table-cell">
+          {{ formatCurrency(element.amount) }}
+        </td>
+      </ng-container>
+
+      <!-- Estado -->
+      <ng-container matColumnDef="noticeStatus">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Estado</th>
+        <td mat-cell *matCellDef="let element" class="table-cell">
+          <span [ngClass]="{
+            'status-paid': element.noticeStatus === 'PAGADO',
+            'status-active': element.noticeStatus === 'ACTIVO',
+            'status-cancelled': element.noticeStatus === 'ANULADO'
+          }">
+            {{ element.noticeStatus }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Tipo de Transporte -->
+      <ng-container matColumnDef="transportType">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Tipo Transporte</th>
+        <td mat-cell *matCellDef="let element" class="table-cell">
+          {{ element.transportType }}
+        </td>
+      </ng-container>
+
+      <!-- Categoría -->
+      <ng-container matColumnDef="categoryDescription">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Categoría</th>
+        <td mat-cell *matCellDef="let element" class="table-cell">
+          {{ element.categoryDescription || 'N/A' }}
+        </td>
+      </ng-container>
+
+      <!-- Tipo -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Tipo</th>
+        <td mat-cell *matCellDef="let element" class="table-cell">
+          {{ element.type || 'N/A' }}
+        </td>
+      </ng-container>
+
+      <!-- Fecha de Emisión -->
+      <ng-container matColumnDef="issueDate">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Fecha Emisión</th>
+        <td mat-cell *matCellDef="let element" class="table-cell">
+          {{ getDate(element.issueDate) }}
+        </td>
+      </ng-container>
+
+      <!-- Fecha de Entrega -->
+      <ng-container matColumnDef="deliveryDate">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Fecha Entrega</th>
+        <td mat-cell *matCellDef="let element" class="table-cell">
+          {{ getDate(element.deliveryDate) }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <pagination-controls
+      *ngIf="schoolCertificates.length > 0"
+      class="my-pagination"
+      (pageChange)="onPageChange($event)"
+      previousLabel="Anterior"
+      nextLabel="Siguiente"
+    ></pagination-controls>
+  </section>
+</div>

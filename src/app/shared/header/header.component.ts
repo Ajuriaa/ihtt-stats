@@ -25,7 +25,8 @@ export class HeaderComponent implements OnInit {
     { value: 'certificates', label: 'Certificados y Permisos' },
     { value: 'fines', label: 'Multas' },
     { value: 'eventual-permits', label: 'Permisos Eventuales' },
-    { value: 'applications', label: 'Solicitudes' }
+    { value: 'applications', label: 'Solicitudes' },
+    { value: 'school-certificates', label: 'Certificados Escolares' }
   ];
 
   constructor(
@@ -74,6 +75,9 @@ export class HeaderComponent implements OnInit {
         break;
       case 'applications':
         modeTitle = ' de Solicitudes';
+        break;
+      case 'school-certificates':
+        modeTitle = ' de Certificados Escolares';
         break;
       default:
         modeTitle = '';

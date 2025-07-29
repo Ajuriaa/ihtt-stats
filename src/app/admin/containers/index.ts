@@ -11,3 +11,6 @@ export * from './eventual-permits-details/eventual-permits-details.component';
 export * from './applications-dashboard/applications-dashboard.component';
 export * from './applications-details/applications-details.component';
 export * from './applications-reports/applications-reports.component';
+export * from './school-certificates-dashboard/school-certificates-dashboard.component';
+export * from './school-certificates-details/school-certificates-details.component';
+export * from './school-certificates-reports/school-certificates-reports.component';

@@ -46,12 +46,12 @@ export class ApplicationsDetailsComponent implements OnInit {
   // Filter options from documentation
   public fileStatuses: string[] = [
     'ACTIVO',
-    'ESTADO-020', 
+    'ESTADO-020',
     'INACTIVO',
     'RETROTRAIDO POR ERROR DE USUARIO',
     'FINALIZADO'
   ];
-  
+
   public procedureTypes: string[] = [
     'NUEVO',
     'MODIFICACIÓN',
@@ -67,7 +67,7 @@ export class ApplicationsDetailsComponent implements OnInit {
     'OPOSICIÓN',
     'IMPUGNACIÓN'
   ];
-  
+
   public categories: string[] = [
     'BUS NACIONAL EJECUTIVO AEROPORTUARIO',
     'TAXI DIRECTO O DE BARRIDO',
@@ -118,7 +118,7 @@ export class ApplicationsDetailsComponent implements OnInit {
     'MOTOCARGA',
     'CARGA GENERAL NO ARTICULADA'
   ];
-  
+
   public procedureClasses: string[] = [
     'PERMISO DE EXPLOTACIÓN',
     'CAMBIO DE PLACA',
@@ -187,10 +187,10 @@ export class ApplicationsDetailsComponent implements OnInit {
     'SOLICITUD EN TRAMITE',
     'ACTO ADMINISTRATIVO EMITIDO'
   ];
-  
+
   public cityOptions: string[] = [
     'Regional SPS',
-    'Regional TGU', 
+    'Regional TGU',
     'Regional CHO',
     'Regional CEI'
   ];
@@ -205,7 +205,7 @@ export class ApplicationsDetailsComponent implements OnInit {
   public selectedCategory = '';
   public selectedCityCode = '';
   public selectedRenewalState: boolean | null = null;
-  
+
   // Filtered options for autocomplete
   public filteredCategories = this.categories;
   public filteredProcedureClasses = this.procedureClasses;
@@ -373,7 +373,7 @@ export class ApplicationsDetailsComponent implements OnInit {
         return 'status-unknown';
     }
   }
-  
+
   public filterCategories(value: string): void {
     if (!value) {
       this.filteredCategories = this.categories;
@@ -383,22 +383,22 @@ export class ApplicationsDetailsComponent implements OnInit {
       category.toLowerCase().includes(value.toLowerCase())
     );
   }
-  
+
   public filterProcedureClasses(value: string): void {
     if (!value) {
       this.filteredProcedureClasses = this.procedureClasses;
       return;
     }
-    this.filteredProcedureClasses = this.procedureClasses.filter(procedureClass => 
+    this.filteredProcedureClasses = this.procedureClasses.filter(procedureClass =>
       procedureClass.toLowerCase().includes(value.toLowerCase())
     );
   }
 
-  public getRenewalText(isAutomatic: boolean): string {
-    return isAutomatic ? 'Automática' : 'Manual';
+  public getRenewalText(isAutomatic: string): string {
+    return isAutomatic === 'true' ? 'Automática' : 'Manual';
   }
 
-  public getRenewalClass(isAutomatic: boolean): string {
-    return isAutomatic ? 'renewal-automatic' : 'renewal-manual';
+  public getRenewalClass(isAutomatic: string): string {
+    return isAutomatic === 'true' ? 'renewal-automatic' : 'renewal-manual';
   }
 }

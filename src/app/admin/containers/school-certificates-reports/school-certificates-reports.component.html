@@ -1,0 +1,193 @@
+<div class="reports-container">
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>Reportes de Certificados Escolares</mat-card-title>
+      <mat-card-subtitle>Genere reportes detallados de certificados escolares emitidos</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="filters-section">
+        <h3>Filtros de Búsqueda</h3>
+        
+        <div class="filters-grid">
+          <!-- Filtro de fechas con tipo -->
+          <div class="date-filters">
+            <app-date-filter
+              [showDateTypeFilter]="true"
+              [dateType]="dateType"
+              [dateTypeOptions]="[
+                {value: 'issueDate', label: 'Fecha de Emisión'},
+                {value: 'preRegistration', label: 'Fecha de Pre-registro'},
+                {value: 'paid', label: 'Fecha de Pago'},
+                {value: 'delivery', label: 'Fecha de Entrega'}
+              ]"
+              [startDate]="startDateObject"
+              [endDate]="endDateObject"
+              (dateRangeChanged)="filterDates($event)">
+            </app-date-filter>
+          </div>
+          
+          <!-- Estado -->
+          <mat-form-field appearance="outline">
+            <mat-label>Estado</mat-label>
+            <mat-select [(ngModel)]="selectedNoticeStatus" (selectionChange)="applyFilter('noticeStatus', $event.value)">
+              <mat-option value="">TODOS</mat-option>
+              <mat-option *ngFor="let status of noticeStatuses" [value]="status">
+                {{ status }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Tipo de Transporte -->
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Transporte</mat-label>
+            <mat-select [(ngModel)]="selectedTransportType" (selectionChange)="applyFilter('transportType', $event.value)">
+              <mat-option value="">TODOS</mat-option>
+              <mat-option *ngFor="let transport of transportTypes" [value]="transport">
+                {{ transport }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Categoría - Autocomplete -->
+          <mat-form-field appearance="outline">
+            <mat-label>Categoría del Vehículo</mat-label>
+            <input matInput 
+                   [(ngModel)]="selectedCategory" 
+                   (input)="filterCategories($any($event.target).value)" 
+                   [matAutocomplete]="categoryAuto" 
+                   placeholder="Buscar categoría...">
+            <mat-autocomplete #categoryAuto="matAutocomplete" (optionSelected)="applyFilter('categoryDescription', $event.option.value)">
+              <mat-option value="">TODAS</mat-option>
+              <mat-option *ngFor="let category of filteredCategories" [value]="category">
+                {{ category }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <!-- Tipo -->
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo</mat-label>
+            <mat-select [(ngModel)]="selectedType" (selectionChange)="applyFilter('type', $event.value)">
+              <mat-option value="">TODOS</mat-option>
+              <mat-option *ngFor="let type of types" [value]="type">
+                {{ type }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Búsqueda Universal -->
+          <mat-form-field appearance="outline">
+            <mat-label>Buscar</mat-label>
+            <input matInput 
+                   [(ngModel)]="searchTerm" 
+                   placeholder="RTN, Distribuidor o Código">
+          </mat-form-field>
+        </div>
+        
+        <!-- Botones de filtros -->
+        <div class="filter-buttons">
+          <button mat-raised-button color="primary" (click)="aplicarFiltros()" [disabled]="loading">
+            <mat-icon>search</mat-icon>
+            Aplicar Filtros
+          </button>
+          
+          <button mat-stroked-button (click)="limpiarFiltros()" [disabled]="loading">
+            <mat-icon>clear</mat-icon>
+            Limpiar Filtros
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  
+  <!-- Sección de resultados y reportes -->
+  <mat-card class="results-card">
+    <mat-card-header>
+      <mat-card-title>Resultados</mat-card-title>
+      <mat-card-subtitle>{{ schoolCertificates.length }} certificados escolares encontrados</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div *ngIf="loading" class="loading-section">
+        <app-loading></app-loading>
+        <p>Cargando certificados escolares...</p>
+      </div>
+      
+      <div *ngIf="!loading" class="reports-section">
+        <h3>Reportes PDF Disponibles</h3>
+        <p class="reports-description">
+          Seleccione el tipo de reporte que desea generar en formato PDF. Los reportes se abrirán en una nueva pestaña.
+        </p>
+        
+        <!-- Selector de tipo de reporte -->
+        <div class="report-type-selector">
+          <mat-form-field appearance="outline" class="report-type-field">
+            <mat-label>Tipo de Reporte</mat-label>
+            <mat-select [(ngModel)]="tipoReporte">
+              <mat-option value="analisis">
+                <mat-icon>analytics</mat-icon>
+                Reporte Ejecutivo de Análisis
+              </mat-option>
+              <mat-option value="lista">
+                <mat-icon>list</mat-icon>
+                Lista Detallada de Certificados Escolares
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        
+        <div class="report-buttons">
+          <button 
+            mat-raised-button 
+            color="accent" 
+            (click)="generarReportePDF()"
+            [disabled]="loading">
+            <mat-icon>picture_as_pdf</mat-icon>
+            {{ tipoReporte === 'analisis' ? 'Generar Reporte Ejecutivo' : 'Generar Lista Detallada' }}
+          </button>
+
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="exportToExcel()"
+            [disabled]="loading">
+            <mat-icon>table_view</mat-icon>
+            Exportar a Excel
+          </button>
+        </div>
+        
+        <div *ngIf="tipoReporte === 'lista' && schoolCertificates.length === 0" class="no-data-message">
+          <mat-icon>info</mat-icon>
+          <p>No se encontraron certificados escolares con los filtros aplicados.</p>
+          <p>Ajuste los filtros de búsqueda para obtener resultados.</p>
+        </div>
+        
+        <!-- Información adicional sobre los reportes -->
+        <div class="report-info">
+          <h4>{{ tipoReporte === 'analisis' ? 'Reporte Ejecutivo incluye:' : 'Lista Detallada incluye:' }}</h4>
+          
+          <ul *ngIf="tipoReporte === 'analisis'">
+            <li><strong>Resumen Ejecutivo:</strong> KPIs de certificados escolares emitidos y pagos</li>
+            <li><strong>Análisis de Ingresos:</strong> Tasas de pago y gestión de cobros específicos</li>
+            <li><strong>Tendencias:</strong> Comparaciones mensuales de certificados escolares</li>
+            <li><strong>Top Distribuidores:</strong> Empresas con mayor número de certificados escolares</li>
+            <li><strong>Análisis por Categoría:</strong> Distribución por tipo de vehículo educativo</li>
+            <li><strong>Gestión de Procesamiento:</strong> Tiempos promedio de emisión y entrega</li>
+            <li><strong>Rendimiento por Región:</strong> Productividad por oficina de transporte escolar</li>
+            <li><strong>Insights y Recomendaciones:</strong> Conclusiones estratégicas del sector educativo</li>
+          </ul>
+          
+          <ul *ngIf="tipoReporte === 'lista'">
+            <li>Detalle completo de cada certificado escolar (código, fecha de emisión)</li>
+            <li>Estado de pago y aviso de cobro específico</li>
+            <li>Información del distribuidor (empresa, RTN, nombre comercial)</li>
+            <li>Datos de categoría y tipo de vehículo escolar</li>
+            <li>Fechas de pre-registro, pago y entrega</li>
+            <li>Información de transporte (tipo y categoría específica)</li>
+          </ul>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

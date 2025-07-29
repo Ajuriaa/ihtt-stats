@@ -26,6 +26,7 @@ export class DateFilterComponent implements OnInit, OnChanges {
   @Input() startDate: Date | null = new Date(this.today.getFullYear(), this.today.getMonth(), 1);
   @Input() showDateTypeFilter = false;
   @Input() dateType = 'certificateExpiration';
+  @Input() dateTypeOptions: { value: string, label: string }[] = [];
   @Output() dateRangeChanged = new EventEmitter<{ startDate: Date | null, endDate: Date | null, dateType?: string }>();
   public dateForm!: FormGroup;
   public dateTypes = [
@@ -33,6 +34,10 @@ export class DateFilterComponent implements OnInit, OnChanges {
     { value: 'permissionExpiration', label: 'Expiración de Permiso' },
     { value: 'payment', label: 'Fecha de Pago' }
   ];
+
+  get effectiveDateTypes() {
+    return this.dateTypeOptions.length > 0 ? this.dateTypeOptions : this.dateTypes;
+  }
 
   constructor(
     private _formBuilder: FormBuilder

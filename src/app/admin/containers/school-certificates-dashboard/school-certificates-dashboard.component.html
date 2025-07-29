@@ -1,0 +1,143 @@
+<app-loading class="loading" *ngIf="loading"></app-loading>
+
+<div class="container">
+  <!-- Filters Section -->
+  <div class="filter-wrapper">
+    <div class="filter-row">
+      <app-date-filter
+        [showDateTypeFilter]="true"
+        [dateType]="dateType"
+        [dateTypeOptions]="[
+          {value: 'issueDate', label: 'Fecha de Emisión'},
+          {value: 'preRegistration', label: 'Fecha de Pre-registro'},
+          {value: 'paid', label: 'Fecha de Pago'},
+          {value: 'delivery', label: 'Fecha de Entrega'}
+        ]"
+        [startDate]="startDateObject"
+        [endDate]="endDateObject"
+        (dateRangeChanged)="filterDates($event)">
+      </app-date-filter>
+
+      <!-- Estado -->
+      <mat-form-field>
+        <mat-label>Estado</mat-label>
+        <mat-select [(ngModel)]="selectedNoticeStatus" (selectionChange)="applyFilter('noticeStatus', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let status of noticeStatuses" [value]="status">
+            {{ status }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Tipo de Transporte -->
+      <mat-form-field>
+        <mat-label>Tipo de Transporte</mat-label>
+        <mat-select [(ngModel)]="selectedTransportType" (selectionChange)="applyFilter('transportType', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let transport of transportTypes" [value]="transport">
+            {{ transport }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Búsqueda Universal -->
+      <mat-form-field>
+        <mat-label>Buscar</mat-label>
+        <input matInput 
+               [(ngModel)]="searchTerm" 
+               placeholder="RTN, Distribuidor o Código">
+      </mat-form-field>
+    </div>
+
+    <div class="filter-row">
+      <!-- Categoría - Autocomplete -->
+      <mat-form-field>
+        <mat-label>Categoría del Vehículo</mat-label>
+        <input matInput 
+               [(ngModel)]="selectedCategory" 
+               (input)="filterCategories($any($event.target).value)" 
+               [matAutocomplete]="categoryAuto" 
+               placeholder="Buscar categoría...">
+        <mat-autocomplete #categoryAuto="matAutocomplete" (optionSelected)="applyFilter('categoryDescription', $event.option.value)">
+          <mat-option value="">TODAS</mat-option>
+          <mat-option *ngFor="let category of filteredCategories" [value]="category">
+            {{ category }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <!-- Tipo -->
+      <mat-form-field>
+        <mat-label>Tipo</mat-label>
+        <mat-select [(ngModel)]="selectedType" (selectionChange)="applyFilter('type', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let type of types" [value]="type">
+            {{ type }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
+    </div>
+  </div>
+
+  <!-- Filtered KPIs -->
+  <div class="kpi-container" *ngIf="analytics">
+    <mat-card class="kpi-card">
+      <p class="title">{{ analytics.filtered.totalCertificates | number }}</p>
+      <p>Total Certificados Escolares</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ formatCurrency(analytics.filtered.totalRevenue) }}</p>
+      <p>Total Ingresos</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ formatPercentage(analytics.filtered.paymentRate) }}</p>
+      <p>Tasa de Pago</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ analytics.filtered.averageProcessingTime | number }} días</p>
+      <p>Tiempo Promedio Procesamiento</p>
+    </mat-card>
+  </div>
+
+  <!-- Global KPIs -->
+  <div class="kpi-container" *ngIf="analytics">
+    <mat-card class="kpi-card">
+      <p class="title">{{ analytics.global.totalCertificates | number }}</p>
+      <p>Total Certificados (Global)</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ analytics.global.unpaidCertificates | number }}</p>
+      <p>Certificados Sin Pagar (Global)</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ formatPercentage(analytics.global.overallPaymentRate) }}</p>
+      <p>Tasa de Pago Global</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ formatCurrency(analytics.global.totalOutstandingAmount) }}</p>
+      <p>Monto Pendiente Total</p>
+    </mat-card>
+  </div>
+
+  <div class="graph-container" *ngIf="analytics">
+    <div id="monthlyRevenueChart" style="width: 60%; height: 400px;"></div>
+    <div id="statusChart" style="width: 40%; height: 400px;"></div>
+  </div>
+  <div id="transportChart" style="width: 100%; height: 400px;" *ngIf="analytics"></div>
+  <div id="categoryChart" style="width: 100%; height: 400px;" *ngIf="analytics"></div>
+
+  <!-- Global Charts Section -->
+  <h3 style="width: 100%; text-align: center; margin: 40px 0 20px 0; color: #666;" *ngIf="analytics">Gráficos Globales (Comparación)</h3>
+  <div id="annualChart" style="width: 100%; height: 400px;" *ngIf="analytics"></div>
+  <div id="categoryPerformanceChart" style="width: 100%; height: 400px;" *ngIf="analytics"></div>
+  <div id="processingChart" style="width: 100%; height: 400px;" *ngIf="analytics"></div>
+  <div id="globalTransportChart" style="width: 100%; height: 400px; margin-bottom: 15rem;" *ngIf="analytics"></div>
+</div>

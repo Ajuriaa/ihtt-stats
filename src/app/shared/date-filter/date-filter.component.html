@@ -18,7 +18,7 @@
   <mat-form-field *ngIf="showDateTypeFilter" class="width">
     <mat-label>Tipo de Fecha</mat-label>
     <mat-select formControlName="dateType">
-      <mat-option *ngFor="let type of dateTypes" [value]="type.value">
+      <mat-option *ngFor="let type of effectiveDateTypes" [value]="type.value">
         {{ type.label }}
       </mat-option>
     </mat-select>

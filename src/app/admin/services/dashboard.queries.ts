@@ -64,4 +64,20 @@ export class DashboardQueries {
     const queryString = new URLSearchParams(params as any).toString();
     return this.http.get<any>(`${environment.apiUrl}/eventual-permits-analytics?${queryString}`);
   }
+
+  // School Certificates methods
+  public getSchoolCertificates(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/school-certificates?${queryString}`);
+  }
+
+  public getSchoolCertificatesAnalytics(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/school-certificates-analytics?${queryString}`);
+  }
+
+  public getSchoolCertificatesAnalyticsReport(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/school-certificates-analytics-report?${queryString}`);
+  }
 }

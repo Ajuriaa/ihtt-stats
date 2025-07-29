@@ -1,0 +1,229 @@
+@import 'global';
+
+.reports-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.filter-card, .results-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.filters-section {
+  padding: 16px 0;
+}
+
+.filters-section h3 {
+  margin-bottom: 16px;
+  color: $blue;
+  font-weight: 500;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.date-filters {
+  display: flex;
+  gap: 16px;
+  grid-column: 1 / -1;
+}
+
+.date-filters mat-form-field {
+  flex: 1;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.results-card {
+  min-height: 200px;
+}
+
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.loading-section p {
+  margin-top: 16px;
+  color: $dark-blue;
+}
+
+.reports-section {
+  padding: 16px 0;
+}
+
+.reports-section h3 {
+  margin-bottom: 8px;
+  color: $blue;
+  font-weight: 500;
+}
+
+.reports-description {
+  color: $dark-blue;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.report-type-selector {
+  margin-bottom: 24px;
+}
+
+.report-type-field {
+  max-width: 350px;
+}
+
+.report-type-field mat-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.report-type-field mat-option mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.report-info {
+  background-color: $light-gray;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  border-left: 4px solid $blue;
+}
+
+.report-info h4 {
+  margin: 0 0 12px 0;
+  color: $blue;
+  font-weight: 500;
+}
+
+.report-info ul {
+  margin: 0;
+  padding-left: 20px;
+  color: $dark-blue;
+}
+
+.report-info li {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.report-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.report-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-weight: 500;
+}
+
+.report-buttons button mat-icon {
+  font-size: 20px;
+}
+
+.no-data-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+  background-color: $light-gray;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.no-data-message mat-icon {
+  font-size: 48px;
+  color: $opaque-blue;
+  margin-bottom: 16px;
+}
+
+.no-data-message p {
+  color: $dark-blue;
+  margin: 4px 0;
+}
+
+.no-data-message p:first-of-type {
+  font-weight: 500;
+  color: $blue;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .reports-container {
+    padding: 16px;
+  }
+  
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .date-filters {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .filter-buttons {
+    justify-content: center;
+  }
+  
+  .report-buttons {
+    flex-direction: column;
+  }
+  
+  .report-buttons button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+// Material Design overrides
+mat-form-field {
+  width: 100%;
+}
+
+mat-card-header {
+  padding-bottom: 16px;
+}
+
+mat-card-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: $blue;
+}
+
+mat-card-subtitle {
+  color: $dark-blue;
+  margin-top: 4px;
+}
