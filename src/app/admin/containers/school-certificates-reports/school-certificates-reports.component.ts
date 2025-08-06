@@ -15,6 +15,8 @@ import moment from 'moment';
 import { DashboardQueries } from '../../services';
 import { LoadingComponent } from '../../../shared/loading/loading.component';
 import { DateFilterComponent } from '../../../shared/date-filter/date-filter.component';
+import { ReportesPDFService } from '../../../reports/services/reportes-pdf.service';
+import { ExcelHelper } from '../../../core/helpers/excel.helper';
 
 @Component({
   selector: 'app-school-certificates-reports',
@@ -41,6 +43,7 @@ import { DateFilterComponent } from '../../../shared/date-filter/date-filter.com
 export class SchoolCertificatesReportsComponent implements OnInit {
   public loading = false;
   public schoolCertificates: any[] = [];
+  public analyticsData: any = null;
   public tipoReporte: 'lista' | 'analisis' = 'analisis';
   public dateType = 'issueDate';
   public searchTerm = '';
@@ -89,7 +92,9 @@ export class SchoolCertificatesReportsComponent implements OnInit {
   public filteredCategories: string[] = this.categories;
   
   constructor(
-    private dashboardService: DashboardQueries
+    private dashboardService: DashboardQueries,
+    private reportesPDFService: ReportesPDFService,
+    private excelHelper: ExcelHelper
   ) {}
   
   get startDateObject(): Date {
@@ -102,6 +107,7 @@ export class SchoolCertificatesReportsComponent implements OnInit {
   
   ngOnInit(): void {
     this.loadSchoolCertificates();
+    this.loadAnalyticsData();
   }
   
   public filterCategories(value: string): void {
@@ -146,6 +152,33 @@ export class SchoolCertificatesReportsComponent implements OnInit {
       }
     });
   }
+
+  public loadAnalyticsData(): void {
+    const params = {
+      startDate: this.startDate || undefined,
+      endDate: this.endDate || undefined,
+      dateType: this.dateType || undefined,
+      noticeStatus: this.selectedNoticeStatus || undefined,
+      transportType: this.selectedTransportType || undefined,
+      categoryDescription: this.selectedCategory || undefined,
+      type: this.selectedType || undefined,
+      searchTerm: this.searchTerm || undefined
+    };
+
+    // Clean undefined parameters
+    const cleanedParams = Object.fromEntries(
+      Object.entries(params).filter(([_, value]) => value !== undefined)
+    );
+
+    this.dashboardService.getSchoolCertificatesAnalyticsReport(cleanedParams).subscribe({
+      next: (response) => {
+        this.analyticsData = response;
+      },
+      error: (error) => {
+        console.error('Error loading school certificates analytics:', error);
+      }
+    });
+  }
   
   public filterDates(dates: { startDate: Date | null, endDate: Date | null, dateType?: string }): void {
     if (dates.startDate && dates.endDate) {
@@ -179,6 +212,7 @@ export class SchoolCertificatesReportsComponent implements OnInit {
   
   public aplicarFiltros(): void {
     this.loadSchoolCertificates();
+    this.loadAnalyticsData();
   }
   
   public limpiarFiltros(): void {
@@ -192,6 +226,7 @@ export class SchoolCertificatesReportsComponent implements OnInit {
     this.selectedType = '';
     this.filteredCategories = this.categories;
     this.loadSchoolCertificates();
+    this.loadAnalyticsData();
   }
   
   public generarReportePDF(): void {
@@ -203,7 +238,26 @@ export class SchoolCertificatesReportsComponent implements OnInit {
   }
   
   private generarReporteAnalisis(): void {
-    alert('Funcionalidad de reporte ejecutivo en desarrollo. Próximamente estará disponible.');
+    if (!this.analyticsData) {
+      alert('Cargando datos de análisis, por favor espere un momento.');
+      return;
+    }
+
+    const parametros = {
+      fechaInicio: this.startDate || undefined,
+      fechaFin: this.endDate || undefined,
+      tipoFecha: this.dateType,
+      filtroEstado: this.selectedNoticeStatus || undefined,
+      filtroTransporte: this.selectedTransportType || undefined,
+      filtroCategoria: this.selectedCategory || undefined,
+      filtroTipo: this.selectedType || undefined,
+      busqueda: this.searchTerm || undefined
+    };
+
+    this.reportesPDFService.generarReporteEscuelasAnalisisEjecutivo(
+      this.analyticsData,
+      parametros
+    );
   }
   
   private generarReporteDetallado(): void {
@@ -211,8 +265,22 @@ export class SchoolCertificatesReportsComponent implements OnInit {
       alert('No hay datos para generar el reporte');
       return;
     }
-    
-    alert('Funcionalidad de reporte detallado en desarrollo. Próximamente estará disponible.');
+
+    const parametros = {
+      fechaInicio: this.startDate || undefined,
+      fechaFin: this.endDate || undefined,
+      tipoFecha: this.dateType,
+      filtroEstado: this.selectedNoticeStatus || undefined,
+      filtroTransporte: this.selectedTransportType || undefined,
+      filtroCategoria: this.selectedCategory || undefined,
+      filtroTipo: this.selectedType || undefined,
+      busqueda: this.searchTerm || undefined
+    };
+
+    this.reportesPDFService.generarReporteEscuelasLista(
+      this.schoolCertificates,
+      parametros
+    );
   }
   
   public exportToExcel(): void {
@@ -220,7 +288,11 @@ export class SchoolCertificatesReportsComponent implements OnInit {
       alert('No hay datos para exportar');
       return;
     }
-    
-    alert('Funcionalidad de exportación a Excel en desarrollo. Próximamente estará disponible.');
+
+    const fileName = `certificados-escolares-${moment().format('YYYY-MM-DD-HHmm')}.xlsx`;
+    this.excelHelper.exportSchoolCertificatesToExcel(
+      this.schoolCertificates,
+      fileName
+    );
   }
 }

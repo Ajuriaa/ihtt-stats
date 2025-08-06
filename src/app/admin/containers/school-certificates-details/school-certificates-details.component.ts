@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ExcelHelper, PDFHelper } from 'src/app/core/helpers';
+import { ReportesPDFService } from '../../../reports/services/reportes-pdf.service';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
@@ -85,7 +86,8 @@ export class SchoolCertificatesDetailsComponent {
     private dashboardService: DashboardQueries,
     private _toaster: ToastrService,
     private pdfHelper: PDFHelper,
-    private excelHelper: ExcelHelper
+    private excelHelper: ExcelHelper,
+    private reportesPDFService: ReportesPDFService
   ) {}
 
   get startDateObject(): Date {
@@ -151,8 +153,52 @@ export class SchoolCertificatesDetailsComponent {
   }
 
   public generatePDF(): void {
-    // TODO: Implement PDF generation for school certificates
-    this._toaster.info('PDF generation will be implemented');
+    this.isLoading = true;
+    const params = {
+      startDate: this.start || undefined,
+      endDate: this.end || undefined,
+      dateType: this.dateType || undefined,
+      noticeStatus: this.selectedNoticeStatus || undefined,
+      transportType: this.selectedTransportType || undefined,
+      categoryDescription: this.selectedCategory || undefined,
+      type: this.selectedType || undefined,
+      searchTerm: this.searchTerm || undefined
+    };
+
+    const cleanedParams = Object.fromEntries(
+      Object.entries(params).filter(([_, value]) => value !== undefined)
+    );
+
+    this.dashboardService.getSchoolCertificates(cleanedParams).subscribe({
+      next: (response) => {
+        const allCertificates = response.data || [];
+        if (allCertificates.length === 0) {
+          this._toaster.warning('No hay datos para generar el PDF');
+          this.isLoading = false;
+          return;
+        }
+
+        const parametros = {
+          fechaInicio: this.start || undefined,
+          fechaFin: this.end || undefined,
+          tipoFecha: this.dateType,
+          filtroEstado: this.selectedNoticeStatus || undefined,
+          filtroTransporte: this.selectedTransportType || undefined,
+          filtroCategoria: this.selectedCategory || undefined,
+          filtroTipo: this.selectedType || undefined,
+          busqueda: this.searchTerm || undefined
+        };
+
+        this.reportesPDFService.generarReporteEscuelasLista(allCertificates, parametros);
+        this._toaster.success(`PDF generado: ${allCertificates.length} certificados escolares`);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this._toaster.error('Error al generar PDF');
+        console.error('PDF generation error:', error);
+        this.isLoading = false;
+      }
+    });
   }
 
   public generateExcel(): void {
@@ -172,18 +218,23 @@ export class SchoolCertificatesDetailsComponent {
       Object.entries(params).filter(([_, value]) => value !== undefined)
     );
 
-    const filtersString = Object.entries(cleanedParams)
-      .map(([key, value]) => `${value}`)
-      .join('_');
-
     this.dashboardService.getSchoolCertificates(cleanedParams).subscribe({
       next: (response) => {
-        // TODO: Implement Excel helper for school certificates
-        this._toaster.info('Excel export will be implemented');
+        const allCertificates = response.data || [];
+        if (allCertificates.length === 0) {
+          this._toaster.warning('No hay datos para exportar');
+          this.isLoading = false;
+          return;
+        }
+
+        const fileName = `certificados-escolares-detalles-${moment().format('YYYY-MM-DD-HHmm')}.xlsx`;
+        this.excelHelper.exportSchoolCertificatesToExcel(allCertificates, fileName);
+        this._toaster.success(`Excel generado: ${allCertificates.length} registros exportados`);
         this.isLoading = false;
       },
       error: (error) => {
-        this._toaster.error('Error loading school certificates:', error);
+        this._toaster.error('Error al exportar a Excel');
+        console.error('Excel export error:', error);
         this.isLoading = false;
       }
     });

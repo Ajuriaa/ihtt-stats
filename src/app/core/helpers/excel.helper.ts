@@ -309,6 +309,68 @@ export class ExcelHelper {
     });
   }
 
+  public exportSchoolCertificatesToExcel(certificates: any[], name: string): void {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Certificados Escolares');
+
+    const headers = [
+      'Código Pre-registro',
+      'Fecha Pre-registro',
+      'RTN Distribuidor',
+      'Nombre Distribuidor',
+      'Código Aviso Cobro',
+      'Monto',
+      'Estado Aviso',
+      'Fecha Pago/Cancelación',
+      'Tipo Transporte',
+      'Descripción Categoría',
+      'Tipo',
+      'Código Certificado',
+      'Fecha Emisión',
+      'Fecha Entrega'
+    ];
+
+    worksheet.addRow(headers);
+
+    certificates.forEach(cert => {
+      worksheet.addRow([
+        cert.preRegistrationCode || 'N/A',
+        this.getDate(cert.preRegistrationDate),
+        cert.dealerRtn || 'N/A',
+        cert.dealerName || 'N/A',
+        cert.paymentNoticeCode || 'N/A',
+        cert.amount || 0,
+        cert.noticeStatus || 'N/A',
+        this.getDate(cert.paidCancelledDate),
+        cert.transportType || 'N/A',
+        cert.categoryDescription || 'N/A',
+        cert.type || 'N/A',
+        cert.certificateCode || 'N/A',
+        this.getDate(cert.issueDate),
+        this.getDate(cert.deliveryDate)
+      ]);
+    });
+
+    worksheet.columns.forEach(column => {
+      let maxLength = 0;
+      if (!column.eachCell) {
+        return;
+      }
+      column.eachCell({ includeEmpty: true }, cell => {
+        if (cell.value) {
+          const cellValue = cell.value.toString();
+          maxLength = Math.max(maxLength, cellValue.length);
+        }
+      });
+      column.width = maxLength + 2;
+    });
+
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/octet-stream' });
+      FileSaver.saveAs(blob, name);
+    });
+  }
+
   private getDate(date: Date | null | undefined | string): Date | null {
     if (!date) {
       return null; // Si la fecha es null o undefined, retorna null (celda vacía en Excel)

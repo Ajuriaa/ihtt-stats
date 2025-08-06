@@ -1507,4 +1507,328 @@ export class ReportesPDFService {
     this.agregarPiesDePagina(doc, parametros);
     doc.output('dataurlnewwindow');
   }
+
+  // School Certificates Reports
+  public generarReporteEscuelasLista(
+    certificados: any[],
+    parametros: ReporteParametros
+  ): void {
+    const doc = this.configurarDocumento();
+    const titulo = 'Lista Detallada de Certificados Escolares';
+
+    // Deduplication not needed for school certificates (unique notice codes)
+    const certificadosUnicos = certificados;
+
+    if (certificadosUnicos.length === 0) {
+      doc.text('No se encontraron certificados escolares para los parámetros seleccionados.', 20, 60);
+      this.agregarPiesDePagina(doc, parametros);
+      doc.output('dataurlnewwindow');
+      return;
+    }
+
+    // Summary section
+    const totalCertificados = certificadosUnicos.length;
+    const totalPagados = certificadosUnicos.filter(cert => cert.noticeStatus === 'PAGADO').length;
+    const totalIngresos = certificadosUnicos
+      .filter(cert => cert.noticeStatus === 'PAGADO')
+      .reduce((sum, cert) => sum + (cert.amount || 0), 0);
+    const tasaPago = totalCertificados > 0 ? (totalPagados / totalCertificados * 100) : 0;
+
+    let yPosition = 60;
+
+    // Summary table
+    const resumen = [
+      ['Total Certificados Escolares', totalCertificados.toString()],
+      ['Certificados Pagados', totalPagados.toString()],
+      ['Certificados Pendientes', (totalCertificados - totalPagados).toString()],
+      ['Ingresos Totales', this.formatearMoneda(totalIngresos)],
+      ['Tasa de Pago', this.formatearPorcentaje(tasaPago)]
+    ];
+
+    autoTable(doc, {
+      head: [['Concepto', 'Valor']],
+      body: resumen,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#88CFE0', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // Main data table
+    const datosCertificados = certificadosUnicos.map(cert => [
+      cert.preRegistrationCode || 'N/A',
+      cert.dealerName?.substring(0, 20) || 'N/A',
+      cert.dealerRtn || 'N/A',
+      this.formatearMoneda(cert.amount),
+      cert.noticeStatus || 'N/A',
+      this.obtenerFecha(cert.issueDate),
+      cert.categoryDescription?.substring(0, 15) || 'N/A',
+      cert.transportType || 'N/A'
+    ]);
+
+    autoTable(doc, {
+      head: [['Código Pre-reg.', 'Distribuidor', 'RTN', 'Monto', 'Estado', 'F. Emisión', 'Categoría', 'Tipo Transp.']],
+      body: datosCertificados,
+      startY: yPosition,
+      margin: { left: 14, right: 14 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 8 },
+      headStyles: { fillColor: '#81C784', fontStyle: 'bold' },
+      columnStyles: {
+        0: { cellWidth: 25 },
+        1: { cellWidth: 35 },
+        2: { cellWidth: 25 },
+        3: { cellWidth: 25 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 25 },
+        6: { cellWidth: 30 },
+        7: { cellWidth: 25 }
+      },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    this.agregarPiesDePagina(doc, parametros);
+    doc.output('dataurlnewwindow');
+  }
+
+  public generarReporteEscuelasAnalisisEjecutivo(
+    datosAnalisis: any,
+    parametros: ReporteParametros
+  ): void {
+    const doc = this.configurarDocumento();
+    const titulo = 'Reporte Ejecutivo - Análisis de Certificados Escolares';
+
+    let yPosition = 60;
+
+    // ======== RESUMEN EJECUTIVO ========
+    doc.setFontSize(16);
+    doc.setFont('bold');
+    doc.text('RESUMEN EJECUTIVO', 20, yPosition);
+    yPosition += 15;
+
+    const resumenEjecutivo = [
+      ['Total de Certificados Escolares', datosAnalisis.reportAnalysis.executiveSummary.totalCertificates.toString()],
+      ['Ingresos Totales del Período', this.formatearMoneda(datosAnalisis.reportAnalysis.executiveSummary.totalRevenue)],
+      ['Tasa de Pago Actual', this.formatearPorcentaje(datosAnalisis.reportAnalysis.executiveSummary.paymentRate)],
+      ['Cumplimiento de Meta (70%)', datosAnalisis.reportAnalysis.executiveSummary.targetAchievement]
+    ];
+
+    autoTable(doc, {
+      head: [['Indicador Clave', 'Valor']],
+      body: resumenEjecutivo,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#4FC3F7', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE TENDENCIAS ========
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE TENDENCIAS', 20, yPosition);
+    yPosition += 10;
+
+    if (datosAnalisis.reportAnalysis.trends) {
+      const tendencias = [
+        ['Certificados Mes Actual', datosAnalisis.reportAnalysis.trends.monthOverMonth.current.toString()],
+        ['Certificados Mes Anterior', datosAnalisis.reportAnalysis.trends.monthOverMonth.previous.toString()],
+        ['Variación Mensual (%)', this.formatearPorcentaje(datosAnalisis.reportAnalysis.trends.monthOverMonth.change)],
+        ['Variación Anual (%)', this.formatearPorcentaje(datosAnalisis.reportAnalysis.trends.yearOverYear.change)]
+      ];
+
+      autoTable(doc, {
+        head: [['Métrica', 'Valor']],
+        body: tendencias,
+        startY: yPosition,
+        margin: { left: 20, right: 20 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+        headStyles: { fillColor: '#FFB74D', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+    }
+
+    // ======== TOP CATEGORÍAS DE VEHÍCULOS ESCOLARES ========
+    if (datosAnalisis.reportAnalysis.topCategories && datosAnalisis.reportAnalysis.topCategories.length > 0) {
+      doc.setFontSize(14);
+      doc.setFont('bold');
+      doc.text('TOP CATEGORÍAS DE VEHÍCULOS ESCOLARES', 20, yPosition);
+      yPosition += 10;
+
+      const topCategorias = datosAnalisis.reportAnalysis.topCategories.slice(0, 8).map((cat: any) => [
+        cat.category?.substring(0, 25) || 'N/A',
+        cat.count.toString(),
+        this.formatearPorcentaje(cat.percentage),
+        this.formatearMoneda(cat.totalAmount)
+      ]);
+
+      autoTable(doc, {
+        head: [['Categoría de Vehículo', 'Cantidad', 'Porcentaje (%)', 'Ingresos']],
+        body: topCategorias,
+        startY: yPosition,
+        margin: { left: 20, right: 20 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+        headStyles: { fillColor: '#81C784', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+    }
+
+    // ======== ANÁLISIS POR TIPO DE TRANSPORTE ESCOLAR ========
+    if (datosAnalisis.reportAnalysis.transportAnalysis && datosAnalisis.reportAnalysis.transportAnalysis.length > 0) {
+      // Check if we need a new page
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont('bold');
+      doc.text('ANÁLISIS POR TIPO DE TRANSPORTE ESCOLAR', 20, yPosition);
+      yPosition += 10;
+
+      const transporteAnalisis = datosAnalisis.reportAnalysis.transportAnalysis.map((transport: any) => [
+        transport.transportType || 'N/A',
+        transport.count.toString(),
+        this.formatearPorcentaje(transport.percentage),
+        this.formatearMoneda(transport.totalAmount)
+      ]);
+
+      autoTable(doc, {
+        head: [['Tipo de Transporte', 'Cantidad', 'Porcentaje (%)', 'Ingresos']],
+        body: transporteAnalisis,
+        startY: yPosition,
+        margin: { left: 20, right: 20 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+        headStyles: { fillColor: '#9575CD', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+    }
+
+    // ======== ANÁLISIS DE INGRESOS Y EFICIENCIA ========
+    if (datosAnalisis.reportAnalysis.revenueAnalysis) {
+      // Check if we need a new page
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont('bold');
+      doc.text('ANÁLISIS DE INGRESOS Y EFICIENCIA', 20, yPosition);
+      yPosition += 10;
+
+      const analisisIngresos = [
+        ['Total Emitidos', datosAnalisis.reportAnalysis.revenueAnalysis.totalIssued.toString()],
+        ['Total Pagados', datosAnalisis.reportAnalysis.revenueAnalysis.totalPaid.toString()],
+        ['Total Activos', datosAnalisis.reportAnalysis.revenueAnalysis.totalActive.toString()],
+        ['Total Anulados', datosAnalisis.reportAnalysis.revenueAnalysis.totalCancelled.toString()],
+        ['Ingresos Realizados', this.formatearMoneda(datosAnalisis.reportAnalysis.revenueAnalysis.totalRevenue)],
+        ['Eficiencia de Pago', this.formatearPorcentaje(datosAnalisis.reportAnalysis.revenueAnalysis.paymentRate)]
+      ];
+
+      autoTable(doc, {
+        head: [['Métrica', 'Valor']],
+        body: analisisIngresos,
+        startY: yPosition,
+        margin: { left: 20, right: 20 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+        headStyles: { fillColor: '#E57373', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+    }
+
+    // ======== INSIGHTS ESTRATÉGICOS ========
+    if (datosAnalisis.reportAnalysis.insights && datosAnalisis.reportAnalysis.insights.length > 0) {
+      // Check if we need a new page
+      if (yPosition > 220) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont('bold');
+      doc.text('INSIGHTS ESTRATÉGICOS', 20, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('normal');
+
+      datosAnalisis.reportAnalysis.insights.forEach((insight: string, index: number) => {
+        const textLines = doc.splitTextToSize(`• ${insight}`, 250);
+        doc.text(textLines, 25, yPosition);
+        yPosition += textLines.length * 5 + 3;
+      });
+
+      yPosition += 10;
+    }
+
+    // ======== RECOMENDACIONES ESTRATÉGICAS ========
+    if (datosAnalisis.reportAnalysis.recommendations && datosAnalisis.reportAnalysis.recommendations.length > 0) {
+      // Check if we need a new page
+      if (yPosition > 220) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont('bold');
+      doc.text('RECOMENDACIONES PARA EL SECTOR ESCOLAR', 20, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('normal');
+
+      datosAnalisis.reportAnalysis.recommendations.forEach((recomendacion: string, index: number) => {
+        const textLines = doc.splitTextToSize(`• ${recomendacion}`, 250);
+        doc.text(textLines, 25, yPosition);
+        yPosition += textLines.length * 5 + 3;
+      });
+    }
+
+    // ======== DATOS DE SOPORTE (MUESTRA) ========
+    if (datosAnalisis.reportAnalysis.sampleData && datosAnalisis.reportAnalysis.sampleData.length > 0) {
+      doc.addPage();
+      yPosition = 20;
+
+      doc.setFontSize(14);
+      doc.setFont('bold');
+      doc.text('DATOS DE SOPORTE - MUESTRA DE CERTIFICADOS ESCOLARES', 20, yPosition);
+      yPosition += 10;
+
+      const certificadosMuestra = datosAnalisis.reportAnalysis.sampleData.slice(0, 20).map((cert: any) => [
+        cert.preRegistrationCode || 'N/A',
+        this.obtenerFecha(cert.issueDate),
+        cert.dealerName?.substring(0, 15) || 'N/A',
+        cert.categoryDescription?.substring(0, 12) || 'N/A',
+        cert.transportType || 'N/A',
+        cert.noticeStatus || 'N/A',
+        this.formatearMoneda(cert.amount)
+      ]);
+
+      autoTable(doc, {
+        head: [['Código', 'F. Emisión', 'Distribuidor', 'Categoría', 'Transporte', 'Estado', 'Monto']],
+        body: certificadosMuestra,
+        startY: yPosition,
+        margin: { left: 14, right: 14 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 8 },
+        headStyles: { fillColor: '#78909C', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+    }
+
+    this.agregarPiesDePagina(doc, parametros);
+    doc.output('dataurlnewwindow');
+  }
 }

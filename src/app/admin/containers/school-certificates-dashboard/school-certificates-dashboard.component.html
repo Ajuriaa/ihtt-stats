@@ -13,8 +13,6 @@
           {value: 'paid', label: 'Fecha de Pago'},
           {value: 'delivery', label: 'Fecha de Entrega'}
         ]"
-        [startDate]="startDateObject"
-        [endDate]="endDateObject"
         (dateRangeChanged)="filterDates($event)">
       </app-date-filter>
 
@@ -43,8 +41,8 @@
       <!-- Búsqueda Universal -->
       <mat-form-field>
         <mat-label>Buscar</mat-label>
-        <input matInput 
-               [(ngModel)]="searchTerm" 
+        <input matInput
+               [(ngModel)]="searchTerm"
                placeholder="RTN, Distribuidor o Código">
       </mat-form-field>
     </div>
@@ -53,10 +51,10 @@
       <!-- Categoría - Autocomplete -->
       <mat-form-field>
         <mat-label>Categoría del Vehículo</mat-label>
-        <input matInput 
-               [(ngModel)]="selectedCategory" 
-               (input)="filterCategories($any($event.target).value)" 
-               [matAutocomplete]="categoryAuto" 
+        <input matInput
+               [(ngModel)]="selectedCategory"
+               (input)="filterCategories($any($event.target).value)"
+               [matAutocomplete]="categoryAuto"
                placeholder="Buscar categoría...">
         <mat-autocomplete #categoryAuto="matAutocomplete" (optionSelected)="applyFilter('categoryDescription', $event.option.value)">
           <mat-option value="">TODAS</mat-option>
@@ -76,7 +74,7 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-      
+
       <app-primary-button (btnClick)="onSubmit()">FILTRAR</app-primary-button>
     </div>
   </div>

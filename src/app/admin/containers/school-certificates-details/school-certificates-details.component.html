@@ -12,8 +12,6 @@
           {value: 'paid', label: 'Fecha de Pago'},
           {value: 'delivery', label: 'Fecha de Entrega'}
         ]"
-        [startDate]="startDateObject"
-        [endDate]="endDateObject"
         (dateRangeChanged)="filterDates($event)">
       </app-date-filter>
 
@@ -42,8 +40,8 @@
       <!-- Búsqueda Universal -->
       <mat-form-field>
         <mat-label>Buscar</mat-label>
-        <input matInput 
-               [(ngModel)]="searchTerm" 
+        <input matInput
+               [(ngModel)]="searchTerm"
                placeholder="RTN, Distribuidor o Código de Certificado">
       </mat-form-field>
     </div>

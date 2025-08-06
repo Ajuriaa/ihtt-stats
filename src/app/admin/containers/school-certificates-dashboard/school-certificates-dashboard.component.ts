@@ -72,7 +72,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
   // Autocomplete for categories
   public filteredCategories: string[] = this.categories;
 
-  // Charts
+  // Charts and Roots
   private monthlyRevenueChart: am5xy.XYChart | null = null;
   private statusChart: am5percent.PieChart | null = null;
   private transportChart: am5xy.XYChart | null = null;
@@ -81,6 +81,9 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
   private categoryPerformanceChart: am5xy.XYChart | null = null;
   private processingChart: am5xy.XYChart | null = null;
   private globalTransportChart: am5percent.PieChart | null = null;
+
+  // Root references for proper disposal
+  private chartRoots: { [key: string]: am5.Root } = {};
 
   constructor(
     private dashboardService: DashboardQueries
@@ -103,14 +106,29 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
   }
 
   private disposeCharts(): void {
-    if (this.monthlyRevenueChart) this.monthlyRevenueChart.dispose();
-    if (this.statusChart) this.statusChart.dispose();
-    if (this.transportChart) this.transportChart.dispose();
-    if (this.categoryChart) this.categoryChart.dispose();
-    if (this.annualChart) this.annualChart.dispose();
-    if (this.categoryPerformanceChart) this.categoryPerformanceChart.dispose();
-    if (this.processingChart) this.processingChart.dispose();
-    if (this.globalTransportChart) this.globalTransportChart.dispose();
+    // Dispose all chart roots to prevent "multiple Roots on same DOM node" errors
+    Object.values(this.chartRoots).forEach(root => {
+      if (root) {
+        try {
+          root.dispose();
+        } catch (error) {
+          console.warn('Error disposing chart root:', error);
+        }
+      }
+    });
+    
+    // Clear the roots object
+    this.chartRoots = {};
+    
+    // Reset chart references
+    this.monthlyRevenueChart = null;
+    this.statusChart = null;
+    this.transportChart = null;
+    this.categoryChart = null;
+    this.annualChart = null;
+    this.categoryPerformanceChart = null;
+    this.processingChart = null;
+    this.globalTransportChart = null;
   }
 
   public filterCategories(value: string): void {
@@ -150,8 +168,8 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
         this.loading = false;
         // Delay chart creation to ensure DOM elements are rendered
         setTimeout(() => {
-          this.createCharts();
-        }, 100);
+          this.createChartsWithRetry();
+        }, 200);
       },
       error: (error) => {
         console.error('Error loading school certificates analytics:', error);
@@ -194,30 +212,71 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
     this.loadAnalytics();
   }
 
+  private createChartsWithRetry(retryCount: number = 0): void {
+    const maxRetries = 3;
+    const chartIds = [
+      'monthlyRevenueChart', 'statusChart', 'transportChart', 'categoryChart',
+      'annualChart', 'categoryPerformanceChart', 'processingChart', 'globalTransportChart'
+    ];
+
+    // Check if all required DOM elements exist
+    const allElementsExist = chartIds.every(id => {
+      const element = document.getElementById(id);
+      return element && element.offsetParent !== null; // offsetParent check ensures element is visible
+    });
+
+    if (!allElementsExist && retryCount < maxRetries) {
+      // Retry after a short delay
+      setTimeout(() => {
+        this.createChartsWithRetry(retryCount + 1);
+      }, 100 * (retryCount + 1)); // Exponential backoff
+      return;
+    }
+
+    if (!allElementsExist) {
+      console.warn('Some chart elements not found after retries, proceeding anyway');
+    }
+
+    this.createCharts();
+  }
+
   private createCharts(): void {
     if (!this.analytics) return;
 
     this.disposeCharts();
 
-    // Create all charts
-    this.createMonthlyRevenueChart();
-    this.createStatusDistributionChart();
-    this.createTransportTypeChart();
-    this.createCategoryChart();
-    this.createAnnualOverviewChart();
-    this.createCategoryPerformanceChart();
-    this.createProcessingEfficiencyChart();
-    this.createGlobalTransportChart();
+    // Create all charts with error handling
+    try {
+      this.createMonthlyRevenueChart();
+      this.createStatusDistributionChart();
+      this.createTransportTypeChart();
+      this.createCategoryChart();
+      this.createAnnualOverviewChart();
+      this.createCategoryPerformanceChart();
+      this.createProcessingEfficiencyChart();
+      this.createGlobalTransportChart();
+    } catch (error) {
+      console.error('Error creating charts:', error);
+    }
   }
 
   private createMonthlyRevenueChart(): void {
-    const element = document.getElementById("monthlyRevenueChart");
-    if (!element) {
-      console.warn('Chart element monthlyRevenueChart not found');
+    const chartId = "monthlyRevenueChart";
+    const element = document.getElementById(chartId);
+    if (!element || !element.offsetParent) {
+      console.warn(`Chart element ${chartId} not found or not visible`);
       return;
     }
 
-    const root = am5.Root.new("monthlyRevenueChart");
+    try {
+      // Dispose existing root if it exists
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+
+      const root = am5.Root.new(chartId);
+      this.chartRoots[chartId] = root;
     root.setThemes([am5themes_Animated.new(root)]);
 
     const chart = root.container.children.push(am5xy.XYChart.new(root, {
@@ -283,21 +342,37 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       })
     );
 
-    const data = this.analytics.chartData.filtered.monthlyRevenue || [];
-    xAxis.data.setAll(data);
-    series.data.setAll(data);
+      const data = this.analytics.chartData.filtered.monthlyRevenue || [];
+      xAxis.data.setAll(data);
+      series.data.setAll(data);
 
-    this.monthlyRevenueChart = chart;
+      this.monthlyRevenueChart = chart;
+    } catch (error) {
+      console.error(`Error creating ${chartId}:`, error);
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+    }
   }
 
   private createStatusDistributionChart(): void {
-    const element = document.getElementById("statusChart");
-    if (!element) {
-      console.warn('Chart element statusChart not found');
+    const chartId = "statusChart";
+    const element = document.getElementById(chartId);
+    if (!element || !element.offsetParent) {
+      console.warn(`Chart element ${chartId} not found or not visible`);
       return;
     }
 
-    const root = am5.Root.new("statusChart");
+    try {
+      // Dispose existing root if it exists
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+
+      const root = am5.Root.new(chartId);
+      this.chartRoots[chartId] = root;
     root.setThemes([am5themes_Animated.new(root)]);
 
     const chart = root.container.children.push(am5percent.PieChart.new(root, {
@@ -337,18 +412,34 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       count
     }));
 
-    series.data.setAll(data);
-    this.statusChart = chart;
+      series.data.setAll(data);
+      this.statusChart = chart;
+    } catch (error) {
+      console.error(`Error creating ${chartId}:`, error);
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+    }
   }
 
   private createTransportTypeChart(): void {
-    const element = document.getElementById("transportChart");
-    if (!element) {
-      console.warn('Chart element transportChart not found');
+    const chartId = "transportChart";
+    const element = document.getElementById(chartId);
+    if (!element || !element.offsetParent) {
+      console.warn(`Chart element ${chartId} not found or not visible`);
       return;
     }
 
-    const root = am5.Root.new("transportChart");
+    try {
+      // Dispose existing root if it exists
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+
+      const root = am5.Root.new(chartId);
+      this.chartRoots[chartId] = root;
     root.setThemes([am5themes_Animated.new(root)]);
 
     const chart = root.container.children.push(am5xy.XYChart.new(root, {
@@ -413,19 +504,35 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       count
     }));
 
-    xAxis.data.setAll(data);
-    series.data.setAll(data);
-    this.transportChart = chart;
+      xAxis.data.setAll(data);
+      series.data.setAll(data);
+      this.transportChart = chart;
+    } catch (error) {
+      console.error(`Error creating ${chartId}:`, error);
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+    }
   }
 
   private createCategoryChart(): void {
-    const element = document.getElementById("categoryChart");
-    if (!element) {
-      console.warn('Chart element categoryChart not found');
+    const chartId = "categoryChart";
+    const element = document.getElementById(chartId);
+    if (!element || !element.offsetParent) {
+      console.warn(`Chart element ${chartId} not found or not visible`);
       return;
     }
 
-    const root = am5.Root.new("categoryChart");
+    try {
+      // Dispose existing root if it exists
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+
+      const root = am5.Root.new(chartId);
+      this.chartRoots[chartId] = root;
     root.setThemes([am5themes_Animated.new(root)]);
 
     const chart = root.container.children.push(am5xy.XYChart.new(root, {
@@ -492,19 +599,35 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       count
     }));
 
-    xAxis.data.setAll(data);
-    series.data.setAll(data);
-    this.categoryChart = chart;
+      xAxis.data.setAll(data);
+      series.data.setAll(data);
+      this.categoryChart = chart;
+    } catch (error) {
+      console.error(`Error creating ${chartId}:`, error);
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+    }
   }
 
   private createAnnualOverviewChart(): void {
-    const element = document.getElementById("annualChart");
-    if (!element) {
-      console.warn('Chart element annualChart not found');
+    const chartId = "annualChart";
+    const element = document.getElementById(chartId);
+    if (!element || !element.offsetParent) {
+      console.warn(`Chart element ${chartId} not found or not visible`);
       return;
     }
 
-    const root = am5.Root.new("annualChart");
+    try {
+      // Dispose existing root if it exists
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+
+      const root = am5.Root.new(chartId);
+      this.chartRoots[chartId] = root;
     root.setThemes([am5themes_Animated.new(root)]);
 
     const chart = root.container.children.push(am5xy.XYChart.new(root, {
@@ -561,20 +684,36 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       })
     );
 
-    const data = this.analytics.chartData.global.annualOverview || [];
-    xAxis.data.setAll(data);
-    series.data.setAll(data);
-    this.annualChart = chart;
+      const data = this.analytics.chartData.global.annualOverview || [];
+      xAxis.data.setAll(data);
+      series.data.setAll(data);
+      this.annualChart = chart;
+    } catch (error) {
+      console.error(`Error creating ${chartId}:`, error);
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+    }
   }
 
   private createCategoryPerformanceChart(): void {
-    const element = document.getElementById("categoryPerformanceChart");
-    if (!element) {
-      console.warn('Chart element categoryPerformanceChart not found');
+    const chartId = "categoryPerformanceChart";
+    const element = document.getElementById(chartId);
+    if (!element || !element.offsetParent) {
+      console.warn(`Chart element ${chartId} not found or not visible`);
       return;
     }
 
-    const root = am5.Root.new("categoryPerformanceChart");
+    try {
+      // Dispose existing root if it exists
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+
+      const root = am5.Root.new(chartId);
+      this.chartRoots[chartId] = root;
     root.setThemes([am5themes_Animated.new(root)]);
 
     const chart = root.container.children.push(am5xy.XYChart.new(root, {
@@ -674,23 +813,39 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Convert back to array
-    const data = Array.from(aggregatedData.values());
-    console.log('Aggregated data:', data);
-    xAxis.data.setAll(data);
-    paidSeries.data.setAll(data);
-    unpaidSeries.data.setAll(data);
-    this.categoryPerformanceChart = chart;
+      // Convert back to array
+      const data = Array.from(aggregatedData.values());
+      console.log('Aggregated data:', data);
+      xAxis.data.setAll(data);
+      paidSeries.data.setAll(data);
+      unpaidSeries.data.setAll(data);
+      this.categoryPerformanceChart = chart;
+    } catch (error) {
+      console.error(`Error creating ${chartId}:`, error);
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+    }
   }
 
   private createProcessingEfficiencyChart(): void {
-    const element = document.getElementById("processingChart");
-    if (!element) {
-      console.warn('Chart element processingChart not found');
+    const chartId = "processingChart";
+    const element = document.getElementById(chartId);
+    if (!element || !element.offsetParent) {
+      console.warn(`Chart element ${chartId} not found or not visible`);
       return;
     }
 
-    const root = am5.Root.new("processingChart");
+    try {
+      // Dispose existing root if it exists
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+
+      const root = am5.Root.new(chartId);
+      this.chartRoots[chartId] = root;
     root.setThemes([am5themes_Animated.new(root)]);
 
     const chart = root.container.children.push(am5xy.XYChart.new(root, {
@@ -751,20 +906,36 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       })
     );
 
-    const data = this.analytics.chartData.global.processingEfficiency || [];
-    xAxis.data.setAll(data);
-    series.data.setAll(data);
-    this.processingChart = chart;
+      const data = this.analytics.chartData.global.processingEfficiency || [];
+      xAxis.data.setAll(data);
+      series.data.setAll(data);
+      this.processingChart = chart;
+    } catch (error) {
+      console.error(`Error creating ${chartId}:`, error);
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+    }
   }
 
   private createGlobalTransportChart(): void {
-    const element = document.getElementById("globalTransportChart");
-    if (!element) {
-      console.warn('Chart element globalTransportChart not found');
+    const chartId = "globalTransportChart";
+    const element = document.getElementById(chartId);
+    if (!element || !element.offsetParent) {
+      console.warn(`Chart element ${chartId} not found or not visible`);
       return;
     }
 
-    const root = am5.Root.new("globalTransportChart");
+    try {
+      // Dispose existing root if it exists
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+
+      const root = am5.Root.new(chartId);
+      this.chartRoots[chartId] = root;
     root.setThemes([am5themes_Animated.new(root)]);
 
     const chart = root.container.children.push(am5percent.PieChart.new(root, {
@@ -804,8 +975,15 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       count
     }));
 
-    series.data.setAll(data);
-    this.globalTransportChart = chart;
+      series.data.setAll(data);
+      this.globalTransportChart = chart;
+    } catch (error) {
+      console.error(`Error creating ${chartId}:`, error);
+      if (this.chartRoots[chartId]) {
+        this.chartRoots[chartId].dispose();
+        delete this.chartRoots[chartId];
+      }
+    }
   }
 
   public formatCurrency(amount: number | null): string {
