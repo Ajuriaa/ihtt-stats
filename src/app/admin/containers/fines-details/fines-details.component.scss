@@ -7,6 +7,11 @@
   width: 100%;
 }
 
+.blue {
+  color: $blue;
+  font-weight: bold;
+}
+
 .filter-row {
   width: 70%;
   @include flex-center;

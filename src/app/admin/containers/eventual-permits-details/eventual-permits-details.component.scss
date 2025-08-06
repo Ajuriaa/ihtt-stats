@@ -7,6 +7,11 @@
   margin-bottom: 25rem;
 }
 
+.blue {
+  color: $blue;
+  font-weight: bold;
+}
+
 .filter-wrapper {
   @include flex-center-column;
   gap: 2rem;

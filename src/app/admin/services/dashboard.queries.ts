@@ -65,6 +65,11 @@ export class DashboardQueries {
     return this.http.get<any>(`${environment.apiUrl}/eventual-permits-analytics?${queryString}`);
   }
 
+  public getEventualPermitsAnalyticsReport(params: Object): Observable<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.http.get<any>(`${environment.apiUrl}/eventual-permits-analytics-report?${queryString}`);
+  }
+
   // School Certificates methods
   public getSchoolCertificates(params: Object): Observable<any> {
     const queryString = new URLSearchParams(params as any).toString();

@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '../core/guards';
-import { FinesDashboardComponent, AdminRouterComponent, DashboardComponent, DetailsComponent, FinesDetailsComponent, FinesReportsComponent, ReportsComponent, EventualPermitsDashboardComponent, EventualPermitsDetailsComponent, ApplicationsDashboardComponent, ApplicationsDetailsComponent, ApplicationsReportsComponent, SchoolCertificatesDashboardComponent, SchoolCertificatesDetailsComponent, SchoolCertificatesReportsComponent } from './containers';
+import { FinesDashboardComponent, AdminRouterComponent, DashboardComponent, DetailsComponent, FinesDetailsComponent, FinesReportsComponent, ReportsComponent, EventualPermitsDashboardComponent, EventualPermitsDetailsComponent, EventualPermitsReportsComponent, ApplicationsDashboardComponent, ApplicationsDetailsComponent, ApplicationsReportsComponent, SchoolCertificatesDashboardComponent, SchoolCertificatesDetailsComponent, SchoolCertificatesReportsComponent } from './containers';
 
 export const adminRoutes: Routes = [{
   path: '',
@@ -14,6 +14,7 @@ export const adminRoutes: Routes = [{
     { path: 'dashboard/school-certificates', component: SchoolCertificatesDashboardComponent, title: 'Dashboard' },
     { path: 'reports/certificates', component: ReportsComponent, title: 'Reportes' },
     { path: 'reports/fines', component: FinesReportsComponent, title: 'Reportes' },
+    { path: 'reports/eventual-permits', component: EventualPermitsReportsComponent, title: 'Reportes' },
     { path: 'reports/applications', component: ApplicationsReportsComponent, title: 'Reportes' },
     { path: 'reports/school-certificates', component: SchoolCertificatesReportsComponent, title: 'Reportes' },
     { path: 'details/certificates', component: DetailsComponent, title: 'Listado' },

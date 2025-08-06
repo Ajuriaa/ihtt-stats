@@ -1,141 +1,137 @@
+<app-loading class="loading" *ngIf="loading"></app-loading>
+
 <div class="container">
-  <div class="content">
-    <div class="top-section">
-      <!-- Filtros adicionales -->
-      <div class="filters-container">
-        <div class="filter-row">
-          <!-- Filtros de fecha -->
-          <app-date-filter
-            [showDateTypeFilter]="false"
-            (dateRangeChanged)="filterDates($event)">
-          </app-date-filter>
-          <!-- RTN del Solicitante -->
-          <mat-form-field class="filter-field">
-            <mat-label>RTN del Solicitante</mat-label>
-            <input matInput [(ngModel)]="rtn" name="rtn" placeholder="Ingrese RTN">
-          </mat-form-field>
-        </div>
+  <div class="filter-wrapper">
+    <div class="filter-row">
+      <!-- Filtros de fecha -->
+      <app-date-filter
+        [showDateTypeFilter]="false"
+        (dateRangeChanged)="filterDates($event)">
+      </app-date-filter>
 
-        <div class="filter-row">
-          <!-- Nombre del Solicitante -->
-          <mat-form-field class="filter-field">
-            <mat-label>Nombre del Solicitante</mat-label>
-            <input matInput [(ngModel)]="applicantName" name="applicantName" placeholder="Ingrese nombre">
-          </mat-form-field>
+      <!-- Estado del Permiso -->
+      <mat-form-field>
+        <mat-label>Estado del Permiso</mat-label>
+        <mat-select [(value)]="selectedPermitStatus" (selectionChange)="applyFilter('permitStatus', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let status of permitStatuses" [value]="status">{{ status }}</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-          <!-- Estado del Permiso -->
-          <mat-form-field class="filter-field">
-            <mat-label>Estado del Permiso</mat-label>
-            <mat-select [(value)]="selectedPermitStatus" (selectionChange)="applyFilter('permitStatus', $event.value)">
-              <mat-option value="">Todos</mat-option>
-              <mat-option *ngFor="let status of permitStatuses" [value]="status">{{ status }}</mat-option>
-            </mat-select>
-          </mat-form-field>
+      <!-- Tipo de Servicio -->
+      <mat-form-field>
+        <mat-label>Tipo de Servicio</mat-label>
+        <mat-select [(value)]="selectedServiceType" (selectionChange)="applyFilter('serviceType', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let serviceType of serviceTypes" [value]="serviceType">{{ serviceType }}</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-          <!-- Tipo de Servicio -->
-          <mat-form-field class="filter-field">
-            <mat-label>Tipo de Servicio</mat-label>
-            <mat-select [(value)]="selectedServiceType" (selectionChange)="applyFilter('serviceType', $event.value)">
-              <mat-option value="">Todos</mat-option>
-              <mat-option *ngFor="let serviceType of serviceTypes" [value]="serviceType">{{ serviceType }}</mat-option>
-            </mat-select>
-          </mat-form-field>
+      <!-- Oficina Regional -->
+      <mat-form-field>
+        <mat-label>Oficina Regional</mat-label>
+        <mat-select [(value)]="selectedRegionalOffice" (selectionChange)="applyFilter('regionalOffice', $event.value)">
+          <mat-option value="">TODAS</mat-option>
+          <mat-option *ngFor="let office of regionalOffices" [value]="office">{{ office }}</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-          <!-- Botón de filtro -->
-          <app-primary-button [disableButton]="loading">
-            Aplicar Filtros
-          </app-primary-button>
-        </div>
-      </div>
+            <!-- Origen de Creación -->
+      <mat-form-field>
+        <mat-label>Origen de Creación</mat-label>
+        <mat-select [(value)]="selectedCreationOrigin" (selectionChange)="applyFilter('creationOrigin', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let origin of creationOrigins" [value]="origin">{{ origin }}</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
+    <div class="filter-row">
+      <!-- RTN del Solicitante -->
+      <mat-form-field>
+        <input matInput placeholder="RTN del Solicitante" [(ngModel)]="rtn">
+      </mat-form-field>
 
-    <!-- Sección de estadísticas rápidas -->
-    <div class="stats-cards" *ngIf="!loading && (totalPermits > 0 || totalRevenue > 0 || activePermits > 0 || processedPermits > 0 || cancelledPermits > 0)">
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-content">
-            <mat-icon class="stat-icon">description</mat-icon>
-            <div class="stat-info">
-              <h3>{{ totalPermits | number }}</h3>
-              <p>Total Permisos</p>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <!-- Nombre del Solicitante -->
+      <mat-form-field>
+        <input matInput placeholder="Nombre del Solicitante" [(ngModel)]="applicantName">
+      </mat-form-field>
 
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-content">
-            <mat-icon class="stat-icon">attach_money</mat-icon>
-            <div class="stat-info">
-              <h3>L. {{ totalRevenue | number:'1.2-2' }}</h3>
-              <p>Ingresos Totales</p>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <!-- Tipo de Firma -->
+      <mat-form-field>
+        <mat-label>Tipo de Firma</mat-label>
+        <mat-select [(value)]="selectedSignatureType" (selectionChange)="applyFilter('signatureType', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let sigType of signatureTypes" [value]="sigType">{{ sigType }}</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-content">
-            <mat-icon class="stat-icon active">check_circle</mat-icon>
-            <div class="stat-info">
-              <h3>{{ activePermits | number }}</h3>
-              <p>Activos</p>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <!-- Tipo PETI -->
+      <mat-form-field>
+        <mat-label>Tipo PETI</mat-label>
+        <mat-select [(value)]="selectedPetiType" (selectionChange)="applyFilter('petiType', $event.value)">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option *ngFor="let peti of petiTypes" [value]="peti">{{ peti }}</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-content">
-            <mat-icon class="stat-icon processed">hourglass_empty</mat-icon>
-            <div class="stat-info">
-              <h3>{{ processedPermits | number }}</h3>
-              <p>Procesados</p>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-content">
-            <mat-icon class="stat-icon cancelled">cancel</mat-icon>
-            <div class="stat-info">
-              <h3>{{ cancelledPermits | number }}</h3>
-              <p>Anulados</p>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-
-    <!-- Gráficos -->
-    <div class="charts-section">
-      <div class="chart-container">
-        <div id="statusDistributionChart" class="chart"></div>
-      </div>
-
-      <div class="chart-container">
-        <div id="revenueByStatusChart" class="chart"></div>
-      </div>
-
-      <div class="chart-container">
-        <div id="serviceTypeChart" class="chart"></div>
-      </div>
-
-      <div class="chart-container">
-        <div id="monthlyRevenueChart" class="chart"></div>
-      </div>
-
-      <div class="chart-container">
-        <div id="regionalOfficeChart" class="chart"></div>
-      </div>
+      <app-primary-button (click)="fetchDashboard()">FILTRAR</app-primary-button>
     </div>
   </div>
 
-  <!-- Loading overlay -->
-  <app-loading *ngIf="loading"></app-loading>
+  <div class="kpi-container">
+    <mat-card class="kpi-card">
+      <p class="title">{{ totalPermits | number }}</p>
+      <p>Total Permisos Eventuales</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ totalRevenue | currency:'HNL':'L.':'2.2' }}</p>
+      <p>Total Pagado por Permisos</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ deliveredPermits | number }}</p>
+      <p>Permisos Entregados</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ totalOwed | currency:'HNL':'L.':'2.2' }}</p>
+      <p>Total Adeudado por Permisos Activos</p>
+    </mat-card>
+  </div>
+
+  <!-- Global KPIs Section -->
+  <div class="kpi-container">
+    <mat-card class="kpi-card">
+      <p class="title">{{ globalTotalPermits | number }}</p>
+      <p>Total Permisos (Global)</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ globalTotalRevenue | currency:'HNL':'L.':'2.2' }}</p>
+      <p>Ingresos Totales (Global)</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ globalTotalOwed | currency:'HNL':'L.':'2.2' }}</p>
+      <p>Total Adeudado (Global)</p>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <p class="title">{{ globalDeliveredPermits | number }}</p>
+      <p>Permisos Entregados (Global)</p>
+    </mat-card>
+  </div>
+
+  <div class="graph-container">
+    <div id="statusDistributionChart" style="width: 40%; height: 400px;"></div>
+    <div id="monthlyRevenueChart" style="width: 60%; height: 400px;"></div>
+  </div>
+
+  <div id="revenueByStatusChart" style="width: 100%; height: 400px;"></div>
+
+  <div class="graph-container">
+    <div id="serviceTypeChart" style="width: 40%; height: 400px;"></div>
+    <div id="regionalOfficeChart" style="width: 60%; height: 400px;"></div>
+  </div>
 </div>

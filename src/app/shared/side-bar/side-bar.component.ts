@@ -26,10 +26,7 @@ export class SideBarComponent implements OnInit {
         this.selectedOption = segments[2] || 'dashboard'; // Segundo segmento
         this.currentMode = segments[3] || 'certificates'; // Tercer segmento
         
-        // If user is on reports page but switched to eventual-permits mode, redirect to dashboard
-        if (this.currentMode === 'eventual-permits' && this.selectedOption === 'reports') {
-          this.router.navigate([`admin/dashboard/${this.currentMode}`]);
-        }
+        // Remove the redirect for eventual permits reports - now supported
         
         this.animateIcon();
       }
@@ -82,14 +79,10 @@ export class SideBarComponent implements OnInit {
         this.iconTopPosition = 3.5;
         break;
       case 'details':
-        // If in eventual-permits mode (no reports), adjust the details position
-        this.iconTopPosition = this.currentMode === 'eventual-permits' ? 18 : 18;
+        this.iconTopPosition = 18;
         break;
       case 'reports':
-        // Only show reports position if not in eventual-permits mode
-        if (this.currentMode !== 'eventual-permits') {
-          this.iconTopPosition = 32.5;
-        }
+        this.iconTopPosition = 32.5;
         break;
     }
   }

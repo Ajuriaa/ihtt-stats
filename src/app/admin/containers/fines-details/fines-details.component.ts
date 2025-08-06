@@ -77,8 +77,8 @@ export class FinesDetailsComponent {
     this.pdfHelper.generateFinePDF(this.fines, this.globalParams);
   }
 
-  public goToNoticeFile(id: string | null): void {
-    if (!id) {
+  public goToNoticeFile(id: string | null, amount: number): void {
+    if (!id || !amount) {
       return;
     }
     window.open(`https://satt.transporte.gob.hn:90/api_rep.php?action=get-facturaPdf&nu=${id}&va=1`);

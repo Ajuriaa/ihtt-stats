@@ -1,103 +1,40 @@
 @import 'global';
 
-.content {
-  width: 90%;
-  margin-bottom: 15rem;
-}
-
-.top-section {
-  margin-bottom: 2rem;
-}
-
-.filters-container {
+.container {
   @include flex-center-column;
-  gap: 1rem;
-  margin-top: 1rem;
+  margin: 2rem 0;
+  gap: 2rem;
+  width: 100%;
 }
-.filter-field {
-  margin: 0;
+
+.filter-wrapper {
+  @include flex-center-column;
+  gap: 2rem;
+  width: 100%;
 }
 
 .filter-row {
+  width: 70%;
   @include flex-center;
-  gap: 1rem;
+  justify-content: space-between;
 }
 
-// Tarjetas de estadsticas
-.stats-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  .stat-content {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 8px;
-  }
-
-  .stat-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    color: #2196F3;
-
-    &.active {
-      color: #4CAF50;
-    }
-
-    &.processed {
-      color: #FF9800;
-    }
-
-    &.cancelled {
-      color: #F44336;
-    }
-  }
-
-  .stat-info {
-    h3 {
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #333;
-    }
-
-    p {
-      margin: 4px 0 0 0;
-      color: #666;
-      font-size: 0.9rem;
-    }
-  }
-}
-
-.charts-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+.kpi-container {
+  @include flex-center;
+  justify-content: space-between;
   gap: 2rem;
+  font-size: 2.2rem;
+  width: 85%;
+
+  .title {
+    font-weight: bold;
+    font-size: 2.5rem;
+  }
 }
 
-.chart-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
-  min-height: 400px;
-}
-
-.chart {
+.graph-container {
+  @include flex-center;
+  justify-content: space-between;
   width: 100%;
-  height: 350px;
+  height: auto;
 }

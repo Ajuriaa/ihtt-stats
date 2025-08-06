@@ -1,0 +1,218 @@
+<div class="eventual-permits-reports-container">
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>Reportes de Permisos Eventuales</mat-card-title>
+      <mat-card-subtitle>Genere reportes detallados de permisos eventuales de transporte</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="filters-section">
+        <h3>Filtros de Búsqueda</h3>
+        
+        <div class="filters-grid">
+          <!-- Filtro de fechas -->
+          <div class="date-filters">
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha Inicio</mat-label>
+              <input 
+                matInput 
+                [matDatepicker]="pickerInicio" 
+                [(ngModel)]="fechaInicio"
+                (dateChange)="onFechaInicioChange($event.value)">
+              <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerInicio></mat-datepicker>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha Fin</mat-label>
+              <input 
+                matInput 
+                [matDatepicker]="pickerFin" 
+                [(ngModel)]="fechaFin"
+                (dateChange)="onFechaFinChange($event.value)">
+              <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFin></mat-datepicker>
+            </mat-form-field>
+          </div>
+          
+          <!-- Estado del Permiso -->
+          <mat-form-field appearance="outline">
+            <mat-label>Estado del Permiso</mat-label>
+            <mat-select [(ngModel)]="filtros.estadoPermiso">
+              <mat-option value="">TODOS</mat-option>
+              <mat-option *ngFor="let estado of estadosPermiso" [value]="estado">
+                {{ estado }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Tipo de Servicio -->
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Servicio</mat-label>
+            <mat-select [(ngModel)]="filtros.tipoServicio">
+              <mat-option value="">TODOS</mat-option>
+              <mat-option *ngFor="let tipo of tiposServicio" [value]="tipo">
+                {{ tipo }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- RTN -->
+          <mat-form-field appearance="outline">
+            <mat-label>RTN</mat-label>
+            <input matInput placeholder="RTN" [(ngModel)]="filtros.rtn">
+          </mat-form-field>
+          
+          <!-- Nombre del Solicitante -->
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del Solicitante</mat-label>
+            <input matInput placeholder="Nombre del Solicitante" [(ngModel)]="filtros.nombreSolicitante">
+          </mat-form-field>
+        </div>
+        
+        <!-- Botones de filtros -->
+        <div class="filter-buttons">
+          <button mat-raised-button color="primary" (click)="aplicarFiltros()" [disabled]="cargando">
+            <mat-icon>search</mat-icon>
+            Aplicar Filtros
+          </button>
+          
+          <button mat-stroked-button (click)="limpiarFiltros()" [disabled]="cargando">
+            <mat-icon>clear</mat-icon>
+            Limpiar Filtros
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  
+  <!-- Sección de estadísticas rápidas -->
+  <div class="stats-cards" *ngIf="!cargando && permisos.length > 0">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon">description</mat-icon>
+          <div class="stat-info">
+            <h3>{{ totalPermisos }}</h3>
+            <p>Total Permisos</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon">attach_money</mat-icon>
+          <div class="stat-info">
+            <h3>L. {{ montoTotalPermisos.toLocaleString('es-HN') }}</h3>
+            <p>Monto Total</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon active">fiber_manual_record</mat-icon>
+          <div class="stat-info">
+            <h3>{{ permisosActivos }}</h3>
+            <p>Activos</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon processed">check_circle</mat-icon>
+          <div class="stat-info">
+            <h3>{{ permisosProcesados }}</h3>
+            <p>Procesados</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  
+  <!-- Sección de resultados y reportes -->
+  <mat-card class="results-card">
+    <mat-card-header>
+      <mat-card-title>Generar Reportes</mat-card-title>
+      <mat-card-subtitle>{{ permisos.length }} permisos eventuales encontrados</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div *ngIf="cargando" class="loading-section">
+        <app-loading></app-loading>
+        <p>Cargando permisos eventuales...</p>
+      </div>
+      
+      <div *ngIf="!cargando" class="reports-section">
+        <h3>Reportes PDF Disponibles</h3>
+        <p class="reports-description">
+          Seleccione el tipo de reporte que desea generar en formato PDF. Los reportes se abrirán en una nueva pestaña.
+        </p>
+        
+        <!-- Selector de tipo de reporte -->
+        <div class="report-type-selector">
+          <mat-form-field appearance="outline" class="report-type-field">
+            <mat-label>Tipo de Reporte</mat-label>
+            <mat-select [(ngModel)]="tipoReporte">
+              <mat-option value="analisis">
+                <mat-icon>analytics</mat-icon>
+                Reporte Ejecutivo de Análisis
+              </mat-option>
+              <mat-option value="lista">
+                <mat-icon>list</mat-icon>
+                Lista Detallada de Permisos
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        
+        <div class="report-buttons">
+          <button 
+            mat-raised-button 
+            color="accent" 
+            (click)="generarReportePermisosPDF()"
+            [disabled]="cargando">
+            <mat-icon>picture_as_pdf</mat-icon>
+            {{ tipoReporte === 'analisis' ? 'Generar Reporte Ejecutivo' : 'Generar Lista Detallada' }}
+          </button>
+        </div>
+        
+        <div *ngIf="tipoReporte === 'lista' && permisos.length === 0" class="no-data-message">
+          <mat-icon>info</mat-icon>
+          <p>No se encontraron permisos eventuales con los filtros aplicados.</p>
+          <p>Ajuste los filtros de búsqueda para obtener resultados.</p>
+        </div>
+        
+        <!-- Información adicional sobre los reportes -->
+        <div class="report-info">
+          <h4>{{ tipoReporte === 'analisis' ? 'Reporte Ejecutivo incluye:' : 'Lista Detallada incluye:' }}</h4>
+          
+          <ul *ngIf="tipoReporte === 'analisis'">
+            <li><strong>Resumen Ejecutivo:</strong> KPIs principales y métricas de procesamiento</li>
+            <li><strong>Análisis de Eficiencia:</strong> Tasa de procesamiento y gestión operativa</li>
+            <li><strong>Tendencias:</strong> Comparaciones mensuales e interanuales</li>
+            <li><strong>Top Solicitantes:</strong> Empresas con mayor número de permisos</li>
+            <li><strong>Análisis por Tipo de Servicio:</strong> Distribución por modalidad</li>
+            <li><strong>Rendimiento Regional:</strong> Productividad por oficina regional</li>
+            <li><strong>Insights y Recomendaciones:</strong> Conclusiones estratégicas</li>
+          </ul>
+          
+          <ul *ngIf="tipoReporte === 'lista'">
+            <li>Detalle completo de cada permiso (fecha, solicitante, tipo de servicio)</li>
+            <li>Estado actual de cada permiso (activo, procesado, anulado)</li>
+            <li>Información del solicitante (nombre, RTN)</li>
+            <li>Tipo de servicio solicitado (pasajeros, carga)</li>
+            <li>Oficina regional de procesamiento</li>
+          </ul>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

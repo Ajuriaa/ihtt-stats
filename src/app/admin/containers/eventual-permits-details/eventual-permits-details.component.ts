@@ -37,16 +37,43 @@ export class EventualPermitsDetailsComponent implements OnInit {
   public dateType = 'system';
   public rtn = '';
   public applicantName = '';
-  public permitStatuses: string[] = ['ACTIVO', 'PROCESADO', 'ANULADO', 'PENDIENTE'];
+  public permitStatuses: string[] = [
+    'Entregado', 
+    'Pendiente Pago en Banco', 
+    'Pagado en Banco - Entregado'
+  ];
   public serviceTypes: string[] = [
-    'PERMISO EVENTUAL DE PASAJEROS',
-    'PERMISO EVENTUAL DE CARGA',
-    'PERMISO ESPECIAL',
-    'PERMISO TEMPORAL',
-    'OTROS'
+    'No Especificado',
+    'PASAJEROS',
+    'CARGA'
+  ];
+  public regionalOffices: string[] = [
+    'Creado desde portal',
+    'TEGUCIGALPA, OFICINA PRINCIPAL',
+    'REGIONAL NOR OCCIDENTAL, OFICINA PRINCIPAL, SAN PEDRO SULA',
+    'REGIONAL SUR, OFICINA PRINCIPAL, CHOLUTECA',
+    'REGIONAL DEL ATLANTICO, OFICINA PRINCIPAL, LA CEIBA'
+  ];
+  public signatureTypes: string[] = [
+    'Con Firma Digital',
+    'Valido Solo con firma Fisica'
+  ];
+  public petiTypes: string[] = [
+    'No Aplica',
+    'TRANSPORTE DE MIGRANTES',
+    'BUS INTERNACIONAL CON DESTINO/SALIDA HONDURAS'
+  ];
+  public creationOrigins: string[] = [
+    'SIPEV (Sistema de Permisos Eventuales)',
+    'SITRAP (Portal Transportista)',
+    'LLAMADA TELEFONICA'
   ];
   public selectedPermitStatus = '';
   public selectedServiceType = '';
+  public selectedRegionalOffice = '';
+  public selectedSignatureType = '';
+  public selectedPetiType = '';
+  public selectedCreationOrigin = '';
 
   constructor(
     private permitService: DashboardQueries,
@@ -77,6 +104,10 @@ export class EventualPermitsDetailsComponent implements OnInit {
       dateType: this.dateType || undefined,
       permitStatus: this.selectedPermitStatus || undefined,
       serviceType: this.selectedServiceType || undefined,
+      regionalOffice: this.selectedRegionalOffice || undefined,
+      signatureType: this.selectedSignatureType || undefined,
+      petiType: this.selectedPetiType || undefined,
+      creationOrigin: this.selectedCreationOrigin || undefined,
       rtn: this.rtn !== '' ? this.rtn : undefined,
       applicantName: this.applicantName !== '' ? this.applicantName : undefined
     };
@@ -122,6 +153,18 @@ export class EventualPermitsDetailsComponent implements OnInit {
       case 'serviceType':
         this.selectedServiceType = value || '';
         break;
+      case 'regionalOffice':
+        this.selectedRegionalOffice = value || '';
+        break;
+      case 'signatureType':
+        this.selectedSignatureType = value || '';
+        break;
+      case 'petiType':
+        this.selectedPetiType = value || '';
+        break;
+      case 'creationOrigin':
+        this.selectedCreationOrigin = value || '';
+        break;
     }
   }
 
@@ -154,5 +197,12 @@ export class EventualPermitsDetailsComponent implements OnInit {
       default:
         return 'status-default';
     }
+  }
+
+  public goToNoticeFile(id: string | null, amount: number): void {
+    if (!id || !amount) {
+      return;
+    }
+    window.open(`https://satt.transporte.gob.hn:90/api_rep.php?action=get-facturaPdf&nu=${id}&va=1`);
   }
 }

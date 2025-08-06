@@ -1160,6 +1160,292 @@ export class ReportesPDFService {
     doc.output('dataurlnewwindow');
   }
 
+  // 5b. Reporte de Permisos Eventuales - Análisis Ejecutivo
+  public generarReportePermisosEventualesAnalisis(
+    datosAnalisis: any,
+    parametros: any
+  ): void {
+    const doc = this.configurarDocumento();
+    const titulo = 'Reporte Ejecutivo de Permisos Eventuales - Análisis Integral';
+
+    let yPosition = 50;
+
+    // ======== RESUMEN EJECUTIVO ========
+    doc.setFontSize(16);
+    doc.setFont('bold');
+    doc.text('RESUMEN EJECUTIVO', 20, yPosition);
+    yPosition += 15;
+
+    const resumenEjecutivo = [
+      ['Total de Permisos Procesados', datosAnalisis.reportAnalysis.executiveSummary.totalPermits.toString()],
+      ['Ingresos por Permisos', this.formatearMoneda(datosAnalisis.reportAnalysis.executiveSummary.totalRevenue)],
+      ['Tasa de Procesamiento', this.formatearPorcentaje(datosAnalisis.reportAnalysis.executiveSummary.processingRate)],
+      ['Permisos Activos', datosAnalisis.reportAnalysis.executiveSummary.activePermits.toString()],
+      ['Permisos Procesados', datosAnalisis.reportAnalysis.executiveSummary.processedPermits.toString()],
+      ['Período Analizado', `${this.obtenerFecha(datosAnalisis.reportAnalysis.executiveSummary.periodCovered.startDate)} - ${this.obtenerFecha(datosAnalisis.reportAnalysis.executiveSummary.periodCovered.endDate)}`]
+    ];
+
+    autoTable(doc, {
+      body: resumenEjecutivo,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'left', valign: 'middle', fontSize: 11 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 80 },
+        1: { fontStyle: 'normal', cellWidth: 60 }
+      },
+      theme: 'grid',
+      headStyles: { fillColor: '#9C27B0' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE EFICIENCIA DE PROCESAMIENTO ========
+    if (yPosition > 230) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE EFICIENCIA DE PROCESAMIENTO', 20, yPosition);
+    yPosition += 10;
+
+    const analisisProcesamiento = [
+      ['Permisos Solicitados', datosAnalisis.reportAnalysis.processingAnalysis.totalSubmitted.toString()],
+      ['Permisos Procesados', datosAnalisis.reportAnalysis.processingAnalysis.totalProcessed.toString()],
+      ['Permisos Activos', datosAnalisis.reportAnalysis.processingAnalysis.totalActive.toString()],
+      ['Permisos Anulados', datosAnalisis.reportAnalysis.processingAnalysis.totalCancelled.toString()],
+      ['Eficiencia de Procesamiento', this.formatearPorcentaje(datosAnalisis.reportAnalysis.processingAnalysis.processingRate)]
+    ];
+
+    autoTable(doc, {
+      head: [['Concepto', 'Cantidad']],
+      body: analisisProcesamiento,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#9C27B0', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS DE TENDENCIAS ========
+    if (yPosition > 220) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS DE TENDENCIAS', 20, yPosition);
+    yPosition += 10;
+
+    const tendencias = [
+      ['Permisos Mes Actual', datosAnalisis.reportAnalysis.trends.monthOverMonth.current.toString()],
+      ['Permisos Mes Anterior', datosAnalisis.reportAnalysis.trends.monthOverMonth.previous.toString()],
+      ['Variación Mensual (%)', this.formatearPorcentaje(datosAnalisis.reportAnalysis.trends.monthOverMonth.change)],
+      ['Ingresos Mes Actual', this.formatearMoneda(datosAnalisis.reportAnalysis.trends.monthOverMonth.revenue.current)],
+      ['Ingresos Mes Anterior', this.formatearMoneda(datosAnalisis.reportAnalysis.trends.monthOverMonth.revenue.previous)],
+      ['Variación Interanual (%)', this.formatearPorcentaje(datosAnalisis.reportAnalysis.trends.yearOverYear.change)]
+    ];
+
+    autoTable(doc, {
+      head: [['Indicador', 'Valor']],
+      body: tendencias,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#2196F3', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== TOP SOLICITANTES ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.topApplicants.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('TOP 10 SOLICITANTES DE PERMISOS', 20, yPosition);
+    yPosition += 10;
+
+    const topSolicitantes = datosAnalisis.reportAnalysis.topApplicants.slice(0, 10).map((applicant: any) => [
+      applicant.applicantName,
+      applicant.rtn,
+      applicant.permitCount.toString(),
+      this.formatearMoneda(applicant.totalAmount)
+    ]);
+
+    autoTable(doc, {
+      head: [['Solicitante', 'RTN', 'Permisos', 'Monto Total']],
+      body: topSolicitantes,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+      headStyles: { fillColor: '#FF5722', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== ANÁLISIS POR TIPO DE SERVICIO ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.serviceTypeAnalysis.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('ANÁLISIS POR TIPO DE SERVICIO', 20, yPosition);
+    yPosition += 10;
+
+    const tiposServicio = datosAnalisis.reportAnalysis.serviceTypeAnalysis.map((sta: any) => [
+      sta.serviceType,
+      sta.count.toString(),
+      this.formatearPorcentaje(sta.percentage),
+      this.formatearMoneda(sta.totalAmount)
+    ]);
+
+    autoTable(doc, {
+      head: [['Tipo de Servicio', 'Cantidad', 'Porcentaje', 'Monto Total']],
+      body: tiposServicio,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 10 },
+      headStyles: { fillColor: '#795548', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== RENDIMIENTO POR OFICINA REGIONAL ========
+    if (yPosition > 180 || datosAnalisis.reportAnalysis.regionalOfficePerformance.length > 5) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('RENDIMIENTO POR OFICINA REGIONAL', 20, yPosition);
+    yPosition += 10;
+
+    const oficinasRegionales = datosAnalisis.reportAnalysis.regionalOfficePerformance.map((rop: any) => [
+      rop.regionalOffice,
+      rop.permitsProcessed.toString(),
+      this.formatearPorcentaje(rop.percentage),
+      this.formatearMoneda(rop.totalAmount)
+    ]);
+
+    autoTable(doc, {
+      head: [['Oficina Regional', 'Permisos', 'Porcentaje', 'Monto Total']],
+      body: oficinasRegionales,
+      startY: yPosition,
+      margin: { left: 20, right: 20 },
+      styles: { halign: 'center', valign: 'middle', fontSize: 9 },
+      headStyles: { fillColor: '#607D8B', fontStyle: 'bold' },
+      didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+    // ======== INSIGHTS Y RECOMENDACIONES ========
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont('bold');
+    doc.text('INSIGHTS Y RECOMENDACIONES ESTRATÉGICAS', 20, yPosition);
+    yPosition += 15;
+
+    // Insights
+    if (datosAnalisis.reportAnalysis.insights.length > 0) {
+      doc.setFontSize(12);
+      doc.setFont('bold');
+      doc.text('📊 OBSERVACIONES CLAVE:', 20, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('normal');
+      datosAnalisis.reportAnalysis.insights.forEach((insight: string, index: number) => {
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        const textoWrapped = doc.splitTextToSize(`• ${insight}`, 250);
+        doc.text(textoWrapped, 25, yPosition);
+        yPosition += textoWrapped.length * 5 + 5;
+      });
+
+      yPosition += 10;
+    }
+
+    // Recomendaciones
+    if (datosAnalisis.reportAnalysis.recommendations.length > 0) {
+      if (yPosition > 220) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(12);
+      doc.setFont('bold');
+      doc.text('💡 RECOMENDACIONES ESTRATÉGICAS:', 20, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('normal');
+      datosAnalisis.reportAnalysis.recommendations.forEach((recommendation: string, index: number) => {
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        const textoWrapped = doc.splitTextToSize(`• ${recommendation}`, 250);
+        doc.text(textoWrapped, 25, yPosition);
+        yPosition += textoWrapped.length * 5 + 5;
+      });
+    }
+
+    // ======== DATOS DE SOPORTE ========
+    if (datosAnalisis.reportAnalysis.samplePermits.length > 0) {
+      doc.addPage();
+      yPosition = 20;
+
+      doc.setFontSize(14);
+      doc.setFont('bold');
+      doc.text('MUESTRA DE DATOS DE SOPORTE (PRIMEROS 50 REGISTROS)', 20, yPosition);
+      yPosition += 15;
+
+      const datosSoporte = datosAnalisis.reportAnalysis.samplePermits.slice(0, 50).map((permit: any) => [
+        this.obtenerFecha(permit.systemDate),
+        permit.applicantName || 'N/A',
+        permit.rtn || 'N/A',
+        permit.serviceTypeDescription || 'N/A',
+        permit.permitStatus || 'N/A',
+        this.formatearMoneda(permit.amount)
+      ]);
+
+      autoTable(doc, {
+        head: [['Fecha Sistema', 'Solicitante', 'RTN', 'Tipo Servicio', 'Estado', 'Monto']],
+        body: datosSoporte,
+        startY: yPosition,
+        margin: { left: 20, right: 20 },
+        styles: { halign: 'center', valign: 'middle', fontSize: 8 },
+        headStyles: { fillColor: '#9E9E9E', fontStyle: 'bold' },
+        didDrawPage: this.crearEncabezadoYPie(doc, titulo, parametros)
+      });
+    }
+
+    this.agregarPiesDePagina(doc, parametros);
+    doc.output('dataurlnewwindow');
+  }
+
   // 6. Reporte de Solicitudes
   public generarReporteSolicitudes(
     solicitudes: Application[],

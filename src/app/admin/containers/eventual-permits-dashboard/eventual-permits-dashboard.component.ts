@@ -31,24 +31,61 @@ export class EventualPermitsDashboardComponent implements OnInit, OnDestroy {
   public analytics: any = null;
   public totalPermits = 0;
   public totalRevenue = 0;
+  public totalOwed = 0;
   public activePermits = 0;
   public processedPermits = 0;
   public cancelledPermits = 0;
+  public deliveredPermits = 0;
+  public pendingPermits = 0;
+  // Global KPIs
+  public globalTotalPermits = 0;
+  public globalTotalRevenue = 0;
+  public globalTotalOwed = 0;
+  public globalActivePermits = 0;
+  public globalProcessedPermits = 0;
+  public globalDeliveredPermits = 0;
   public rtn = '';
   public applicantName = '';
   public start = moment.utc().startOf('month').format('YYYY-MM-DD');
   public end = moment.utc().format('YYYY-MM-DD');
   public dateType = 'system';
-  public permitStatuses: string[] = ['ACTIVO', 'PROCESADO', 'ANULADO', 'PENDIENTE'];
+  public permitStatuses: string[] = [
+    'Entregado', 
+    'Pendiente Pago en Banco', 
+    'Pagado en Banco - Entregado'
+  ];
   public serviceTypes: string[] = [
-    'PERMISO EVENTUAL DE PASAJEROS',
-    'PERMISO EVENTUAL DE CARGA',
-    'PERMISO ESPECIAL',
-    'PERMISO TEMPORAL',
-    'OTROS'
+    'No Especificado',
+    'PASAJEROS',
+    'CARGA'
+  ];
+  public regionalOffices: string[] = [
+    'Creado desde portal',
+    'TEGUCIGALPA, OFICINA PRINCIPAL',
+    'REGIONAL NOR OCCIDENTAL, OFICINA PRINCIPAL, SAN PEDRO SULA',
+    'REGIONAL SUR, OFICINA PRINCIPAL, CHOLUTECA',
+    'REGIONAL DEL ATLANTICO, OFICINA PRINCIPAL, LA CEIBA'
+  ];
+  public signatureTypes: string[] = [
+    'Con Firma Digital',
+    'Valido Solo con firma Fisica'
+  ];
+  public petiTypes: string[] = [
+    'No Aplica',
+    'TRANSPORTE DE MIGRANTES',
+    'BUS INTERNACIONAL CON DESTINO/SALIDA HONDURAS'
+  ];
+  public creationOrigins: string[] = [
+    'SIPEV (Sistema de Permisos Eventuales)',
+    'SITRAP (Portal Transportista)',
+    'LLAMADA TELEFONICA'
   ];
   public selectedPermitStatus = '';
   public selectedServiceType = '';
+  public selectedRegionalOffice = '';
+  public selectedSignatureType = '';
+  public selectedPetiType = '';
+  public selectedCreationOrigin = '';
   private chartRoots: am5.Root[] = [];
 
   constructor(
@@ -80,17 +117,41 @@ export class EventualPermitsDashboardComponent implements OnInit, OnDestroy {
       case 'serviceType':
         this.selectedServiceType = value || '';
         break;
+      case 'regionalOffice':
+        this.selectedRegionalOffice = value || '';
+        break;
+      case 'signatureType':
+        this.selectedSignatureType = value || '';
+        break;
+      case 'petiType':
+        this.selectedPetiType = value || '';
+        break;
+      case 'creationOrigin':
+        this.selectedCreationOrigin = value || '';
+        break;
     }
   }
 
   public fetchDashboard(): void {
     this.loading = true;
 
-    this.dashboardQueries.getEventualPermitsAnalytics({
+    const params: any = {
       startDate: this.start,
       endDate: this.end,
       dateType: this.dateType
-    }).subscribe((response) => {
+    };
+
+    // Add filters only if they have values
+    if (this.selectedPermitStatus) params.permitStatus = this.selectedPermitStatus;
+    if (this.selectedServiceType) params.serviceType = this.selectedServiceType;
+    if (this.selectedRegionalOffice) params.regionalOffice = this.selectedRegionalOffice;
+    if (this.selectedSignatureType) params.signatureType = this.selectedSignatureType;
+    if (this.selectedPetiType) params.petiType = this.selectedPetiType;
+    if (this.selectedCreationOrigin) params.creationOrigin = this.selectedCreationOrigin;
+    if (this.rtn) params.rtn = this.rtn;
+    if (this.applicantName) params.applicantName = this.applicantName;
+
+    this.dashboardQueries.getEventualPermitsAnalytics(params).subscribe((response) => {
       this.analytics = response;
       this.updateKPIsFromAnalytics();
       this.generateGraphsFromAnalytics();
@@ -125,12 +186,24 @@ export class EventualPermitsDashboardComponent implements OnInit, OnDestroy {
 
   private updateKPIsFromAnalytics(): void {
     if (!this.analytics?.kpis) return;
-
-    this.totalPermits = this.analytics.kpis.totalPermits;
-    this.totalRevenue = this.analytics.kpis.totalRevenue;
-    this.activePermits = this.analytics.kpis.activePermits;
-    this.processedPermits = this.analytics.kpis.processedPermits;
-    this.cancelledPermits = this.analytics.kpis.cancelledPermits;
+    
+    // Filtered KPIs (based on current filters)
+    this.totalPermits = this.analytics.kpis.filtered.totalPermits;
+    this.totalRevenue = this.analytics.kpis.filtered.totalRevenue;
+    this.totalOwed = this.analytics.kpis.filtered.totalOwed;
+    this.activePermits = this.analytics.kpis.filtered.activePermits;
+    this.processedPermits = this.analytics.kpis.filtered.processedPermits;
+    this.cancelledPermits = this.analytics.kpis.filtered.cancelledPermits;
+    this.deliveredPermits = this.analytics.kpis.filtered.deliveredPermits;
+    this.pendingPermits = this.analytics.kpis.filtered.pendingPermits;
+    
+    // Global KPIs (overall totals regardless of filters)
+    this.globalTotalPermits = this.analytics.kpis.global.totalPermits;
+    this.globalTotalRevenue = this.analytics.kpis.global.totalRevenue;
+    this.globalTotalOwed = this.analytics.kpis.global.totalOwed;
+    this.globalActivePermits = this.analytics.kpis.global.activePermits;
+    this.globalProcessedPermits = this.analytics.kpis.global.processedPermits;
+    this.globalDeliveredPermits = this.analytics.kpis.global.deliveredPermits;
   }
 
   private generateGraphsFromAnalytics(): void {
