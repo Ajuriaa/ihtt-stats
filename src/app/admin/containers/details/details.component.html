@@ -3,7 +3,7 @@
 <div class="container" *ngIf="!isLoading">
   <div class="filter-wrapper">
     <div class="filter-row">
-      <app-date-filter [showDateTypeFilter]="true" [dateType]="dateType" [startDate]="startDateObject" [endDate]="endDateObject" (dateRangeChanged)="filterDates($event)"></app-date-filter>
+      <app-date-filter [showDateTypeFilter]="true" [dateType]="dateType" (dateRangeChanged)="filterDates($event)"></app-date-filter>
       <!-- Modalidad -->
       <mat-form-field>
         <mat-label>Modalidad</mat-label>

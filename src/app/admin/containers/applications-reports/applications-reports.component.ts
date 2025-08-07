@@ -149,6 +149,9 @@ export class ApplicationsReportsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Initialize default date range (start of month to today)
+    this.filtros.startDate = moment.utc().startOf('month').format('YYYY-MM-DD');
+    this.filtros.endDate = moment.utc().format('YYYY-MM-DD');
     this.cargarSolicitudes();
   }
 
@@ -171,6 +174,7 @@ export class ApplicationsReportsComponent implements OnInit {
     if (fechas.startDate && fechas.endDate) {
       this.filtros.startDate = moment.utc(fechas.startDate).format('YYYY-MM-DD');
       this.filtros.endDate = moment.utc(fechas.endDate).format('YYYY-MM-DD');
+      this.cargarSolicitudes();
     }
   }
 
@@ -208,15 +212,15 @@ export class ApplicationsReportsComponent implements OnInit {
 
   limpiarFiltros(): void {
     this.filtros = {
-      startDate: '',
-      endDate: '',
+      startDate: moment.utc().startOf('month').format('YYYY-MM-DD'),
+      endDate: moment.utc().format('YYYY-MM-DD'),
       fileStatus: '',
       procedureType: '',
       categoryId: '',
       applicantName: '',
       companyName: '',
       applicationId: '',
-        isAutomaticRenewal: undefined,
+      isAutomaticRenewal: undefined,
       tipoReporte: 'analisis'
     };
     this.tipoReporte = 'analisis';

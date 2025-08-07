@@ -62,6 +62,17 @@
             <mat-label>Nombre de la Empresa</mat-label>
             <input matInput [(ngModel)]="filtros.companyName" placeholder="Ingrese empresa">
           </mat-form-field>
+          
+          <!-- Renovación Automática -->
+          <mat-form-field appearance="outline">
+            <mat-label>Renovación Automática</mat-label>
+            <mat-select [(ngModel)]="filtros.isAutomaticRenewal">
+              <mat-option [value]="undefined">Todos</mat-option>
+              <mat-option *ngFor="let estado of estadosRenovacion" [value]="estado.value">
+                {{ estado.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
         
         <div class="filter-actions">
