@@ -729,113 +729,117 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
 
       const root = am5.Root.new(chartId);
       this.chartRoots[chartId] = root;
-    root.setThemes([am5themes_Animated.new(root)]);
+      root.setThemes([am5themes_Animated.new(root)]);
 
-    const chart = root.container.children.push(am5xy.XYChart.new(root, {
-      panX: false,
-      panY: false,
-      layout: root.verticalLayout
-    }));
+      const chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: true,
+        panY: false,
+        wheelX: "panX",
+        wheelY: "zoomX",
+        layout: root.verticalLayout
+      }));
 
-    // Add title
-    chart.children.unshift(
-      am5.Label.new(root, {
-        text: 'Rendimiento por Categoría (Pagados vs Sin Pagar)',
-        fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        x: am5.p50,
-        centerX: am5.p50,
-      })
-    );
+      // Add horizontal scrollbar
+      chart.set("scrollbarX", am5.Scrollbar.new(root, {
+        orientation: "horizontal"
+      }));
 
-    // Add cursor for tooltip functionality
-    const cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
-    cursor.lineY.set("visible", false);
-    cursor.lineX.set("visible", false);
-
-    const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
-      categoryField: "category",
-      renderer: am5xy.AxisRendererX.new(root, {
-        minGridDistance: 50
-      })
-    }));
-
-    const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-      renderer: am5xy.AxisRendererY.new(root, {})
-    }));
-
-    const paidSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
-      name: "Pagados",
-      xAxis: xAxis,
-      yAxis: yAxis,
-      valueYField: "paid",
-      categoryXField: "category",
-      stacked: true,
-      tooltip: am5.Tooltip.new(root, {
-        labelText: "[bold fontSize: 2rem]{categoryX}[/]\n[bold]Pagados:[/] {paid}\n[bold]Sin Pagar:[/] {unpaid}\n[bold]Total:[/] {total}"
-      })
-    }));
-
-    const unpaidSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
-      name: "Sin Pagar",
-      xAxis: xAxis,
-      yAxis: yAxis,
-      valueYField: "unpaid",
-      categoryXField: "category",
-      stacked: true,
-      tooltip: am5.Tooltip.new(root, {
-        labelText: "[bold fontSize: 2rem]{categoryX}[/]\n[bold]Pagados:[/] {paid}\n[bold]Sin Pagar:[/] {unpaid}\n[bold]Total:[/] {total}"
-      })
-    }));
-
-    // Add single data label on top of the entire stacked bar
-    unpaidSeries.bullets.push(() =>
-      am5.Bullet.new(root, {
-        locationY: 1,
-        sprite: am5.Label.new(root, {
-          text: "P: {paid}, NP: {unpaid}",
-          centerY: am5.p100,
+      // Add title
+      chart.children.unshift(
+        am5.Label.new(root, {
+          text: 'Rendimiento por Categoría (Pagados vs Sin Pagar)',
+          fontSize: 20,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          x: am5.p50,
           centerX: am5.p50,
-          dy: -5,
-          fontSize: 12,
-          fontWeight: "bold",
-          fill: am5.color("#000000"),
-          populateText: true
         })
-      })
-    );
+      );
 
-    const performanceData = this.analytics.chartData.global.categoryPerformance || {};
+      // Add cursor for tooltip functionality
+      const cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+      cursor.lineY.set("visible", false);
+      cursor.lineX.set("visible", false);
 
-    // First, map and truncate categories
-    const rawData = Object.entries(performanceData).map(([category, stats]: [string, any]) => ({
-      category: category.length > 15 ? category.substring(0, 12) + '...' : category,
-      paid: stats.paid || 0,
-      unpaid: stats.unpaid || 0,
-      total: (stats.paid || 0) + (stats.unpaid || 0)
-    }));
+      const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+        categoryField: "category",
+        renderer: am5xy.AxisRendererX.new(root, {
+          minGridDistance: 120
+        })
+      }));
 
-    // Then, aggregate duplicate truncated categories
-    const aggregatedData = new Map();
+      // Use an adapter to visually truncate labels without changing underlying data
+      xAxis.get("renderer").labels.template.setAll({
+        rotation: -45,
+        centerY: am5.p50,
+        centerX: am5.p100,
+        paddingRight: 10,
+        oversizedBehavior: "truncate",
+        maxWidth: 100
+      });
 
-    rawData.forEach(item => {
-      if (aggregatedData.has(item.category)) {
-        const existing = aggregatedData.get(item.category);
-        aggregatedData.set(item.category, {
-          category: item.category,
-          paid: existing.paid + item.paid,
-          unpaid: existing.unpaid + item.unpaid,
-          total: existing.total + item.total
-        });
-      } else {
-        aggregatedData.set(item.category, item);
-      }
-    });
+      // Use an adapter to visually truncate labels without changing underlying data
+      xAxis.get("renderer").labels.template.adapters.add("text", (text, target) => {
+        if (text && text.length > 15) {
+          return text.substring(0, 12) + '...';
+        }
+        return text;
+      });
 
-      // Convert back to array
-      const data = Array.from(aggregatedData.values());
-      console.log('Aggregated data:', data);
+      const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, {})
+      }));
+
+      const paidSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
+        name: "Pagados",
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: "paid",
+        categoryXField: "category",
+        stacked: true,
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "[bold fontSize: 2rem]{categoryX}[/]\n[bold]Pagados:[/]{paid}\n[bold]Sin Pagar:[/]{unpaid}\n[bold]Total:[/]{total}"
+        })
+      }));
+
+      const unpaidSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
+        name: "Sin Pagar",
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: "unpaid",
+        categoryXField: "category",
+        stacked: true,
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "[bold fontSize: 2rem]{categoryX}[/]\n[bold]Pagados:[/]{paid}\n[bold]Sin Pagar:[/]{unpaid}\n[bold]Total:[/]{total}"
+        })
+      }));
+
+      // Add single data label on top of the entire stacked bar
+      unpaidSeries.bullets.push(() =>
+        am5.Bullet.new(root, {
+          locationY: 1,
+          sprite: am5.Label.new(root, {
+            text: "P: {paid}, NP: {unpaid}",
+            centerY: am5.p100,
+            centerX: am5.p50,
+            dy: -5,
+            fontSize: 12,
+            fontWeight: "bold",
+            fill: am5.color("#000000"),
+            populateText: true
+          })
+        })
+      );
+
+      const performanceData = this.analytics.chartData.global.categoryPerformance || {};
+      
+      const data = Object.entries(performanceData).map(([category, stats]: [string, any]) => ({
+        category: category,
+        paid: stats.paid || 0,
+        unpaid: stats.unpaid || 0,
+        total: (stats.paid || 0) + (stats.unpaid || 0)
+      }));
+
       xAxis.data.setAll(data);
       paidSeries.data.setAll(data);
       unpaidSeries.data.setAll(data);

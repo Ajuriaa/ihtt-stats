@@ -38,3 +38,9 @@
   width: 100%;
   height: auto;
 }
+
+.chart-scroll-wrapper {
+  width: 100%;
+  max-width: calc(100vw - 10rem);
+  overflow-x: auto;
+}
