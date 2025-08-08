@@ -538,76 +538,90 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
 
       const root = am5.Root.new(chartId);
       this.chartRoots[chartId] = root;
-    root.setThemes([am5themes_Animated.new(root)]);
+      root.setThemes([am5themes_Animated.new(root)]);
 
-    const chart = root.container.children.push(am5xy.XYChart.new(root, {
-      panX: false,
-      panY: false,
-      wheelX: "none",
-      wheelY: "none",
-      layout: root.verticalLayout
-    }));
+      const chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: true,
+        panY: false,
+        wheelX: "panX",
+        wheelY: "zoomX",
+        layout: root.verticalLayout
+      }));
 
-    // Add title
-    chart.children.unshift(
-      am5.Label.new(root, {
-        text: 'Distribución por Categoría de Vehículo',
-        fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        x: am5.p50,
-        centerX: am5.p50,
-      })
-    );
+      // Add horizontal scrollbar
+      chart.set("scrollbarX", am5.Scrollbar.new(root, {
+        orientation: "horizontal"
+      }));
 
-    // Add cursor for tooltip functionality
-    const cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
-    cursor.lineY.set("visible", false);
-    cursor.lineX.set("visible", false);
-
-    const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
-      categoryField: "category",
-      renderer: am5xy.AxisRendererX.new(root, {
-        minGridDistance: 30
-      })
-    }));
-
-    const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-      renderer: am5xy.AxisRendererY.new(root, {})
-    }));
-
-    const series = chart.series.push(am5xy.ColumnSeries.new(root, {
-      name: "Certificados",
-      xAxis: xAxis,
-      yAxis: yAxis,
-      valueYField: "count",
-      categoryXField: "category",
-      tooltip: am5.Tooltip.new(root, {
-        labelText: "[bold fontSize: 2rem]{categoryX}: {valueY} certificados[/]"
-      })
-    }));
-
-    // Add data labels on top of bars
-    series.bullets.push(() =>
-      am5.Bullet.new(root, {
-        locationY: 1,
-        sprite: am5.Label.new(root, {
-          text: "{valueY}",
-          centerY: am5.p100,
+      // Add title
+      chart.children.unshift(
+        am5.Label.new(root, {
+          text: 'Distribución por Categoría de Vehículo',
+          fontSize: 20,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          x: am5.p50,
           centerX: am5.p50,
-          dy: -5,
-          fontSize: 12,
-          fontWeight: "bold",
-          populateText: true
         })
-      })
-    );
+      );
 
-    const categoryData = this.analytics.chartData.filtered.categoryDistribution || {};
-    const data = Object.entries(categoryData).map(([category, count]) => ({
-      category: category.length > 20 ? category.substring(0, 17) + '...' : category,
-      count
-    }));
+      // Add cursor for tooltip functionality
+      const cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+      cursor.lineY.set("visible", false);
+      cursor.lineX.set("visible", false);
+
+      const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+        categoryField: "category",
+        renderer: am5xy.AxisRendererX.new(root, {
+          minGridDistance: 120
+        })
+      }));
+
+      xAxis.get("renderer").labels.template.setAll({
+        rotation: -45,
+        centerY: am5.p50,
+        centerX: am5.p100,
+        paddingRight: 10,
+        oversizedBehavior: "truncate",
+        maxWidth: 100
+      });
+
+      const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, {})
+      }));
+
+      const series = chart.series.push(am5xy.ColumnSeries.new(root, {
+        name: "Certificados",
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: "count",
+        categoryXField: "category",
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "[bold fontSize: 2rem]{categoryX}: {valueY} certificados[/]"
+        })
+      }));
+
+      // Add data labels on top of bars
+      series.bullets.push(() =>
+        am5.Bullet.new(root, {
+          locationY: 1,
+          sprite: am5.Label.new(root, {
+            text: "{valueY}",
+            centerY: am5.p100,
+            centerX: am5.p50,
+            dy: -5,
+            fontSize: 12,
+            fontWeight: "bold",
+            populateText: true
+          })
+        })
+      );
+
+      const categoryData = this.analytics.chartData.filtered.categoryDistribution || {};
+      const data = Object.entries(categoryData).map(([category, count]) => ({
+        category: category,
+        count
+      }));
 
       xAxis.data.setAll(data);
       series.data.setAll(data);

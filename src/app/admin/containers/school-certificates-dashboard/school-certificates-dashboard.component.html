@@ -130,7 +130,9 @@
     <div id="statusChart" style="width: 40%; height: 400px;"></div>
   </div>
   <div id="transportChart" style="width: 100%; height: 400px;" *ngIf="analytics"></div>
-  <div id="categoryChart" style="width: 100%; height: 400px;" *ngIf="analytics"></div>
+    <div class="chart-scroll-wrapper">
+    <div id="categoryChart" style="height: 400px;" *ngIf="analytics"></div>
+  </div>
 
   <!-- Global Charts Section -->
   <h3 style="width: 100%; text-align: center; margin: 40px 0 20px 0; color: #666;" *ngIf="analytics">Gráficos Globales (Comparación)</h3>
