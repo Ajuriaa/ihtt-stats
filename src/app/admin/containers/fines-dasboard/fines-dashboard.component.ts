@@ -210,7 +210,14 @@ export class FinesDashboardComponent implements OnInit, OnDestroy {
       count: data.count,
     }));
 
+    // Bank distribution data
+    const bankData = Object.entries(chartData.bankDistribution || {}).map(([bank, amount]) => ({
+      category: bank,
+      value: amount as number,
+    }));
+
     this.generatePieChart(statusData, "finesStatusChart", "Distribución por Estado");
+    this.generatePieChart(bankData, "finesBankChart", "Distribución por Banco");
     this.generateLineChart(revenueData, "monthlyFineRevenueChart", "Ingresos Mensuales por Multas");
     this.generateBarChart(debtData, "fineDebtByDepartmentChart", "Deuda por Departamento (Filtrada)");
     this.generateFinesByRegionChart(regionDebtData);

@@ -197,9 +197,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
       paid: data.paid
     }));
 
+    // Bank distribution data
+    const bankData = Object.entries(chartData.bankDistribution || {}).map(([bank, amount]) => ({
+      category: bank,
+      value: amount as number,
+    }));
+
     this.generateBarChart(barChartData);
     this.generateLineChart(lineChartData);
     this.generatePieChart(pieChartData);
+    this.generateBankPieChart(bankData);
     
     console.log('About to generate projection chart with data:', projectionChartData);
     if (projectionChartData.length > 0) {
@@ -581,6 +588,46 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     series.slices.template.setAll({
       tooltipText: "{category}: [bold]{value}[/]"
+    });
+
+    series.appear(1000, 100);
+  }
+
+  private generateBankPieChart(data: { category: string, value: number }[]): void {
+    const root = am5.Root.new("certificatesBankChart");
+    this.chartRoots.push(root);
+
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    const chart = root.container.children.push(
+      am5percent.PieChart.new(root, {
+        layout: root.verticalLayout,
+      })
+    );
+
+    // Agregar título
+    chart.children.unshift(
+      am5.Label.new(root, {
+        text: "Distribución por Banco",
+        fontSize: 20,
+        fontWeight: "bold",
+        textAlign: "center",
+        x: am5.p50,
+        centerX: am5.p50,
+      })
+    );
+
+    const series = chart.series.push(
+      am5percent.PieSeries.new(root, {
+        valueField: "value",
+        categoryField: "category",
+      })
+    );
+
+    series.data.setAll(data);
+
+    series.slices.template.setAll({
+      tooltipText: "{category}: [bold]L. {value}[/]"
     });
 
     series.appear(1000, 100);

@@ -144,6 +144,13 @@
         </td>
       </ng-container>
 
+      <ng-container matColumnDef="bankDescription">
+        <th mat-header-cell *matHeaderCellDef class="table-cell title">Banco</th>
+        <td mat-cell *matCellDef="let element" class="table-cell pointer">
+          {{ element.bankDescription || 'SIN BANCO' }}
+        </td>
+      </ng-container>
+
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>

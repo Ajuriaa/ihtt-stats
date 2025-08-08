@@ -13,7 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 import { MatInputModule } from '@angular/material/input';
 import { ExcelHelper, PDFHelper } from 'src/app/core/helpers';
 
-const COLUMNS = ['systemDate', 'permitCode', 'applicantName', 'rtn', 'serviceTypeDescription', 'permitStatus', 'regionalOffice', 'amount', 'noticeCode'];
+const COLUMNS = ['systemDate', 'permitCode', 'applicantName', 'rtn', 'serviceTypeDescription', 'permitStatus', 'regionalOffice', 'amount', 'noticeCode', 'bankDescription'];
 
 @Component({
   selector: 'app-eventual-permits-details',

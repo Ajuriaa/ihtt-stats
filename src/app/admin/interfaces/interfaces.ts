@@ -33,6 +33,8 @@ export interface Certificate {
   certificateExpirationDate: string | null; // Fecha de expiración del certificado
   paymentDate: string | null;    // Fecha de pago (en formato ISO)
   permissionExpirationDate: string | null;  // Fecha de expiración del permiso
+  bankCode: string | null;       // Código del banco
+  bankDescription: string | null; // Descripción del banco
 }
 
 export interface CertificateResponse {
@@ -64,10 +66,49 @@ export interface Fine {
   place?: string;
   employeeId?: string;
   employeeName?: string;
+  bankCode?: string;
+  bankDescription?: string;
 }
 
 export interface FineResponse {
   data: Fine[];
+  total: number;
+  page?: number;
+  pages?: number;
+}
+
+export interface EventualPermit {
+  id: number;
+  permitCode?: string;
+  permitTypeCode?: string;
+  driverCode?: string;
+  permitStatusCode?: string;
+  permitStatus?: string;
+  censusCode?: string;
+  rtn?: string;
+  applicantName?: string;
+  plate?: string;
+  validationCode?: string;
+  systemUser?: string;
+  employeeName?: string;
+  regionalOffice?: string;
+  systemDate?: string;
+  creationYear?: number;
+  creationMonth?: number;
+  creationMonthName?: string;
+  serviceTypeCode?: string;
+  serviceTypeDescription?: string;
+  signatureType?: string;
+  petiType?: string;
+  noticeCode?: string;
+  amount?: number;
+  creationOrigin?: string;
+  bankCode?: string;
+  bankDescription?: string;
+}
+
+export interface EventualPermitResponse {
+  data: EventualPermit[];
   total: number;
   page?: number;
   pages?: number;

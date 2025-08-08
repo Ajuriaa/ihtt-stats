@@ -15,7 +15,7 @@ import { ExcelHelper, PDFHelper } from 'src/app/core/helpers';
 import { MatInputModule } from '@angular/material/input';
 
 const COLUMNS = [
-  'fineId', 'totalAmount', 'fineStatus', 'date', 'department', 'region', 'plate', 'rtn', 'employeeId', 'employeeName', 'noticeID'
+  'fineId', 'totalAmount', 'fineStatus', 'date', 'department', 'region', 'plate', 'rtn', 'employeeId', 'employeeName', 'noticeID', 'bankDescription'
 ];
 
 

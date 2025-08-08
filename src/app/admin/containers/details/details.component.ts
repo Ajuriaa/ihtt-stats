@@ -14,7 +14,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ExcelHelper, PDFHelper } from 'src/app/core/helpers';
 import { MatInputModule } from '@angular/material/input';
 
-const COLUMNS = ['certificateExpirationDate', 'permissionExpirationDate', 'paymentDate', 'areaName', 'department', 'coStatus', 'noticeStatusDescription', 'noticeCode', 'totalNoticeAmount', 'document'];
+const COLUMNS = ['certificateExpirationDate', 'permissionExpirationDate', 'paymentDate', 'areaName', 'department', 'coStatus', 'noticeStatusDescription', 'noticeCode', 'totalNoticeAmount', 'bankDescription', 'document'];
 @Component({
   selector: 'app-details',
   standalone: true,

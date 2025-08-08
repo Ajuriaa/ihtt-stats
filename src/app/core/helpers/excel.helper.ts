@@ -31,6 +31,7 @@ export class ExcelHelper {
       'Email',
       'Certificado',
       'Codigo Aviso de Cobro',
+      'Banco',
     ];
 
     // Add headers to the worksheet
@@ -57,6 +58,7 @@ export class ExcelHelper {
         fine.email || 'N/A', // Email
         fine.certificate || 'N/A', // Certificado
         fine.noticeCode || 'N/A', // Codigo Aviso de Cobro
+        fine.bankDescription || 'SIN BANCO', // Banco
       ]);
     });
 
@@ -114,6 +116,7 @@ export class ExcelHelper {
       'Nombre del Representante Legal',
       'Teléfono del Representante Legal',
       'Email del Representante Legal',
+      'Banco',
     ];
 
     // Add headers to the worksheet
@@ -148,6 +151,7 @@ export class ExcelHelper {
         certificate.legalRepresentativeName || 'N/A', // Nombre del Representante Legal
         certificate.legalRepresentativePhone || 'N/A', // Teléfono del Representante Legal
         certificate.legalRepresentativeEmail || 'N/A', // Email del Representante Legal
+        certificate.bankDescription || 'SIN BANCO', // Banco
       ]);
     });
 
@@ -187,7 +191,8 @@ export class ExcelHelper {
       'Tipo de Servicio',
       'Oficina Regional',
       'Monto',
-      'Código de Aviso'
+      'Código de Aviso',
+      'Banco'
     ];
 
     worksheet.addRow(headers);
@@ -203,7 +208,8 @@ export class ExcelHelper {
         permit.serviceTypeDescription || 'N/A',
         permit.regionalOffice || 'N/A',
         permit.amount || 0,
-        permit.noticeCode || 'N/A'
+        permit.noticeCode || 'N/A',
+        permit.bankDescription || 'SIN BANCO'
       ]);
     });
 

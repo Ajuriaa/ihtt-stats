@@ -239,7 +239,14 @@ export class EventualPermitsDashboardComponent implements OnInit, OnDestroy {
       value: count as number,
     }));
 
+    // Bank distribution data
+    const bankData = Object.entries(chartData.bankDistribution || {}).map(([bank, amount]) => ({
+      category: bank,
+      value: amount as number,
+    }));
+
     this.generatePieChart(statusChartData, "statusDistributionChart", "Distribución por Estado del Permiso");
+    this.generatePieChart(bankData, "permitsBankChart", "Distribución por Banco");
     this.generateBarChart(revenueByStatusData, "revenueByStatusChart", "Ingresos por Estado del Permiso");
     this.generateBarChart(serviceTypeData, "serviceTypeChart", "Distribución por Tipo de Servicio");
     this.generateLineChart(monthlyRevenueData, "monthlyRevenueChart", "Tendencia de Ingresos Mensuales");
