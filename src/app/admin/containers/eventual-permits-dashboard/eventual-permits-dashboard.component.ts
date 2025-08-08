@@ -235,7 +235,8 @@ export class EventualPermitsDashboardComponent implements OnInit, OnDestroy {
     }));
 
     const regionalOfficeData = Object.entries(chartData.regionalOfficeDistribution).map(([office, count]) => ({
-      category: office,
+      category: this.getLastThreeWords(office), // Short label for display
+      fullCategory: office, // Full text for tooltips
       value: count as number,
     }));
 
@@ -292,7 +293,7 @@ export class EventualPermitsDashboardComponent implements OnInit, OnDestroy {
     series.appear(1000, 100);
   }
 
-  private generateBarChart(data: { category: string, value: number }[], containerId: string, title: string): void {
+  private generateBarChart(data: { category: string, value: number, fullCategory?: string }[], containerId: string, title: string): void {
     const root = am5.Root.new(containerId);
     this.chartRoots.push(root);
 
@@ -344,7 +345,7 @@ export class EventualPermitsDashboardComponent implements OnInit, OnDestroy {
     series.data.setAll(data);
 
     series.columns.template.setAll({
-      tooltipText: "{category}: [bold]{value}[/]",
+      tooltipText: "{fullCategory}: [bold]{value}[/]", // Use full category in tooltip
     });
 
     series.appear(1000);
@@ -424,5 +425,13 @@ export class EventualPermitsDashboardComponent implements OnInit, OnDestroy {
     );
 
     chart.appear(1000, 100);
+  }
+
+  private getLastThreeWords(text: string): string {
+    const words = text.trim().split(/\s+/);
+    if (words.length <= 3) {
+      return text;
+    }
+    return words.slice(-3).join(' ');
   }
 }

@@ -359,7 +359,8 @@ export class ApplicationsDashboardComponent implements OnInit, OnDestroy {
     }));
 
     const serviceClassChartData = Object.entries(chartData.serviceClassDistribution).map(([serviceClass, count]) => ({
-      category: serviceClass,
+      category: this.getLastTwoWords(serviceClass), // Short label for display
+      fullCategory: serviceClass, // Full text for tooltips
       value: count as number,
     }));
 
@@ -602,6 +603,14 @@ export class ApplicationsDashboardComponent implements OnInit, OnDestroy {
     return `${months[parseInt(monthNum) - 1]} ${year}`;
   }
 
+  private getLastTwoWords(text: string): string {
+    const words = text.trim().split(/\s+/);
+    if (words.length <= 2) {
+      return text;
+    }
+    return words.slice(-2).join(' ');
+  }
+
   private generateServiceClassBarChart(data: { category: string, value: number }[]): void {
     const root = am5.Root.new("serviceClassChart");
     this.chartRoots.push(root);
@@ -656,7 +665,7 @@ export class ApplicationsDashboardComponent implements OnInit, OnDestroy {
     series.data.setAll(data);
 
     series.columns.template.setAll({
-      tooltipText: "{category}: [bold]{value}[/] solicitudes",
+      tooltipText: "{fullCategory}: [bold]{value}[/] solicitudes", // Use full category in tooltip
       fill: am5.color(0x9c27b0),
       stroke: am5.color(0x9c27b0),
     });
