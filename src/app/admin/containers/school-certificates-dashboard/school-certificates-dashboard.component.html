@@ -86,12 +86,12 @@
       <p>Total Certificados Escolares</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-green">
       <p class="title">{{ formatCurrency(analytics.filtered.totalRevenue) }}</p>
       <p>Total Ingresos</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-blue">
       <p class="title">{{ formatPercentage(analytics.filtered.paymentRate) }}</p>
       <p>Tasa de Pago</p>
     </mat-card>
@@ -109,17 +109,17 @@
       <p>Total Certificados (Global)</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-orange">
       <p class="title">{{ analytics.global.unpaidCertificates | number }}</p>
       <p>Certificados Sin Pagar (Global)</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-blue">
       <p class="title">{{ formatPercentage(analytics.global.overallPaymentRate) }}</p>
       <p>Tasa de Pago Global</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-red">
       <p class="title">{{ formatCurrency(analytics.global.totalOutstandingAmount) }}</p>
       <p>Monto Pendiente Total</p>
     </mat-card>

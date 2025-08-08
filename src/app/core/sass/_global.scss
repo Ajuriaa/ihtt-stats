@@ -43,3 +43,32 @@
   color: black;
   padding: 15rem 0 0 15rem;
 }
+
+// KPI Color Classes for Dashboard Cards
+.kpi-green {
+  .title {
+    color: #4CAF50 !important; // Green for money generated/collected/paid
+  }
+  border-left: 4px solid #4CAF50;
+}
+
+.kpi-red {
+  .title {
+    color: #F44336 !important; // Red for money owed/debt/pending
+  }
+  border-left: 4px solid #F44336;
+}
+
+.kpi-orange {
+  .title {
+    color: #FF9800 !important; // Orange for warnings/alerts/pending items
+  }
+  border-left: 4px solid #FF9800;
+}
+
+.kpi-blue {
+  .title {
+    color: #2196F3 !important; // Blue for rates/projections/neutral metrics
+  }
+  border-left: 4px solid #2196F3;
+}

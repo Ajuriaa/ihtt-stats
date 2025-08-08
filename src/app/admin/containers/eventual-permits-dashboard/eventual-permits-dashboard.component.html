@@ -84,7 +84,7 @@
       <p>Total Permisos Eventuales</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-green">
       <p class="title">{{ totalRevenue | currency:'HNL':'L.':'2.2' }}</p>
       <p>Total Pagado por Permisos</p>
     </mat-card>
@@ -94,7 +94,7 @@
       <p>Permisos Entregados</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-red">
       <p class="title">{{ totalOwed | currency:'HNL':'L.':'2.2' }}</p>
       <p>Total Adeudado por Permisos Activos</p>
     </mat-card>
@@ -107,12 +107,12 @@
       <p>Total Permisos (Global)</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-green">
       <p class="title">{{ globalTotalRevenue | currency:'HNL':'L.':'2.2' }}</p>
       <p>Ingresos Totales (Global)</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-red">
       <p class="title">{{ globalTotalOwed | currency:'HNL':'L.':'2.2' }}</p>
       <p>Total Adeudado (Global)</p>
     </mat-card>

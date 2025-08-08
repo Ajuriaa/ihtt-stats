@@ -62,7 +62,7 @@
       <p>Total de Multas Emitidas</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-green">
       <p class="title">{{ totalFineRevenue | currency:'HNL':'L.':'2.2' }}</p>
       <p>Total Pagado por Multas</p>
     </mat-card>
@@ -72,7 +72,7 @@
       <p>Multas {{ statusWord }}</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-red">
       <p class="title">{{ totalAmountDue | currency:'HNL':'L.':'2.2' }}</p>
       <p>Total Adeudado por Multas Activas (Filtrado)</p>
     </mat-card>
@@ -90,7 +90,7 @@
       <p>Multas Activas (Global)</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-red">
       <p class="title">{{ globalTotalAmountDue | currency:'HNL':'L.':'2.2' }}</p>
       <p>Total Adeudado Global</p>
     </mat-card>

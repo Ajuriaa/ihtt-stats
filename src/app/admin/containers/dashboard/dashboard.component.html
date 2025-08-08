@@ -57,17 +57,17 @@
   </div>
 
   <div class="kpi-container">
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-red">
       <p class="title">{{ totalOwed | currency:'HNL':'L.':'2.2'  }}</p>
       <p>Total Adeudado</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-green">
       <p class="title">{{ totalPaid | currency:'HNL':'L.':'2.2' }}</p>
       <p>Total Recaudado</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-orange">
       <p class="title">{{ upcomingExpirations }}</p>
       <p>Certificados Próximos a Vencer</p>
     </mat-card>
@@ -80,12 +80,12 @@
   <div id="debtByDepartmentChart" style="width: 100%; height: 400px;"></div>
   <div id="modalityChart" style="width: 100%; height: 400px;"></div>
   <div class="kpi-container">
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-green">
       <p class="title">{{ totalPaidLast12Months | currency:'HNL':'L.':'2.2' }}</p>
       <p>Recaudo Últimos 12 Meses</p>
     </mat-card>
 
-    <mat-card class="kpi-card">
+    <mat-card class="kpi-card kpi-blue">
       <p class="title">{{ totalProjectedNext12Months | currency:'HNL':'L.':'2.2' }}</p>
       <p>Proyección Próximos 12 Meses</p>
     </mat-card>
