@@ -116,10 +116,10 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
         }
       }
     });
-    
+
     // Clear the roots object
     this.chartRoots = {};
-    
+
     // Reset chart references
     this.monthlyRevenueChart = null;
     this.statusChart = null;
@@ -462,6 +462,11 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Add cursor for tooltip functionality
+    const cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+    cursor.lineY.set("visible", false);
+    cursor.lineX.set("visible", false);
+
     const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
       categoryField: "type",
       renderer: am5xy.AxisRendererX.new(root, {})
@@ -554,6 +559,11 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
         centerX: am5.p50,
       })
     );
+
+    // Add cursor for tooltip functionality
+    const cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+    cursor.lineY.set("visible", false);
+    cursor.lineX.set("visible", false);
 
     const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
       categoryField: "category",
@@ -648,6 +658,11 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Add cursor for tooltip functionality
+    const cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+    cursor.lineY.set("visible", false);
+    cursor.lineX.set("visible", false);
+
     const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
       categoryField: "year",
       renderer: am5xy.AxisRendererX.new(root, {})
@@ -734,6 +749,11 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Add cursor for tooltip functionality
+    const cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+    cursor.lineY.set("visible", false);
+    cursor.lineX.set("visible", false);
+
     const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
       categoryField: "category",
       renderer: am5xy.AxisRendererX.new(root, {
@@ -787,7 +807,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
     );
 
     const performanceData = this.analytics.chartData.global.categoryPerformance || {};
-    
+
     // First, map and truncate categories
     const rawData = Object.entries(performanceData).map(([category, stats]: [string, any]) => ({
       category: category.length > 15 ? category.substring(0, 12) + '...' : category,
@@ -798,7 +818,7 @@ export class SchoolCertificatesDashboardComponent implements OnInit, OnDestroy {
 
     // Then, aggregate duplicate truncated categories
     const aggregatedData = new Map();
-    
+
     rawData.forEach(item => {
       if (aggregatedData.has(item.category)) {
         const existing = aggregatedData.get(item.category);
